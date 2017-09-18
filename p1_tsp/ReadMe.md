@@ -1,5 +1,7 @@
 #### Traveling Salesman Problem
 
+
+##### Source
 * tsp.c
     - Greedy algo.
     - In double linked list
@@ -10,8 +12,9 @@
     - No special data structure
     - Distance sorting w/ Bubble sort
 
-* test: Testing inputs
-* ans: Reference answer for testing inputs
+##### Folder and Exec.
+* test/: Testing inputs
+* ans/: Reference answer for testing inputs
     - The distance calculation is wrong
     - Some test inputs will have multiple answer
 * ./test.bat: Windows automated test batch
