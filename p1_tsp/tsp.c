@@ -85,7 +85,7 @@ void reverse_link(struct City *city, DIRECTION dir) {
 		}
 }
 
-double TSP(struct City *city_list, int num_city) {
+void TSP(struct City *city_list, int num_city) {
 	int i, j;
 	int num_edge = num_city  * (num_city - 1) / 2;	// C(10, 2)
 	struct Edge *edge_list = (struct Edge*) malloc(sizeof(struct Edge) * num_edge);
@@ -227,6 +227,9 @@ double TSP(struct City *city_list, int num_city) {
 	}
 	printf("end\n");
 	fprintf(pOutput, "end");
+
+	free(sel_edge_list);
+	free(edge_list);
 }
 
 int main(int argc, char const *argv[])
@@ -267,6 +270,8 @@ int main(int argc, char const *argv[])
 	}
 
 	TSP(city_list, num_city);
+
+	free(city_list);
 
 	return 0;
 }
