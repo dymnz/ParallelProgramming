@@ -35,10 +35,10 @@ struct Edge {
 
 FILE *pInput, *pOutput;
 
-void swap(struct Edge *v1, struct Edge *v2) {
-	struct Edge v_temp = *v1;
-	*v1 = *v2;
-	*v2 = v_temp;
+void swap(struct Edge *e1, struct Edge *e2) {
+	struct Edge v_temp = *e1;
+	*e1 = *e2;
+	*e2 = v_temp;
 }
 
 void bubble_sort(struct Edge *edge_list, int length) {
@@ -89,7 +89,7 @@ void TSP(struct City *city_list, int num_city) {
 	int i, j;
 	int num_edge = num_city  * (num_city - 1) / 2;	// C(10, 2)
 	struct Edge *edge_list = (struct Edge*) malloc(sizeof(struct Edge) * num_edge);
-	struct Edge **sel_edge_list = (struct Edge**) malloc(sizeof(struct Edge*) * num_city);
+	struct Edge **selected_edge_ptr_list = (struct Edge**) malloc(sizeof(struct Edge*) * num_city);
 
 	// Find the edge of each pair
 	double *dist_list;
@@ -185,7 +185,7 @@ void TSP(struct City *city_list, int num_city) {
 
 		++(city_1->edge_count);
 		++(city_2->edge_count);
-		sel_edge_list[sel_edge_count] = current_edge;
+		selected_edge_ptr_list[sel_edge_count] = current_edge;
 		++sel_edge_count;
 
 #ifdef VERBOSE
@@ -201,15 +201,15 @@ void TSP(struct City *city_list, int num_city) {
 	printf("Good edges:\n");
 	for (i = 0; i < num_city; ++i) {
 		printf("%3d - %3d\n",
-		       sel_edge_list[i]->index_1,
-		       sel_edge_list[i]->index_2);
+		       selected_edge_ptr_list[i]->index_1,
+		       selected_edge_ptr_list[i]->index_2);
 	}
 #endif
 
 	// Sum length of edges
 	double dist_sum = 0.0;
 	for (i = 0; i < num_city; ++i) {
-		dist_sum += sel_edge_list[i]->dist;
+		dist_sum += selected_edge_ptr_list[i]->dist;
 	}
 	printf("%lf\n", dist_sum);
 	fprintf(pOutput, "%lf\n", dist_sum);
@@ -228,7 +228,7 @@ void TSP(struct City *city_list, int num_city) {
 	printf("end\n");
 	fprintf(pOutput, "end");
 
-	free(sel_edge_list);
+	free(selected_edge_ptr_list);
 	free(edge_list);
 }
 
