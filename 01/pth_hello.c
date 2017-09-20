@@ -31,6 +31,7 @@ void *Hello(void* rank);  /* Thread function */
 int main(int argc, char* argv[]) {
    long       thread;  /* Use long in case of a 64-bit system */
    pthread_t* thread_handles; 
+   long       returned_value;
 
    /* Get number of threads from command line */
    if (argc != 2) Usage(argv[0]);
@@ -45,8 +46,10 @@ int main(int argc, char* argv[]) {
 
    printf("Hello from the main thread\n");
 
-   for (thread = 0; thread < thread_count; thread++) 
-      pthread_join(thread_handles[thread], NULL); 
+   for (thread = 0; thread < thread_count; thread++) {      
+      pthread_join(thread_handles[thread], (void **) &returned_value); 
+      printf("Return value from thread %ld is %ld\n", thread, returned_value);
+   }
 
    free(thread_handles);
    return 0;
@@ -56,9 +59,9 @@ int main(int argc, char* argv[]) {
 void *Hello(void* rank) {
    long my_rank = (long) rank;  /* Use long in case of 64-bit system */ 
 
-   printf("Hello from thread %ld of %d\n", my_rank, thread_count);
+   //printf("Hello from thread %ld of %d\n", my_rank, thread_count);
 
-   return NULL;
+   return (void *) (my_rank*2);
 }  /* Hello */
 
 /*-------------------------------------------------------------------*/
