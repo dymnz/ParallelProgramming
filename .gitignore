@@ -1,6 +1,7 @@
-.DS_Store
-LectureNote
 *.exe
 *
 !/**/
 !*.*
+
+LectureNote/*
+.DS_Store
