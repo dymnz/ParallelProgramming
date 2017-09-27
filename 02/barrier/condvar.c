@@ -11,7 +11,7 @@
 
 #define NUM_THREADS  3
 #define TCOUNT 10
-#define COUNT_LIMIT 12
+#define COUNT_LIMIT 10
 
 int     count = 0;
 pthread_mutex_t count_mutex;
@@ -30,7 +30,7 @@ void *inc_count(void *t)
     Check the value of count and signal waiting thread when condition is
     reached.  Note that this occurs while mutex is locked. 
     */
-    if (count == COUNT_LIMIT) {
+    if (count >= COUNT_LIMIT) {
       printf("inc_count(): thread %ld, count = %d  Threshold reached. ",
              my_id, count);
       pthread_cond_signal(&count_threshold_cv); //wake up the watching thread
@@ -53,12 +53,12 @@ void *watch_count(void *t)
   printf("Starting watch_count(): thread %ld\n", my_id);
 
   pthread_mutex_lock(&count_mutex);
-  while (count < COUNT_LIMIT) {
+  while (count < COUNT_LIMIT + 20) {
     printf("watch_count(): thread %ld Count= %d. Going into wait...\n", my_id,count);
     pthread_cond_wait(&count_threshold_cv, &count_mutex); //obtain mutex and condition is satisfied
     printf("watch_count(): thread %ld Condition signal received. Count= %d\n", my_id,count);
     printf("watch_count(): thread %ld Updating the value of count...\n", my_id);
-    count += 125;
+    count += 2;
     printf("watch_count(): thread %ld count now = %d.\n", my_id, count);
   }
   printf("watch_count(): thread %ld Unlocking mutex.\n", my_id);
