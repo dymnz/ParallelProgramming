@@ -11,7 +11,6 @@ const int MAX_THREADS = 1024;
 
 long thread_count;
 long long n;
-long double sum;
 
 void* Thread_sum(void* rank);
 
@@ -29,6 +28,8 @@ int main(int argc, char* argv[]) {
    thread_handles = (pthread_t*) malloc (thread_count*sizeof(pthread_t)); 
 
    sum = Serial_pi(n);
+   printf("%Lf\n", sum)
+   while(1);
    long double thread_sum = 0.0;
    long double term, diff;
    int rotation = 0;
@@ -60,14 +61,20 @@ int main(int argc, char* argv[]) {
  * Global in/out:  sum 
  */
 void* Thread_sum(void* n) {
-   long term = *((long  *) n);
-   long double eight_n = 8.0 * term;
-   long double factor = 1.0;
+   long length = *((long  *) n);
+   long double eight_n = 8.0 * length;
+   long double factor = 1.0, term;
    int i;
-   for (i = 0; i < term ; ++i)
+
+   for (i = 0; i < length ; ++i)
       factor /= 16.0;
 
-   term = (factor * ( 4/(eight_n+1)- 2/(eight_n+4)- 1/(eight_n+5)- 1/(eight_n+6)));
+   term = (
+      factor * (
+           4/(eight_n+1) 
+         - 2/(eight_n+4) 
+         - 1/(eight_n+5) 
+         - 1/(eight_n+6)));
    return (void *) term;
 
 }  /* Thread_sum */
@@ -78,25 +85,26 @@ void* Thread_sum(void* n) {
  * In arg:     n
  * Return val: Estimate of pi using n terms of Maclaurin series
  */
-long double Serial_pi(long long n) {
+long double Serial_pi(long long length) {
    long double sum = 0.0;
-   long double i;
    long double factor = 1.0;
+   long double eight_n = 8.0 * length;   
+   long double i;
 
-   for (i = 5e+19 - 2; 1; i = i + 1 , factor = -factor) {
-      sum += factor/(2*i+1);
+   for (i = 0; i < term ; ++i) {
+      term = (
+         factor * (
+              4/(eight_n+1) 
+            - 2/(eight_n+4) 
+            - 1/(eight_n+5) 
+            - 1/(eight_n+6)));      
+      sum += term;
 
-      if (     (factor/(2*i+1) > 0 && factor/(2*i+1) < 1e-20) 
-            || (factor/(2*i+1) < 0 && factor/(2*i+1) > -1e-20))
-      {
-         printf("diff < 1e-20: %d\n", i);
-         return 0;
-      }
-      printf("%Lf\n", i);
-
+      factor /= 16.0;
    }
-   return 4.0*sum;
 
+
+   return sum;
 }  /* Serial_pi */
 
 /*------------------------------------------------------------------

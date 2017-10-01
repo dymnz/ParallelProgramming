@@ -57,7 +57,7 @@ double distance(int x1, int y1, int x2, int y2) {
 	return sqrt(((x1 - x2) * (x1 - x2)) + ((y1 - y2) * (y1 - y2)));
 }
 
-struct City* root(struct City *city) {
+struct City* get_root(struct City *city) {
 	struct City *ptr = city;
 
 	while (ptr->right != NULL)
@@ -87,7 +87,7 @@ void reverse_link(struct City *city, DIRECTION dir) {
 
 void TSP(struct City *city_list, int num_city) {
 	int i, j;
-	int num_edge = num_city  * (num_city - 1) / 2;	// C(10, 2)
+	int num_edge = num_city  * (num_city - 1) / 2;	// C(N, 2)
 	struct Edge *edge_list = (struct Edge*) malloc(sizeof(struct Edge) * num_edge);
 	struct Edge **selected_edge_ptr_list = (struct Edge**) malloc(sizeof(struct Edge*) * num_city);
 
@@ -136,8 +136,8 @@ void TSP(struct City *city_list, int num_city) {
 		if (city_1->edge_count >= 2 || city_2->edge_count >= 2)
 			continue;
 
-		root_1 = root(city_1);
-		root_2 = root(city_2);
+		root_1 = get_root(city_1);
+		root_2 = get_root(city_2);
 
 		// Check for loop: If two vertex have the same root, continue
 		// The last edge is allowed to have loop.
