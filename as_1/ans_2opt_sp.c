@@ -129,7 +129,7 @@ void *parallel_2opt_job(void *param) {
 
 	// i: Depth control
 	// m: Loop control
-	for (i = thread_param->depth_start; i < thread_param->depth_end; ++i) {
+	for (i = thread_param->start_depth; i < thread_param->end_depth; ++i) {
 		for (m = 1; m < num_city - i; ++m) {			
 			two_opt(m, m + i);
 		}
