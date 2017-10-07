@@ -97,12 +97,10 @@ void two_opt(int start, int end) {
 
 void *parallel_2opt_job(void *param) {
 	struct Thread_Param *thread_param = (struct Thread_Param *) param;
-
-	long i, j;
-	long stop_index;
-
+	
 	//printf("From: %3ld:%3ld:%3ld\n", (long)1, thread_param->max_depth, num_city - thread_param->max_depth);
 
+	long i;
 	for (i = 1; i < num_city - thread_param->max_depth + 1; ++i) {
 		two_opt(i, i + thread_param->max_depth - 1);
 	}
@@ -121,7 +119,6 @@ void parallel_2opt() {
 	pthread_t two_opt_thread_list[THREAD_COUNT];
 
 	int max_depth = num_city - 1; // Change this to control run time
-	int rotation = 0;
 
 	for (i = 0; i < max_depth; ) {
 		for (j = 0; j < THREAD_COUNT; ++j) {
@@ -225,7 +222,7 @@ void *read_route(void *fp) {
 	FILE *fpRoute = (FILE *) fp;
 	route_index_list = (int *) malloc((num_city + 1) * sizeof(int));
 
-	fscanf(fpRoute, "%f", &default_distance);
+	fscanf(fpRoute, "%lf", &default_distance);
 	int index = 0, temp_i;
 	while (fscanf(fpRoute, "%d", &temp_i) != EOF) {
 		route_index_list[index++] = temp_i - 1;
@@ -291,7 +288,6 @@ int main(int argc, char const *argv[])
 
 	// Distances are reset to -1
 	dist_list = (dist_type *) malloc(num_edge * sizeof(dist_type));
-	dist_type neg_1;
 	for (i = 0; i < num_edge; ++i) {
 		dist_list[i] = -1;
 	}
@@ -317,8 +313,8 @@ int main(int argc, char const *argv[])
 	print_route();
 #endif
 
-	printf("Final route distance: %f\n", get_route_distance());
-	
+	printf("Final route distance: %lf\n", get_route_distance());
+
 	// Write to file
 	write_route(fpOutput);
 

@@ -253,7 +253,6 @@ int main(int argc, char const *argv[])
 
 	// Distances are reset to -1
 	dist_list = (dist_type *) malloc(num_edge * sizeof(dist_type));
-	dist_type neg_1;
 	for (i = 0; i < num_edge; ++i) {
 		dist_list[i] = -1;
 	}
@@ -279,7 +278,7 @@ int main(int argc, char const *argv[])
 	print_route();	
 #endif
 
-	printf("Final route distance: %f\n", get_route_distance());
+	printf("Final route distance: %lf\n", get_route_distance());
 
 	// Write to file
 	write_route(fpOutput);
