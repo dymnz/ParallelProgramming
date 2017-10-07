@@ -187,7 +187,7 @@ void *read_route(void *fp) {
 	FILE *fpRoute = (FILE *) fp;
 	route_index_list = (int *) malloc((num_city + 1) * sizeof(int));
 
-	fscanf(fpRoute, "%f", &default_distance);
+	fscanf(fpRoute, "%lf", &default_distance);
 	int index = 0, temp_i;
 	while (fscanf(fpRoute, "%d", &temp_i) != EOF) {
 		route_index_list[index++] = temp_i - 1;
