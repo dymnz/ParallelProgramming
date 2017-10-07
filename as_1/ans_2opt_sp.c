@@ -175,7 +175,7 @@ void parallel_2opt() {
     time_t current_time;
     do {
     	current_time = time (NULL);
-    } while(current_time - start_time >= SECONDS_TO_WAIT);
+    } while(current_time - start_time < SECONDS_TO_WAIT);
 	
 	for (i = 0; i < threads_to_use; ++i)
 			pthread_join(two_opt_thread_list[i], NULL);
