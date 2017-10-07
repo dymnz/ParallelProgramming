@@ -122,7 +122,7 @@ void serial_2opt() {
 				two_opt(i, j);
 			}
 		}
-	} while(time(NULL) < start_time + SECONDS_TO_WAIT);
+	} while (time(NULL) < start_time + SECONDS_TO_WAIT);
 }
 /*
 	Distance array is a serialized 2D-array with -1 as default value.
@@ -300,8 +300,8 @@ int main(int argc, char const *argv[])
 
 	printf("Serial test:\n");
 	serial_2opt();
-#ifdef VERBOSE	
-	print_route();	
+#ifdef VERBOSE
+	print_route();
 #endif
 
 	printf("Final route distance: %lf\n", get_route_distance());
@@ -309,7 +309,9 @@ int main(int argc, char const *argv[])
 	// Write to file
 	write_route(fpOutput);
 
+#ifdef ENABLE_2OPT_COUNTER
 	printf("2opt_call: %d\n", opt_counter);
+#endif
 
 	/* Cleanup */
 	fclose(fpOutput);
@@ -323,7 +325,7 @@ int main(int argc, char const *argv[])
 #ifdef ENABLE_2OPT_COUNTER
 	pthread_rwlock_destroy(&counter_rwlock);
 #endif
-	
+
 
 	return 0;
 }

@@ -118,8 +118,8 @@ void two_opt(int start, int end) {
 	}
 }
 
-/* 
-	Search for depth: [start end) 
+/*
+	Search for depth: [start end)
 	TODO: Check go_flag
 */
 void *parallel_2opt_job(void *param) {
@@ -130,7 +130,7 @@ void *parallel_2opt_job(void *param) {
 	// m: Loop control
 	while (1) {
 		for (i = thread_param->start_depth; i < thread_param->end_depth; ++i) {
-			for (m = 1; m < num_city - i; ++m) {			
+			for (m = 1; m < num_city - i; ++m) {
 				two_opt(m, m + i);
 			}
 		}
@@ -141,7 +141,7 @@ void *parallel_2opt_job(void *param) {
 			break;
 		pthread_rwlock_unlock(&go_flag_rwlock);
 	}
-	
+
 
 	free(thread_param);
 
@@ -163,7 +163,7 @@ void parallel_2opt() {
 
 	// In case there's too many thread available
 	int threads_to_use = THREAD_COUNT;
-	if (max_depth < THREAD_COUNT) 
+	if (max_depth < THREAD_COUNT)
 		threads_to_use = max_depth;
 
 	int depth_segment_size = max_depth / THREAD_COUNT;
@@ -180,15 +180,15 @@ void parallel_2opt() {
 	}
 
 	// Wait for the time up
-    while(time(NULL) - start_time < SECONDS_TO_WAIT);
+	while (time(NULL) - start_time < SECONDS_TO_WAIT);
 
-    // Change go_flag to 0
-    pthread_rwlock_wrlock(&go_flag_rwlock);
-    go_flag = 0;
-    pthread_rwlock_unlock(&go_flag_rwlock);
-	
+	// Change go_flag to 0
+	pthread_rwlock_wrlock(&go_flag_rwlock);
+	go_flag = 0;
+	pthread_rwlock_unlock(&go_flag_rwlock);
+
 	for (i = 0; i < threads_to_use; ++i)
-			pthread_join(two_opt_thread_list[i], NULL);
+		pthread_join(two_opt_thread_list[i], NULL);
 }
 
 /*
@@ -357,11 +357,11 @@ int main(int argc, char const *argv[])
 	// Init route_list_rwlock and go_flag_rwlock
 	pthread_rwlock_init(&route_list_rwlock, NULL);
 	pthread_rwlock_init(&go_flag_rwlock, NULL);
-	
+
 
 #ifdef ENABLE_2OPT_COUNTER
 	pthread_rwlock_init(&counter_rwlock, NULL);
-#endif	
+#endif
 
 #ifdef VERBOSE
 	printf("Original route:\n");
@@ -372,7 +372,7 @@ int main(int argc, char const *argv[])
 	printf("Naive search space division:\n");
 	parallel_2opt();
 
-#ifdef VERBOSE	
+#ifdef VERBOSE
 	print_route();
 #endif
 
@@ -381,7 +381,9 @@ int main(int argc, char const *argv[])
 	// Write to file
 	write_route(fpOutput);
 
+#ifdef ENABLE_2OPT_COUNTER
 	printf("2opt_call: %d\n", opt_counter);
+#endif
 
 	/* Cleanup */
 	fclose(fpOutput);
@@ -394,9 +396,9 @@ int main(int argc, char const *argv[])
 	pthread_rwlock_destroy(&route_list_rwlock);
 	pthread_rwlock_destroy(&go_flag_rwlock);
 
-#ifdef ENABLE_2OPT_COUNTER	
+#ifdef ENABLE_2OPT_COUNTER
 	pthread_rwlock_destroy(&counter_rwlock);
-#endif	
+#endif
 
 	return 0;
 }
