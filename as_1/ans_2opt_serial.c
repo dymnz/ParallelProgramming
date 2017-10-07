@@ -276,9 +276,10 @@ int main(int argc, char const *argv[])
 	printf("Serial test:\n");
 	serial_2opt();
 #ifdef VERBOSE	
-	print_route();
-	printf("Final route distance: %f\n", get_route_distance());
+	print_route();	
 #endif
+
+	printf("Final route distance: %f\n", get_route_distance());
 
 	// Write to file
 	write_route(fpOutput);

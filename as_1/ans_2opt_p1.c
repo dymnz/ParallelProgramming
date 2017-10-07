@@ -319,8 +319,9 @@ int main(int argc, char const *argv[])
 	parallel_2opt();
 #ifdef VERBOSE	
 	print_route();
-	printf("Final route distance: %f\n", get_route_distance());
 #endif
+	
+	printf("Final route distance: %f\n", get_route_distance());
 
 	// Write to file
 	write_route(fpOutput);
