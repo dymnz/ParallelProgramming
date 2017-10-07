@@ -60,7 +60,7 @@ void two_opt(int start, int end) {
 #endif
 
 	pthread_rwlock_wrlock(&counter_rwlock);
-	++counter;
+	++opt_counter;
 	pthread_rwlock_unlock(&counter_rwlock);
 
 	// Do not process the node at the start and the end
