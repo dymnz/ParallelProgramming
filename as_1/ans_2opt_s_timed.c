@@ -121,6 +121,8 @@ void serial_2opt() {
 			for (j = i + 1; j < num_city; ++j) {
 				two_opt(i, j);
 			}
+			if (time(NULL) < start_time + SECONDS_TO_WAIT)
+				break;
 		}
 	} while (time(NULL) < start_time + SECONDS_TO_WAIT);
 }
