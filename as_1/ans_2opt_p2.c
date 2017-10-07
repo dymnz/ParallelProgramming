@@ -4,12 +4,11 @@
 #include <math.h>
 
 //#define VERBOSE
-#define SERIAL_TEST
-//#define PARALLEL_TEST
-#define PARALLEL_TEST_1
 
 #define THREAD_COUNT 8
 //#define DEBUG
+
+typedef double dist_type
 
 struct City {
 	int index;
@@ -26,26 +25,26 @@ struct Thread_Param {
 void print_route();
 void *read_coord(void *fp);
 void *read_route(void *fp);
-inline float distance(int x1, int y1, int x2, int y2);
+inline dist_type distance(int x1, int y1, int x2, int y2);
 
-float get_city_distance(int index_1, int index_2);
-float get_route_distance();
+void parallel_2opt();
+void *parallel_2opt_job(void *param);
+
+dist_type get_city_distance(int index_1, int index_2);
+dist_type get_route_distance();
 
 void two_opt(int start, int end);
 
-void parallel_2opt_1();
-void *parallel_2opt_job_1(void *param);
-
 int		num_city;
-float 	default_distance;
+dist_type 	default_distance;
 
 int		*route_index_list;
-float	*dist_list;
+dist_type	*dist_list;
 struct City	*city_list;
 
 pthread_rwlock_t	rwlock;
 
-inline float distance(int x1, int y1, int x2, int y2) {
+inline dist_type distance(int x1, int y1, int x2, int y2) {
 	return sqrt(((x1 - x2) * (x1 - x2)) + ((y1 - y2) * (y1 - y2)));
 }
 
@@ -62,10 +61,10 @@ void two_opt(int start, int end) {
 	}
 
 	pthread_rwlock_rdlock(&rwlock);
-	float original_distance =
+	dist_type original_distance =
 	    get_city_distance(route_index_list[start - 1], route_index_list[start])
 	    + get_city_distance(route_index_list[end], route_index_list[end + 1]);
-	float swapped_distance =
+	dist_type swapped_distance =
 	    get_city_distance(route_index_list[start - 1], route_index_list[end]);
 	+ get_city_distance( route_index_list[start], route_index_list[end + 1]);
 	pthread_rwlock_unlock(&rwlock);
@@ -95,58 +94,6 @@ void two_opt(int start, int end) {
 #endif
 	}
 }
-
-void *parallel_2opt_job_1(void *param) {
-	struct Thread_Param *thread_param = (struct Thread_Param *) param;
-
-	long i, j;
-	long stop_index;
-
-	for (i = thread_param->start; i <= thread_param->end; ++i) {
-		stop_index = thread_param->max_depth + i > num_city ?
-		             num_city : thread_param->max_depth + i;
-
-		for (j = i + 1; j < stop_index; ++j) {
-			two_opt(i, j);
-		}
-	}
-
-	free(thread_param);
-
-	return NULL;
-}
-
-/*
-	Parallel version of complete 2-opt.
-	The job is split up by giving different starting and ending index.
-
-	Bad result
-*/
-void parallel_2opt_1() {
-	int i;
-	pthread_t two_opt_thread_list[THREAD_COUNT];
-
-	// In case the number of city - 2 is less than THREAD_COUNT
-	int loop_count = THREAD_COUNT > num_city - 2 ? num_city - 2 : THREAD_COUNT;
-
-	// Change max_depth to control run time
-	for (i = 0; i < loop_count; ++i) {
-		struct Thread_Param *thread_param =
-		    (struct Thread_Param *) malloc(sizeof(struct Thread_Param));
-
-		thread_param->start = i * loop_count + 1;
-		thread_param->end = (i + 1) * loop_count; // i.e. i + 1 + loop_count - 1
-		thread_param->max_depth = num_city - 1;	// Change this to control run time
-
-		pthread_create(&two_opt_thread_list[i],
-		               NULL, parallel_2opt_job_1, (void *)thread_param);
-	}
-
-	for (i = 0; i < loop_count; ++i) {
-		pthread_join(two_opt_thread_list[i], NULL);
-	}
-}
-
 
 void *parallel_2opt_job(void *param) {
 	struct Thread_Param *thread_param = (struct Thread_Param *) param;
@@ -194,23 +141,12 @@ void parallel_2opt() {
 	}
 
 }
-/*
-	Serial version of complete 2-opt
-*/
-void serial_2opt() {
-	int i, j;
-	for (i = 1; i < num_city - 1; ++i) {
-		for (j = i + 1; j < num_city; ++j) {
-			two_opt(i, j);
-		}
-	}
-}
 
 /*
 	Distance array is a serialized 2D-array with -1 as default value.
 	The distance is calculated when needed.
 */
-float get_city_distance(int index_1, int index_2) {
+dist_type get_city_distance(int index_1, int index_2) {
 	int array_index;
 
 	// The last node is equal to the first node
@@ -247,10 +183,10 @@ float get_city_distance(int index_1, int index_2) {
 /*
 	Calculate the total route distance
 */
-float get_route_distance() {
+dist_type get_route_distance() {
 	int i;
 	int index_1, index_2;
-	float distance_sum = 0.0;
+	dist_type distance_sum = 0.0;
 	for (i = 0; i < num_city; ++i) {
 		index_1 = route_index_list[i];
 		index_2 = route_index_list[i + 1];
@@ -354,7 +290,8 @@ int main(int argc, char const *argv[])
 	int num_edge = num_city  * (num_city - 1) / 2;	// C(N, 2)
 
 	// Distances are reset to -1
-	dist_list = (float *) malloc(num_edge * sizeof(float));
+	dist_list = (dist_type *) malloc(num_edge * sizeof(dist_type));
+	dist_type neg_1;
 	for (i = 0; i < num_edge; ++i) {
 		dist_list[i] = -1;
 	}
@@ -371,35 +308,20 @@ int main(int argc, char const *argv[])
 #ifdef VERBOSE
 	printf("Original route:\n");
 	print_route();
-	printf("Original route distance: %f\n", get_route_distance());
+	printf("Original route distance: %lf\n", get_route_distance());
 #endif
 
-#ifdef SERIAL_TEST
-	printf("Serial test:\n");
-	serial_2opt();
-	printf("Final route:\n");
-	print_route();
-	printf("Final route distance: %f\n", get_route_distance());
-#endif
-
-#ifdef PARALLEL_TEST_1
-	printf("Parallel test:\n");
-	parallel_2opt_1();
-	printf("Final route:\n");
-	print_route();
-	printf("Final route distance: %f\n", get_route_distance());
-#endif
-
-#ifdef PARALLEL_TEST
-	printf("Parallel test:\n");
+	printf("Parallel test algo_2:\n");
 	parallel_2opt();
-	printf("Final route:\n");
+#ifdef VERBOSE	
 	print_route();
 	printf("Final route distance: %f\n", get_route_distance());
 #endif
 
+	// Write to file
 	write_route(fpOutput);
 
+	/* Cleanup */
 	fclose(fpOutput);
 	fclose(fpCoord);
 	fclose(fpRoute);
