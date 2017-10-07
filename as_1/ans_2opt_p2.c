@@ -8,7 +8,7 @@
 #define THREAD_COUNT 8
 //#define DEBUG
 
-typedef double dist_type
+typedef double dist_type;
 
 struct City {
 	int index;
