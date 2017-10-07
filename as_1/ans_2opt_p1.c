@@ -138,7 +138,7 @@ void parallel_2opt() {
 		thread_param->max_depth = num_city - 1;	// Change this to control run time
 
 		pthread_create(&two_opt_thread_list[i],
-		               NULL, parallel_2opt_job_1, (void *)thread_param);
+		               NULL, parallel_2opt_job, (void *)thread_param);
 	}
 
 	for (i = 0; i < loop_count; ++i) {
