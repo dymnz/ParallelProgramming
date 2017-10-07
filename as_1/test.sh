@@ -1,3 +1,10 @@
 #!/bin/sh
 
-./ans_opt2 ./dis_dir/test0.dis ./in_dir/test0.in ./output
+time(./ans_2opt_s ./dis_dir/test$1.dis ./in_dir/test$1.in ./output_s)
+./verify_2opt ./dis_dir/test$1.dis ./output_s
+time(./ans_2opt_p1 ./dis_dir/test$1.dis ./in_dir/test$1.in ./output_p1)
+./verify_2opt ./dis_dir/test$1.dis ./output_p1
+time(./ans_2opt_p2 ./dis_dir/test$1.dis ./in_dir/test$1.in ./output_p2)
+./verify_2opt ./dis_dir/test$1.dis ./output_p2
+
+

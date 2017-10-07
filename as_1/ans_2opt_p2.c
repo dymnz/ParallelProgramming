@@ -9,9 +9,9 @@
 #include <math.h>
 
 //#define VERBOSE
+//#define DEBUG
 
 #define THREAD_COUNT 8
-//#define DEBUG
 
 typedef double dist_type;
 
