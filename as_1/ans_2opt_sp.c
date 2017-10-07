@@ -25,8 +25,8 @@ struct City {
 };
 
 struct Thread_Param {
-	int depth_start;
-	int depth_end;
+	int start_depth;
+	int end_depth;
 };
 
 void print_route();
