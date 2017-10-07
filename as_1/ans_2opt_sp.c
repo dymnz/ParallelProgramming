@@ -10,8 +10,8 @@
 
 //#define VERBOSE
 //#define DEBUG
-#define ENABLE_2OPT_COUNTER
-#define THREAD_COUNT 8
+//#define ENABLE_2OPT_COUNTER
+#define THREAD_COUNT 16
 #define SECONDS_TO_WAIT 10
 
 typedef double dist_type;

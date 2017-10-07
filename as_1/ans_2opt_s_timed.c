@@ -6,7 +6,7 @@
 
 //#define VERBOSE
 //#define DEBUG
-#define ENABLE_2OPT_COUNTER
+//#define ENABLE_2OPT_COUNTER
 
 #define THREAD_COUNT 8
 #define SECONDS_TO_WAIT 10
