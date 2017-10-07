@@ -1,6 +1,6 @@
 /*
-	Parllization test 1
-	Bad job segmenting 
+	Parllization test 3
+	Serial job parallalized
 */
 
 #include <stdio.h>
@@ -9,9 +9,9 @@
 #include <math.h>
 
 //#define VERBOSE
-//#define DEBUG
 
 #define THREAD_COUNT 8
+//#define DEBUG
 
 typedef double dist_type;
 
@@ -34,7 +34,6 @@ inline dist_type distance(int x1, int y1, int x2, int y2);
 
 void parallel_2opt();
 void *parallel_2opt_job(void *param);
-
 
 dist_type get_city_distance(int index_1, int index_2);
 dist_type get_route_distance();
@@ -60,7 +59,7 @@ inline dist_type distance(int x1, int y1, int x2, int y2) {
 // A signle 2-opt swap
 void two_opt(int start, int end) {
 
-#ifdef DEBUG
+#ifdef VERBOSE
 	printf("two_opt: %3d : %3d\n", start, end);
 #endif
 
@@ -109,18 +108,23 @@ void two_opt(int start, int end) {
 	}
 }
 
-void *parallel_2opt_job(void *param) {
-	struct Thread_Param *thread_param = (struct Thread_Param *) param;
-
-	long i, j;
-	long stop_index;
-
-	for (i = thread_param->start; i <= thread_param->end; ++i) {
-		stop_index = thread_param->max_depth + i > num_city ?
-		             num_city : thread_param->max_depth + i;
-		for (j = i + 1; j < stop_index; ++j) {
+void serial_2opt() {
+	int i, j;
+	for (i = 1; i < num_city - 1; ++i) {
+		for (j = i + 1; j < num_city; ++j) {
 			two_opt(i, j);
 		}
+	}
+}
+
+void *parallel_2opt_job(void *param) {
+	struct Thread_Param *thread_param = (struct Thread_Param *) param;
+	
+	//printf("From: %3ld:%3ld:%3ld\n", (long)1, thread_param->max_depth, num_city - thread_param->max_depth);
+
+	long i;
+	for (i = 1; i < num_city - thread_param->max_depth + 1; ++i) {
+		two_opt(i, i + thread_param->max_depth - 1);
 	}
 
 	free(thread_param);
@@ -133,28 +137,28 @@ void *parallel_2opt_job(void *param) {
 
 */
 void parallel_2opt() {
-	int i;
+	int i, j;
 	pthread_t two_opt_thread_list[THREAD_COUNT];
 
-	// In case the number of city - 2 is less than THREAD_COUNT
-	int loop_count = THREAD_COUNT > num_city - 2 ? num_city - 2 : THREAD_COUNT;
+	int max_depth = num_city - 1; // Change this to control run time
 
-	// Change max_depth to control run time
-	for (i = 0; i < loop_count; ++i) {
-		struct Thread_Param *thread_param =
-		    (struct Thread_Param *) malloc(sizeof(struct Thread_Param));
+	for (i = 0; i < max_depth; ) {
+		for (j = 0; j < THREAD_COUNT; ++j) {
 
-		thread_param->start = i * loop_count + 1;
-		thread_param->end = (i + 1) * loop_count; // i.e. i + 1 + loop_count - 1
-		thread_param->max_depth = num_city - 1;	// Change this to control run time
+			struct Thread_Param *thread_param =
+			    (struct Thread_Param *) malloc(sizeof(struct Thread_Param));
 
-		pthread_create(&two_opt_thread_list[i],
-		               NULL, parallel_2opt_job, (void *)thread_param);
+			thread_param->max_depth = (i + 2);
+
+			pthread_create(&two_opt_thread_list[j],
+			               NULL, parallel_2opt_job, (void *)thread_param);
+			++i;
+		}
+
+		for (j = 0; j < THREAD_COUNT; ++j)
+			pthread_join(two_opt_thread_list[j], NULL);
 	}
 
-	for (i = 0; i < loop_count; ++i) {
-		pthread_join(two_opt_thread_list[i], NULL);
-	}
 }
 
 /*
@@ -326,7 +330,7 @@ int main(int argc, char const *argv[])
 	printf("Original route distance: %lf\n", get_route_distance());
 #endif
 
-	printf("Parallel test algo_1:\n");
+	printf("Parallel test algo_2:\n");
 	parallel_2opt();
 #ifdef VERBOSE	
 	print_route();

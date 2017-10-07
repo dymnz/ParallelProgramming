@@ -1,3 +1,8 @@
+/*
+	Parllization test 2
+	Job properly segmented but slower than single thread
+*/
+
 #include <stdio.h>
 #include <pthread.h>
 #include <stdlib.h>
