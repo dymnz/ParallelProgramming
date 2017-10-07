@@ -6,5 +6,5 @@
 
 LectureNote/*
 .DS_Store
-as_1/dis_dir/test1*.dis
-as_1/in_dir/test1*.in
+as_1/dis_dir/test1?.dis
+as_1/in_dir/test1?.in
