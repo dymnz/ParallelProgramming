@@ -1,7 +1,3 @@
-/*
-	Parllization test 3
-	Serial job parallalized
-*/
 #include <stdio.h>
 #include <pthread.h>
 #include <stdlib.h>
@@ -11,8 +7,10 @@
 //#define VERBOSE
 //#define DEBUG
 #define ENABLE_2OPT_COUNTER
+
 #define THREAD_COUNT 8
 #define SECONDS_TO_WAIT 10
+
 
 typedef double dist_type;
 
@@ -23,8 +21,9 @@ struct City {
 };
 
 struct Thread_Param {
-	int start_depth;
-	int end_depth;
+	int start;
+	int end;
+	int max_depth;
 };
 
 void print_route();
@@ -32,8 +31,7 @@ void *read_coord(void *fp);
 void *read_route(void *fp);
 inline dist_type distance(int x1, int y1, int x2, int y2);
 
-void parallel_2opt();
-void *parallel_2opt_job(void *param);
+void serial_2opt();
 
 dist_type get_city_distance(int index_1, int index_2);
 dist_type get_route_distance();
@@ -47,18 +45,14 @@ int		*route_index_list;
 dist_type	*dist_list;
 struct City	*city_list;
 
-pthread_rwlock_t	route_list_rwlock;
+pthread_rwlock_t	rwlock;
 
-/* Time control*/
-int go_flag = 1;
 time_t start_time;
-pthread_rwlock_t	go_flag_rwlock;
 
 #ifdef ENABLE_2OPT_COUNTER
 int opt_counter = 0;
 pthread_rwlock_t	counter_rwlock;
 #endif
-
 
 inline dist_type distance(int x1, int y1, int x2, int y2) {
 	return sqrt(((x1 - x2) * (x1 - x2)) + ((y1 - y2) * (y1 - y2)));
@@ -66,8 +60,7 @@ inline dist_type distance(int x1, int y1, int x2, int y2) {
 
 // A signle 2-opt swap
 void two_opt(int start, int end) {
-
-#ifdef VERBOSE
+#ifdef DEBUG
 	printf("two_opt: %3d : %3d\n", start, end);
 #endif
 
@@ -83,14 +76,14 @@ void two_opt(int start, int end) {
 		exit(42);
 	}
 
-	pthread_rwlock_rdlock(&route_list_rwlock);
+	pthread_rwlock_rdlock(&rwlock);
 	dist_type original_distance =
 	    get_city_distance(route_index_list[start - 1], route_index_list[start])
 	    + get_city_distance(route_index_list[end], route_index_list[end + 1]);
 	dist_type swapped_distance =
 	    get_city_distance(route_index_list[start - 1], route_index_list[end]);
 	+ get_city_distance( route_index_list[start], route_index_list[end + 1]);
-	pthread_rwlock_unlock(&route_list_rwlock);
+	pthread_rwlock_unlock(&rwlock);
 
 	// Modifiy the route if the new route is shorter
 	if (original_distance > swapped_distance) {
@@ -103,13 +96,13 @@ void two_opt(int start, int end) {
 		int i, temp_i;
 		int swap_count = (end - start + 1) / 2;
 
-		pthread_rwlock_wrlock(&route_list_rwlock);
+		pthread_rwlock_wrlock(&rwlock);
 		for (i = 0; i < swap_count; ++i) {
 			temp_i = route_index_list[start + i];
 			route_index_list[start + i] = route_index_list[end - i];
 			route_index_list[end - i] = temp_i;
 		}
-		pthread_rwlock_unlock(&route_list_rwlock);
+		pthread_rwlock_unlock(&rwlock);
 
 #ifdef DEBUG
 		printf("After swap:\n");
@@ -118,79 +111,19 @@ void two_opt(int start, int end) {
 	}
 }
 
-/* 
-	Search for depth: [start end) 
-	TODO: Check go_flag
+/*
+	Serial version of complete 2-opt
 */
-void *parallel_2opt_job(void *param) {
-	struct Thread_Param *thread_param = (struct Thread_Param *) param;
-	int i, m, n;
-
-	// i: Depth control
-	// m: Loop control
-	while (1) {
-		for (i = thread_param->start_depth; i < thread_param->end_depth; ++i) {
-			for (m = 1; m < num_city - i; ++m) {			
-				two_opt(m, m + i);
+void serial_2opt() {
+	int i, j;
+	do {
+		for (i = 1; i < num_city - 1; ++i) {
+			for (j = i + 1; j < num_city; ++j) {
+				two_opt(i, j);
 			}
 		}
-
-		// End when go_flag != 1
-		pthread_rwlock_rdlock(&go_flag_rwlock);
-		if (go_flag != 1)
-			break;
-		pthread_rwlock_unlock(&go_flag_rwlock);
-	}
-	
-
-	free(thread_param);
-
-	return NULL;
+	} while(time(NULL) < start_time + SECONDS_TO_WAIT);
 }
-
-
-/*
-	Parallel version of complete 2-opt.
-	Split the search space into segments by dividing chunck of depth
-
-	Alternative: Balance the workload by comb dividing
-*/
-void parallel_2opt() {
-	int i;
-	pthread_t two_opt_thread_list[THREAD_COUNT];
-
-	int max_depth = num_city - 1;
-
-	// In case there's too many thread available
-	int threads_to_use = THREAD_COUNT;
-	if (max_depth < THREAD_COUNT) 
-		threads_to_use = max_depth;
-
-	int depth_segment_size = max_depth / THREAD_COUNT;
-
-	for (i = 0; i < threads_to_use; ++i) {
-		struct Thread_Param *thread_param =
-		    (struct Thread_Param *) malloc(sizeof(struct Thread_Param));
-
-		thread_param->start_depth = (depth_segment_size * i) + 1;
-		thread_param->end_depth = (depth_segment_size * (i + 1)) + 1;
-
-		pthread_create(&two_opt_thread_list[i],
-		               NULL, parallel_2opt_job, (void *)thread_param);
-	}
-
-	// Wait for the time up
-    while(time(NULL) - start_time < SECONDS_TO_WAIT);
-
-    // Change go_flag to 0
-    pthread_rwlock_wrlock(&go_flag_rwlock);
-    go_flag = 0;
-    pthread_rwlock_unlock(&go_flag_rwlock);
-	
-	for (i = 0; i < threads_to_use; ++i)
-			pthread_join(two_opt_thread_list[i], NULL);
-}
-
 /*
 	Distance array is a serialized 2D-array with -1 as default value.
 	The distance is calculated when needed.
@@ -320,14 +253,13 @@ int main(int argc, char const *argv[])
 	int i;
 	pthread_t fp_thread_list[2];
 
-	if (argc < 4) {
+	if (argc < 3) {
 		printf("not enough input\n");
 		exit(69);
 	}
 
 	// Get program start time
 	start_time = time(NULL);
-	go_flag = 1;
 
 	// Open file pointers
 	FILE *fpCoord, *fpRoute, *fpOutput;
@@ -354,14 +286,11 @@ int main(int argc, char const *argv[])
 	pthread_join(fp_thread_list[0], NULL);
 	pthread_join(fp_thread_list[1], NULL);
 
-	// Init route_list_rwlock and go_flag_rwlock
-	pthread_rwlock_init(&route_list_rwlock, NULL);
-	pthread_rwlock_init(&go_flag_rwlock, NULL);
-	
-
+	// Init rwlock
+	pthread_rwlock_init(&rwlock, NULL);
 #ifdef ENABLE_2OPT_COUNTER
 	pthread_rwlock_init(&counter_rwlock, NULL);
-#endif	
+#endif
 
 #ifdef VERBOSE
 	printf("Original route:\n");
@@ -369,11 +298,10 @@ int main(int argc, char const *argv[])
 	printf("Original route distance: %lf\n", get_route_distance());
 #endif
 
-	printf("Naive search space division:\n");
-	parallel_2opt();
-
+	printf("Serial test:\n");
+	serial_2opt();
 #ifdef VERBOSE	
-	print_route();
+	print_route();	
 #endif
 
 	printf("Final route distance: %lf\n", get_route_distance());
@@ -390,13 +318,12 @@ int main(int argc, char const *argv[])
 
 	free(city_list);
 	free(route_index_list);
+	pthread_rwlock_destroy(&rwlock);
 
-	pthread_rwlock_destroy(&route_list_rwlock);
-	pthread_rwlock_destroy(&go_flag_rwlock);
-
-#ifdef ENABLE_2OPT_COUNTER	
+#ifdef ENABLE_2OPT_COUNTER
 	pthread_rwlock_destroy(&counter_rwlock);
-#endif	
+#endif
+	
 
 	return 0;
 }
