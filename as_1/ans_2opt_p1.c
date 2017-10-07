@@ -103,10 +103,8 @@ void *parallel_2opt_job(void *param) {
 	long stop_index;
 
 	for (i = thread_param->start; i <= thread_param->end; ++i) {
-
 		stop_index = thread_param->max_depth + i > num_city ?
 		             num_city : thread_param->max_depth + i;
-
 		for (j = i + 1; j < stop_index; ++j) {
 			two_opt(i, j);
 		}
