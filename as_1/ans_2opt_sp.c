@@ -124,7 +124,7 @@ void two_opt(int start, int end) {
 */
 void *parallel_2opt_job(void *param) {
 	struct Thread_Param *thread_param = (struct Thread_Param *) param;
-	int i, m, n;
+	int i, m;
 
 	// i: Depth control
 	// m: Loop control
