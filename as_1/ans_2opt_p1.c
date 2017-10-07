@@ -45,6 +45,9 @@ struct City	*city_list;
 
 pthread_rwlock_t	rwlock;
 
+int opt_counter = 0;
+pthread_rwlock_t	counter_rwlock;
+
 inline dist_type distance(int x1, int y1, int x2, int y2) {
 	return sqrt(((x1 - x2) * (x1 - x2)) + ((y1 - y2) * (y1 - y2)));
 }
@@ -55,6 +58,11 @@ void two_opt(int start, int end) {
 #ifdef DEBUG
 	printf("two_opt: %3d : %3d\n", start, end);
 #endif
+
+	pthread_rwlock_wrlock(&counter_rwlock);
+	++counter;
+	pthread_rwlock_unlock(&counter_rwlock);
+
 	// Do not process the node at the start and the end
 	if (start == 0 || end == num_city) {
 		printf("Please don't do this\n");
@@ -305,6 +313,7 @@ int main(int argc, char const *argv[])
 
 	// Init rwlock
 	pthread_rwlock_init(&rwlock, NULL);
+	pthread_rwlock_init(&counter_rwlock, NULL);
 
 #ifdef VERBOSE
 	printf("Original route:\n");
@@ -323,6 +332,8 @@ int main(int argc, char const *argv[])
 	// Write to file
 	write_route(fpOutput);
 
+	printf("2opt_call: %d\n", opt_counter);
+
 	/* Cleanup */
 	fclose(fpOutput);
 	fclose(fpCoord);
@@ -331,6 +342,7 @@ int main(int argc, char const *argv[])
 	free(city_list);
 	free(route_index_list);
 	pthread_rwlock_destroy(&rwlock);
+	pthread_rwlock_destroy(&counter_rwlock);
 
 	return 0;
 }
