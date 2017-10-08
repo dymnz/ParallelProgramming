@@ -208,6 +208,11 @@ void write_route(FILE *fpOutput) {
 void *read_route(void *fp) {
 	FILE *fpRoute = (FILE *) fp;
 	route_index_list = (int *) malloc((num_city + 1) * sizeof(int));
+	if (route_index_list == NULL) {
+		printf("route_index_list malloc() error\n");
+		exit(56);
+	}	
+
 
 	fscanf(fpRoute, "%lf", &default_distance);
 	int index = 0, temp_i;
@@ -234,6 +239,10 @@ void *read_coord(void *fp) {
 
 	// Init storage
 	city_list = (struct City *) malloc(num_city * sizeof(struct City));
+	if (city_list == NULL) {
+		printf("city_list malloc() error\n");
+		exit(34);
+	}
 
 	int index = 0;
 	while (fscanf(fpCoord, "%d %d %d",
@@ -278,6 +287,11 @@ int main(int argc, char const *argv[])
 
 	// Distances are reset to -1
 	dist_list = (dist_type *) malloc(num_edge * sizeof(dist_type));
+	if (dist_list == NULL) {
+		printf("dist_list malloc() error\n");
+		exit(12);
+	}
+
 	for (i = 0; i < num_edge; ++i) {
 		dist_list[i] = -1;
 	}
