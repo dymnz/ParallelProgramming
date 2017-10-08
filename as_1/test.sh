@@ -8,10 +8,10 @@
 #./verify_2opt ./dis_dir/test$1.dis ./output_p2
 
 time(./ans_2opt_s_timed ./dis_dir/test$1.dis ./in_dir/test$1.in ./output_s_timed)
-./verify_2opt ./dis_dir/test$1.dis ./output_s_timed
+#./verify_2opt ./dis_dir/test$1.dis ./output_s_timed
 
 time(./ans_2opt_sp ./dis_dir/test$1.dis ./in_dir/test$1.in ./output_sp)
-./verify_2opt ./dis_dir/test$1.dis ./output_sp
+#./verify_2opt ./dis_dir/test$1.dis ./output_sp
 
 
 

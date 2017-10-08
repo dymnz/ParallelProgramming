@@ -9,7 +9,7 @@
 //#define ENABLE_2OPT_COUNTER
 
 #define THREAD_COUNT 8
-#define SECONDS_TO_WAIT 10
+#define SECONDS_TO_WAIT 1 * 60
 
 
 typedef double dist_type;
