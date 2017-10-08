@@ -9,7 +9,7 @@
 //#define ENABLE_2OPT_COUNTER
 
 #define THREAD_COUNT 8
-#define SECONDS_TO_WAIT 1 * 60
+#define SECONDS_TO_WAIT 10
 
 
 typedef double dist_type;
@@ -29,7 +29,7 @@ struct Thread_Param {
 void print_route();
 void *read_coord(void *fp);
 void *read_route(void *fp);
-inline dist_type distance(int x1, int y1, int x2, int y2);
+inline dist_type distance(dist_type x1, dist_type y1, dist_type x2, dist_type y2);
 
 void serial_2opt();
 
@@ -54,7 +54,7 @@ int opt_counter = 0;
 pthread_rwlock_t	counter_rwlock;
 #endif
 
-inline dist_type distance(int x1, int y1, int x2, int y2) {
+inline dist_type distance(dist_type x1, dist_type y1, dist_type x2, dist_type y2) {
 	return sqrt(((x1 - x2) * (x1 - x2)) + ((y1 - y2) * (y1 - y2)));
 }
 
@@ -119,10 +119,10 @@ void serial_2opt() {
 	do {
 		for (i = 1; i < num_city - 1; ++i) {
 			for (j = i + 1; j < num_city; ++j) {
-				two_opt(i, j);
+				two_opt(i, j);        
 			}
-			if (time(NULL) < start_time + SECONDS_TO_WAIT)
-				break;
+      if (time(NULL) > start_time + SECONDS_TO_WAIT)
+				  break;
 		}
 	} while (time(NULL) < start_time + SECONDS_TO_WAIT);
 }
@@ -132,10 +132,6 @@ void serial_2opt() {
 */
 dist_type get_city_distance(int index_1, int index_2) {
 	int array_index;
-
-	// The last node is equal to the first node
-	if (index_2 == num_city)
-		index_2 = 0;
 
 	if (index_1 > index_2) {
 		array_index = num_city * (index_2)
@@ -155,9 +151,9 @@ dist_type get_city_distance(int index_1, int index_2) {
 		        city_list[index_2].x,
 		        city_list[index_2].y);
 	}
-
+ 
 #ifdef DEBUG
-	printf("Distance: %2d: %2d:%2d = %3f\n", array_index, index_1, index_2, dist_list[array_index]);
+	printf("Distance: %2d: %2d:%2d = %3lf\n", array_index, index_1, index_2, dist_list[array_index]);
 #endif
 
 	return dist_list[array_index];

@@ -12,7 +12,7 @@
 //#define DEBUG
 //#define ENABLE_2OPT_COUNTER
 #define THREAD_COUNT 16
-#define SECONDS_TO_WAIT 1 * 60
+#define SECONDS_TO_WAIT 10
 
 typedef double dist_type;
 
@@ -30,7 +30,7 @@ struct Thread_Param {
 void print_route();
 void *read_coord(void *fp);
 void *read_route(void *fp);
-inline dist_type distance(int x1, int y1, int x2, int y2);
+inline dist_type distance(dist_type x1, dist_type y1, dist_type x2, dist_type y2);
 
 void parallel_2opt();
 void *parallel_2opt_job(void *param);
@@ -59,8 +59,8 @@ int opt_counter = 0;
 pthread_rwlock_t	counter_rwlock;
 #endif
 
-
-inline dist_type distance(int x1, int y1, int x2, int y2) {
+// Casting coord(int) to coord(double) so they don't overflow while computing
+inline dist_type distance(dist_type x1, dist_type y1, dist_type x2, dist_type y2) {
 	return sqrt(((x1 - x2) * (x1 - x2)) + ((y1 - y2) * (y1 - y2)));
 }
 
@@ -128,24 +128,19 @@ void *parallel_2opt_job(void *param) {
 
 	// i: Depth control
 	// m: Loop control
-	while (1) {
+	do {
 		for (i = thread_param->start_depth; i < thread_param->end_depth; ++i) {
 			for (m = 1; m < num_city - i; ++m) {
-				two_opt(m, m + i);
+				two_opt(m, m + i);        
 			}
-		}
-
-		// End when go_flag != 1
-		pthread_rwlock_rdlock(&go_flag_rwlock);
-		if (go_flag != 1)
-			break;
-		pthread_rwlock_unlock(&go_flag_rwlock);
-	}
-
-
+      if (time(NULL) > start_time + SECONDS_TO_WAIT)
+				  break;     
+		} 
+	} while (time(NULL) < start_time + SECONDS_TO_WAIT);
+  
 	free(thread_param);
 
-	return NULL;
+	return NULL; 
 }
 
 
@@ -166,7 +161,7 @@ void parallel_2opt() {
 	if (max_depth < THREAD_COUNT)
 		threads_to_use = max_depth;
 
-	int depth_segment_size = max_depth / THREAD_COUNT;
+	int depth_segment_size = max_depth / threads_to_use;
 
 	for (i = 0; i < threads_to_use; ++i) {
 		struct Thread_Param *thread_param =
@@ -174,7 +169,7 @@ void parallel_2opt() {
 
 		thread_param->start_depth = (depth_segment_size * i) + 1;
 		thread_param->end_depth = (depth_segment_size * (i + 1)) + 1;
-
+    printf("New thread: %5d:%5d\n", thread_param->start_depth, thread_param->end_depth);
 		pthread_create(&two_opt_thread_list[i],
 		               NULL, parallel_2opt_job, (void *)thread_param);
 	}
