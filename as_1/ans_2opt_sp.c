@@ -12,7 +12,7 @@
 //#define DEBUG
 //#define ENABLE_2OPT_COUNTER
 #define THREAD_COUNT 16
-#define SECONDS_TO_WAIT 10
+#define SECONDS_TO_WAIT 60
 
 typedef double dist_type;
 
@@ -51,7 +51,7 @@ pthread_rwlock_t	route_list_rwlock;
 
 /* Time control*/
 int go_flag = 1;
-time_t start_time;
+time_t start_time, current_time;
 pthread_rwlock_t	go_flag_rwlock;
 
 #ifdef ENABLE_2OPT_COUNTER
@@ -133,10 +133,10 @@ void *parallel_2opt_job(void *param) {
 			for (m = 1; m < num_city - i; ++m) {
 				two_opt(m, m + i);        
 			}
-      if (time(NULL) > start_time + SECONDS_TO_WAIT)
+      if (current_time > start_time + SECONDS_TO_WAIT)
 				  break;     
 		} 
-	} while (time(NULL) < start_time + SECONDS_TO_WAIT);
+	} while (current_time < start_time + SECONDS_TO_WAIT);
   
 	free(thread_param);
 
@@ -175,12 +175,10 @@ void parallel_2opt() {
 	}
 
 	// Wait for the time up
-	while (time(NULL) - start_time < SECONDS_TO_WAIT);
+	do {
+   current_time = time(NULL);
+ } while (current_time - start_time < SECONDS_TO_WAIT);
 
-	// Change go_flag to 0
-	pthread_rwlock_wrlock(&go_flag_rwlock);
-	go_flag = 0;
-	pthread_rwlock_unlock(&go_flag_rwlock);
 
 	for (i = 0; i < threads_to_use; ++i)
 		pthread_join(two_opt_thread_list[i], NULL);
