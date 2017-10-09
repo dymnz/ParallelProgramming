@@ -109,17 +109,19 @@ void two_opt(int start, int end) {
 		// Prepare new route segment		
 		pthread_rwlock_rdlock(&route_list_rwlock);
 		for (i = 0; i < route_segment_length; ++i) {
-			new_route_segment[i] = route_index_list[end - i] 
+			new_route_segment[i] = route_index_list[end - i];
 		}
 		pthread_rwlock_unlock(&route_list_rwlock);
 
 		// Change the route
 		pthread_rwlock_wrlock(&route_list_rwlock);
-		memcpy(route_index_list + start, new_route_segment, route_segment_length * sizeof(int))
+		memcpy(route_index_list + start, 
+			new_route_segment, 
+			route_segment_length * sizeof(int));
 		pthread_rwlock_unlock(&route_list_rwlock);
 
 		free(new_route_segment);
-		
+
 #ifdef DEBUG
 		printf("After swap:\n");
 		print_route();
