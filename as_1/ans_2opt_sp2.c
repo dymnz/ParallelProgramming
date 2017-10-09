@@ -12,7 +12,7 @@
 //#define DEBUG
 //#define ENABLE_2OPT_COUNTER
 #define THREAD_COUNT 16
-#define SECONDS_TO_WAIT 60
+#define SECONDS_TO_WAIT 10
 
 typedef double dist_type;
 
@@ -52,7 +52,7 @@ pthread_rwlock_t	route_list_rwlock;
 
 /* Time control*/
 int go_flag = 1;
-time_t start_time, current_time;
+time_t start_time;
 pthread_rwlock_t	go_flag_rwlock;
 
 #ifdef ENABLE_2OPT_COUNTER
@@ -99,19 +99,27 @@ void two_opt(int start, int end) {
 		printf("Swap route from index: %3d %3d\n", start, end);
 		printf("Before swap:\n");
 		print_route();
-#endif
+#endif		
 
-		int i, temp_i;
-		int swap_count = (end - start + 1) / 2;
+		int i;
+		int route_segment_length = end - start + 1;
+		int swap_count = route_segment_length / 2;
+		int *new_route_segment = (int *) malloc(route_segment_length * sizeof(int));
 
-		pthread_rwlock_wrlock(&route_list_rwlock);
-		for (i = 0; i < swap_count; ++i) {
-			temp_i = route_index_list[start + i];
-			route_index_list[start + i] = route_index_list[end - i];
-			route_index_list[end - i] = temp_i;
+		// Prepare new route segment		
+		pthread_rwlock_rdlock(&route_list_rwlock);
+		for (i = 0; i < route_segment_length; ++i) {
+			new_route_segment[i] = route_index_list[end - i] 
 		}
 		pthread_rwlock_unlock(&route_list_rwlock);
 
+		// Change the route
+		pthread_rwlock_wrlock(&route_list_rwlock);
+		memcpy(route_index_list + start, new_route_segment, route_segment_length * sizeof(int))
+		pthread_rwlock_unlock(&route_list_rwlock);
+
+		free(new_route_segment);
+		
 #ifdef DEBUG
 		printf("After swap:\n");
 		print_route();
@@ -134,10 +142,10 @@ void *parallel_2opt_job(void *param) {
 			for (m = 1; m < num_city - i; ++m) {
 				two_opt(m, m + i);        
 			}
-      if (current_time > start_time + SECONDS_TO_WAIT)
+      if (time(NULL) > start_time + SECONDS_TO_WAIT)
 				  break;     
 		} 
-	} while (current_time < start_time + SECONDS_TO_WAIT);
+	} while (time(NULL) < start_time + SECONDS_TO_WAIT);
   
 	free(thread_param);
 
@@ -176,10 +184,12 @@ void parallel_2opt() {
 	}
 
 	// Wait for the time up
-	do {
-   current_time = time(NULL);
- } while (current_time - start_time < SECONDS_TO_WAIT);
+	while (time(NULL) - start_time < SECONDS_TO_WAIT);
 
+	// Change go_flag to 0
+	pthread_rwlock_wrlock(&go_flag_rwlock);
+	go_flag = 0;
+	pthread_rwlock_unlock(&go_flag_rwlock);
 
 	for (i = 0; i < threads_to_use; ++i)
 		pthread_join(two_opt_thread_list[i], NULL);
