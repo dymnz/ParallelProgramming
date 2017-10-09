@@ -6,7 +6,9 @@
 #include <pthread.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
 #include <time.h>
+
 
 //#define VERBOSE
 //#define DEBUG
@@ -103,7 +105,6 @@ void two_opt(int start, int end) {
 
 		int i;
 		int route_segment_length = end - start + 1;
-		int swap_count = route_segment_length / 2;
 		int *new_route_segment = (int *) malloc(route_segment_length * sizeof(int));
 
 		// Prepare new route segment		
