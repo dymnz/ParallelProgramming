@@ -22,17 +22,22 @@ for (i = 1; i < num_city - 1; ++i) {
 }
 ```
 
-#### Explanation:
+#### Can be changed to:
 
 ```
 start from (1) to (num_city - 1)
-	trying 2opt_swap with *depth* (2) to (num_city - i)
+	2opt_swap with *depth* (2) to (num_city - i)
+
+for (i = 1; i < num_city - 1; ++i) {
+	for (depth = 1; depth < num_city - i; ++depth) {
+		2opt_swap(i, i + depth);
+	}
+}
 ```
+*depth* is the length between the 2opt_swap indices
 
-*depth* is the length of the 2opt_swap participants, i.e. end - start + 1
 
-
-#### Idea: Split *depth* accross
+#### Idea: Split *depth* accross threads
 
 ```
 num_thread: number of thread available
