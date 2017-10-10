@@ -76,7 +76,7 @@ There are also two ways to split the *depth*
 ```
 Example 9 depth, 3 threads
 
-Chunck: 
+Chunk: 
 Thread 1: 1/2/3 depth
 Thread 2: 4/5/6 depth
 Thread 3: 7/8/9 depth
