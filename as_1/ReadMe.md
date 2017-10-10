@@ -37,7 +37,7 @@ for (i = 1; i < num_city - 1; ++i) {
 *depth* is the length between the 2opt_swap indices
 
 
-#### Idea: Split *depth* accross threads
+#### Idea: Split *depth* across threads
 
 ```
 num_thread: number of thread available
