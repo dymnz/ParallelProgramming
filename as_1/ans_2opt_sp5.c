@@ -12,6 +12,7 @@
 
 //#define VERBOSE
 //#define DEBUG
+#define PRINT_STATUS
 #define ENABLE_2OPT_COUNTER
 //#define KEEP_DIST_LIST    // Save the calculated distance, requires a lot of RAM
 
@@ -46,6 +47,7 @@ dist_type get_route_distance(int *);
 
 void two_opt(int start, int end);
 
+int  available_threads = THREAD_COUNT;
 int		num_city;
 dist_type 	default_distance;
 
@@ -210,14 +212,17 @@ void *parallel_2opt_job(void *param) {
 */
 void parallel_2opt() {
 	int i;
-	pthread_t two_opt_thread_list[THREAD_COUNT];
+	pthread_t *two_opt_thread_list = 
+    (pthread_t *) malloc(available_threads * sizeof(pthread_t));
 
 	int max_depth = num_city - 1;
 
 	// In case there's too many thread available
-	int threads_to_use = THREAD_COUNT;
-	if (max_depth < THREAD_COUNT)
+	int threads_to_use = available_threads;
+	if (max_depth < available_threads)
 		threads_to_use = max_depth;
+
+  printf("Using %3d threads\n", threads_to_use);
 
 	for (i = 0; i < threads_to_use; ++i) {
 		struct Thread_Param *thread_param =
@@ -237,6 +242,14 @@ void parallel_2opt() {
 
 	// Wait for the time up
 	while (time(NULL) < start_time + SECONDS_TO_WAIT - SECONDS_BUFFER) {
+     #ifdef PRINT_STATUS
+     if ( time(NULL) - start_time > 0 && (time(NULL) - start_time) % 30 == 0 ) {
+       printf("Distance @ %2lu:%02lu = %lf\n", 
+             (unsigned long)(time(NULL) - start_time)/60,  
+             (unsigned long)(time(NULL) - start_time)%60,
+             cache_route_distance);
+     }
+     #endif
 		sleep(1);
 	}
 	// Change go_flag to 0
@@ -408,6 +421,10 @@ int main(int argc, char const *argv[])
 	if (fpRoute == NULL) exit(2);
 	fpOutput = fopen (argv[3], "w");
 	if (fpOutput == NULL) exit(3);
+
+  available_threads = atoi(argv[4]);
+  
+  printf("Working on %s\n", argv[1]);
 
 	// Read number of city
 	fscanf(fpCoord, "%d", &num_city);
