@@ -64,7 +64,7 @@ be overwritten, so the assertion have to be done again after applying
 `_write_lock`
 
 The aforementioned race condition also prevents partial update of 
-the `current_route`, so a new array(new_route) is created every opertaion.
+the `current_route`, so a new array(new_route) is created every operation.
 
 `distance(current_route)` can be cached.
 
