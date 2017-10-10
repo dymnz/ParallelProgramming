@@ -1,0 +1,116 @@
+running ans_2opt_sp5
+Balanced search space division/Proper/Distance cache:
+Final route distance: 362.660487
+call: 6455910 swap:      15 %: 0.00 race:   0 %: 0.00 avg_swap_length: 3.00 avg_dist_dec: 22.27
+                -- Written by TA
+================================
+Pass!
+
+running ans_2opt_sp5
+Balanced search space division/Proper/Distance cache:
+Final route distance: 8210.055178
+call: 4926028 swap:     361 %: 0.01 race:  49 %: 0.00 avg_swap_length: 15.02 avg_dist_dec: 118.51
+                -- Written by TA
+================================
+Pass!
+
+running ans_2opt_sp5
+Balanced search space division/Proper/Distance cache:
+Final route distance: 24789.992266
+call: 4934760 swap:     817 %: 0.02 race: 173 %: 0.00 avg_swap_length: 22.59 avg_dist_dec: 221.50
+                -- Written by TA
+================================
+Pass!
+
+running ans_2opt_sp5
+Balanced search space division/Proper/Distance cache:
+Final route distance: 94156.825833
+call: 3452688 swap:    2541 %: 0.07 race: 469 %: 0.01 avg_swap_length: 59.95 avg_dist_dec: 478.51
+                -- Written by TA
+================================
+Pass!
+
+running ans_2opt_sp5
+Balanced search space division/Proper/Distance cache:
+Final route distance: 270194.343735
+call: 2340398 swap:    5689 %: 0.24 race: 1070 %: 0.05 avg_swap_length: 94.62 avg_dist_dec: 862.38
+                -- Written by TA
+================================
+Pass!
+
+running ans_2opt_sp5
+Balanced search space division/Proper/Distance cache:
+Final route distance: 22683303.016659
+call:  635438 swap:   16375 %: 2.58 race: 5152 %: 0.81 avg_swap_length: 34.38 avg_dist_dec: 6742.04
+                -- Written by TA
+================================
+Pass!
+
+running ans_2opt_sp5
+Balanced search space division/Proper/Distance cache:
+Final route distance: 90742071.815652
+call:  414223 swap:   19921 %: 4.81 race: 8926 %: 2.15 avg_swap_length: 16.96 avg_dist_dec: 12340.80
+                -- Written by TA
+================================
+Pass!
+
+running ans_2opt_sp5
+Balanced search space division/Proper/Distance cache:
+Final route distance: 168109403.759950
+call:  336510 swap:   21323 %: 6.34 race: 10684 %: 3.17 avg_swap_length: 12.62 avg_dist_dec: 16801.68
+                -- Written by TA
+================================
+Pass!
+
+running ans_2opt_sp5
+Balanced search space division/Proper/Distance cache:
+Final route distance: 12080943924.745222
+call:   69396 swap:    9117 %: 13.14 race: 6778 %: 9.77 avg_swap_length: 5.38 avg_dist_dec: 106858.97
+                -- Written by TA
+================================
+Pass!
+
+running ans_2opt_sp5
+Balanced search space division/Proper/Distance cache:
+Final route distance: 51132000801.282768
+call:   34652 swap:    4674 %: 13.49 race: 3643 %: 10.51 avg_swap_length: 5.48 avg_dist_dec: 208953.42
+                -- Written by TA
+================================
+Pass!
+
+test: 6
+running ans_2opt_sp5
+Balanced search space division/Proper/Distance cache:
+Final route distance: 8732163.608586
+call: 42951244 swap:   55859 %: 0.13 race: 17136 %: 0.04 avg_swap_length: 553.08 avg_dist_dec: 5869.26
+                -- Written by TA
+================================
+Pass!
+
+test: 7
+running ans_2opt_sp5
+Balanced search space division/Proper/Distance cache:
+Final route distance: 18461128.253745
+call: 36063084 swap:   63088 %: 0.17 race: 21915 %: 0.06 avg_swap_length: 531.61 avg_dist_dec: 8050.83
+                -- Written by TA
+================================
+Pass!
+
+test: 8
+running ans_2opt_sp5
+Balanced search space division/Proper/Distance cache:
+Final route distance: 2023185736.735327
+call: 7907147 swap:  173337 %: 2.19 race: 102995 %: 1.30 avg_swap_length: 42.93 avg_dist_dec: 63644.76
+                -- Written by TA
+================================
+Pass!
+
+test: 9
+running ans_2opt_sp5
+Balanced search space division/Proper/Distance cache:
+Final route distance: 15896036454.893982
+call: 4067265 swap:  220584 %: 5.42 race: 201196 %: 4.95 avg_swap_length: 17.77 avg_dist_dec: 164167.00
+                -- Written by TA
+================================
+Pass!
+

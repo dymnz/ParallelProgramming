@@ -1,0 +1,55 @@
+test: 6
+running ans_2opt_sp5
+Balanced search space division/Proper/Distance cache:
+Final route distance: 9025359.480549
+call: 44669282 swap:   55756 %: 0.12 race: 19090 %: 0.04 avg_swap_length: 507.13 avg_dist_dec: 5874.84
+                -- Written by TA
+================================
+Pass!
+
+test: 7
+running ans_2opt_sp5
+Balanced search space division/Proper/Distance cache:
+Final route distance: 17969149.881770
+call: 36936435 swap:   63844 %: 0.17 race: 23568 %: 0.06 avg_swap_length: 567.81 avg_dist_dec: 7963.20
+                -- Written by TA
+================================
+Pass!
+
+test: 8
+running ans_2opt_sp5
+Balanced search space division/Proper/Distance cache:
+Final route distance: 2047891687.569858
+call: 7931139 swap:  172547 %: 2.18 race: 98388 %: 1.24 avg_swap_length: 42.48 avg_dist_dec: 63792.97
+                -- Written by TA
+================================
+Pass!
+
+test: 9
+running ans_2opt_sp5
+Balanced search space division/Proper/Distance cache:
+Final route distance: 21219004267.262352
+call: 2395344 swap:  168963 %: 7.05 race: 183290 %: 7.65 avg_swap_length: 13.38 avg_dist_dec: 182818.99
+                -- Written by TA
+================================
+Pass!
+
+test: 6
+running ans_2opt_sp5
+Balanced search space division/Proper/Distance cache:
+Final route distance: 8783236.386330
+call: 42653661 swap:   55216 %: 0.13 race: 16719 %: 0.04 avg_swap_length: 531.52 avg_dist_dec: 5936.68
+                -- Written by TA
+================================
+Pass!
+
+test: 7
+running ans_2opt_sp5
+Balanced search space division/Proper/Distance cache:
+Final route distance: 19154047.086712
+call: 32194164 swap:   62307 %: 0.19 race: 20251 %: 0.06 avg_swap_length: 497.11 avg_dist_dec: 8140.62
+                -- Written by TA
+================================
+Pass!
+
+test: 8
