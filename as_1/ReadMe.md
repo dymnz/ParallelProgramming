@@ -58,14 +58,32 @@ depth_for_each_thread = maximum_depth / num_thread
 end
 ```
 
+
 A race condition may occur when a thread pass through assertion,
 but not yet change the `current_route`; a better `current_route` may 
 be overwritten, so the assertion have to be done again after applying
 `_write_lock`
 
+
 The aforementioned race condition also prevents partial update of 
 the `current_route`, so a new array(new_route) is created every operation.
 
+
 `distance(current_route)` can be cached.
 
+
+There are also two ways to split the *depth*
+```
+Example 9 depth, 3 threads
+
+Chunck: 
+Thread 1: 1/2/3 depth
+Thread 2: 4/5/6 depth
+Thread 3: 7/8/9 depth
+
+Balanced:
+Thread 1: 1/4/7 depth
+Thread 2: 2/5/8 depth
+Thread 3: 3/6/9 depth
+```
 
