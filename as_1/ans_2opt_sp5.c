@@ -422,7 +422,11 @@ int main(int argc, char const *argv[])
 	fpOutput = fopen (argv[3], "w");
 	if (fpOutput == NULL) exit(3);
 
-  available_threads = atoi(argv[4]);
+	// Use the thread_num in argument if available
+	if (argc > 3)
+		available_threads = atoi(argv[4]);
+	else
+		available_threads = THREAD_COUNT;
   
   printf("Working on %s\n", argv[1]);
 
