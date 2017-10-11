@@ -1,6 +1,6 @@
 #!/bin/sh
 
-a=1
+a=2
 while [ "$a" -le 16 ]
 do 
 echo "testing: $a threads" | tee -a "./results/thread_test_sp3.txt" 

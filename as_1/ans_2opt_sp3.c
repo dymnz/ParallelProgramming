@@ -426,7 +426,7 @@ int main(int argc, char const *argv[])
 	if (fpOutput == NULL) exit(3);
 
 	// Use the thread_num in argument if available
-	if (argc > 3)
+	if (argc > 4)
 		available_threads = atoi(argv[4]);
 	else
 		available_threads = THREAD_COUNT;

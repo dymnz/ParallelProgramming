@@ -372,3 +372,131 @@ running ans_2opt_sp3
                 -- Written by TA
 ================================
 Fail to open: ./dis_dir/test16.dis.
+testing: 1 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 2 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 4 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 8 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 16 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 1 threads
+running ans_2opt_sp3
+Working on ./dis_dir/test11.dis
+Naive search space division/Proper/Distance cache:
+Using   1 threads
+Distance @  0:30 = 5238882675992.268555
+Distance @  1:00 = 5237633773515.666992
+Distance @  1:30 = 5236536864880.305664
+Distance @  2:00 = 5235372264910.958008
+Distance @  2:30 = 5234128473391.944336
+Distance @  3:00 = 5232733151692.178711
+Distance @  3:30 = 5231458775634.576172
+Distance @  4:00 = 5230231443103.469727
+Distance @  4:30 = 5229087320665.430664
+Distance @  5:00 = 5227833633849.680664
+Distance @  5:30 = 5226645018084.446289
+Distance @  6:00 = 5225404929150.416992
+Distance @  6:30 = 5224206606293.699219
+Distance @  7:00 = 5222921525867.032227
+Distance @  7:30 = 5221711681838.193359
+Distance @  8:00 = 5220518106449.310547
+Distance @  8:30 = 5219285239889.882812
+Distance @  9:00 = 5218162946781.033203
+Distance @  9:30 = 5216981150193.715820
+Final route distance: 5215752375271.825195
+call:   29706 swap:   11096 %: 37.35 race:   0 %: 0.00 avg_swap_length: 2.00 avg_dist_dec: 2190488.98
+                -- Written by TA
+================================
+Pass!
+
+testing: 2 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 4 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 8 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 16 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 2 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 4 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 8 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 16 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 2 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 4 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 8 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 16 threads
+running ans_2opt_sp3
