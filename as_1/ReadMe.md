@@ -40,11 +40,12 @@ for (i = 1; i < num_city - 1; ++i) {
 #### Idea: Split *depth* across threads
 
 ```
-num_thread: number of thread available
-num_city: number of cities to connect
-
 maximum_depth = num_city - 1
 depth_for_each_thread = maximum_depth / num_thread
+
+for (depth = thread_depth_start[n]; depth < thread_depth_end[n]; ++depth) 
+	for (i = 1; i < num_city - depth; ++i) 
+		2opt_swap(i, i + depth);
 
 2opt_swap(start, end):
 	_read_lock
@@ -52,27 +53,29 @@ depth_for_each_thread = maximum_depth / num_thread
 	_unlock
 
 	assert(distance(new_route) < distance(current_route))
+	
 	_write_lock
 		current_route = new_route
 	_unlcok
 end
+
 ```
 
 
-A race condition may occur when a thread pass through assertion,
+* A race condition may occur when a thread pass through assertion,
 but not yet change the `current_route`; a better `current_route` may 
 be overwritten, so the assertion have to be done again after applying
 `_write_lock`
 
 
-The aforementioned race condition also prevents partial update of 
+* The aforementioned race condition also prevents partial update of 
 the `current_route`, so a new array(new_route) is created every operation.
 
 
-`distance(current_route)` can be cached.
+* `distance(current_route)` can be cached.
 
 
-There are also two ways to split the *depth*
+* There are also two ways to split the *depth*
 ```
 Example 9 depth, 3 threads
 
@@ -87,3 +90,6 @@ Thread 2: 2/5/8 depth
 Thread 3: 3/6/9 depth
 ```
 
+#### Note
+
+* The bottleneck in my program is the new_route distance calculation
