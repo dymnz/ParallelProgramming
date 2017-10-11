@@ -1,0 +1,77 @@
+testing: 1 threads
+running ans_2opt_sp7
+                -- Written by TA
+================================
+Fail to open: ./output_sp7.
+testing: 2 threads
+running ans_2opt_sp7
+                -- Written by TA
+================================
+Fail to open: ./output_sp7.
+testing: 4 threads
+running ans_2opt_sp7
+                -- Written by TA
+================================
+Fail to open: ./output_sp7.
+testing: 8 threads
+running ans_2opt_sp7
+                -- Written by TA
+================================
+Fail to open: ./output_sp7.
+testing: 16 threads
+running ans_2opt_sp7
+                -- Written by TA
+================================
+Fail to open: ./output_sp7.
+testing: 1 threads
+running ans_2opt_sp7
+Working on ./dis_dir/test11.dis
+Balanced search space division/Proper/Distance cache:
+Using   1 threads
+Distance @  0:30 = 5236992200854.163086
+Distance @  1:00 = 5233848156184.360352
+Distance @  1:30 = 5230622958156.250977
+Distance @  2:00 = 5227386933621.880859
+Distance @  2:30 = 5224266508021.280273
+Distance @  3:00 = 5221018377966.950195
+Distance @  3:30 = 5217922801969.581055
+Distance @  4:00 = 5214803299394.507812
+Distance @  4:30 = 5211681245960.138672
+Distance @  5:00 = 5208646484547.484375
+Distance @  5:30 = 5205603991050.710938
+Distance @  6:00 = 5202596557779.212891
+Distance @  6:30 = 5199517134123.875000
+Distance @  7:00 = 5196467796034.535156
+Distance @  7:30 = 5193483353431.916992
+Distance @  8:00 = 5190311266015.779297
+Distance @  8:30 = 5187301632304.219727
+Distance @  9:00 = 5184153678012.967773
+Distance @  9:30 = 5181050336308.432617
+Final route distance: 5177826220196.229492
+call:   76386 swap:   28620 %: 37.47 race:   0 %: 0.00 avg_swap_length: 2.00 avg_dist_dec: 2174417.22
+                -- Written by TA
+================================
+Pass!
+
+testing: 2 threads
+running ans_2opt_sp7
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 4 threads
+running ans_2opt_sp7
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 8 threads
+running ans_2opt_sp7
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 16 threads
+running ans_2opt_sp7
+testing: 1 threads
+running ans_2opt_sp7

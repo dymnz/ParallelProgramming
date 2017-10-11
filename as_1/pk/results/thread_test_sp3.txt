@@ -1,0 +1,50 @@
+testing: 1 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Fail to open: ./dis_dir/test11.dis.
+testing: 2 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Fail to open: ./dis_dir/test11.dis.
+testing: 4 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Fail to open: ./dis_dir/test11.dis.
+testing: 8 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Fail to open: ./dis_dir/test11.dis.
+testing: 16 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Fail to open: ./dis_dir/test11.dis.
+testing: 1 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Fail to open: ./dis_dir/test11.dis.
+testing: 2 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Fail to open: ./dis_dir/test11.dis.
+testing: 4 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Fail to open: ./dis_dir/test11.dis.
+testing: 8 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Fail to open: ./dis_dir/test11.dis.
+testing: 16 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Fail to open: ./dis_dir/test11.dis.

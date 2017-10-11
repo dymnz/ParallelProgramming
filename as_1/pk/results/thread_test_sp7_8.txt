@@ -1,0 +1,29 @@
+testing: 8 threads
+running ans_2opt_sp7
+Working on ../dis_dir/test11.dis
+Balanced search space division/Proper/Distance cache:
+Using   8 threads
+Distance @  0:30 = 5234461514842.969727
+Distance @  1:00 = 5228853094289.729492
+Distance @  1:30 = 5223243766209.499023
+Distance @  2:00 = 5217649051132.514648
+Distance @  2:30 = 5212055350299.785156
+Distance @  3:00 = 5206329608686.265625
+Distance @  3:30 = 5200581125356.721680
+Distance @  4:00 = 5194926100946.937500
+Distance @  4:30 = 5189244203737.525391
+Distance @  5:00 = 5183488304425.285156
+Distance @  5:30 = 5177942262810.402344
+Distance @  6:00 = 5173900355672.161133
+Distance @  6:30 = 5170288268608.097656
+Distance @  7:00 = 5164649674233.377930
+Distance @  7:30 = 5159111473687.545898
+Distance @  8:00 = 5154037411387.948242
+Distance @  8:30 = 5149101037277.793945
+Distance @  9:00 = 5143754261014.075195
+Distance @  9:30 = 5138610044608.163086
+Final route distance: 5133194144462.959961
+call:  516440 swap:   47366 %: 9.17 race: 120196 %: 23.27 avg_swap_length: 5.77 avg_dist_dec: 2256130.91
+                -- Written by TA
+================================
+Fail to open: ./output_sp7_8.
