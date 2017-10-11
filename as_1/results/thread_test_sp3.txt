@@ -146,7 +146,7 @@ testing: 16 threads
 running ans_2opt_sp3
 Working on ./dis_dir/test11.dis
 Naive search space division/Proper/Distance cache:
-Using  16 threads
+Uing  16 threads
 Distance @  0:30 = 5237016906163.597656
 Distance @  1:00 = 5233820273526.660156
 Distance @  1:30 = 5230420924876.702148
@@ -171,3 +171,336 @@ call:  187609 swap:   24589 %: 13.11 race: 57487 %: 30.64 avg_swap_length: -5731
                 -- Written by TA
 ================================
 Fail to open: ./dis_dir/test16.dis.
+testing: 4 threads
+running ans_2opt_sp3
+testing: 4 threads
+running ans_2opt_sp3
+Working on ./dis_dir/test11.dis
+Naive search space division/Proper/Distance cache:
+Using   4 threads
+Distance @  0:30 = 5237791674746.845703
+Distance @  1:00 = 5235750241071.303711
+Distance @  1:30 = 5233636580130.309570
+Distance @  2:00 = 5231335174322.881836
+Distance @  2:30 = 5229255302699.518555
+Distance @  3:00 = 5227224862610.568359
+Distance @  3:30 = 5224865066041.538086
+Distance @  4:00 = 5222727712738.336914
+Distance @  4:30 = 5220450673832.870117
+Distance @  5:00 = 5218330587488.073242
+Distance @  5:30 = 5216467475847.522461
+Distance @  6:00 = 5214178710964.458984
+Distance @  6:30 = 5212238911643.913086
+Distance @  7:00 = 5210182755979.039062
+Distance @  7:30 = 5208140575549.534180
+Distance @  8:00 = 5206439516062.312500
+Distance @  8:30 = 5204778703021.543945
+Distance @  9:00 = 5203671255539.009766
+Distance @  9:30 = 5202378135867.268555
+Final route distance: 5201362269124.967773
+call:   94357 swap:   17840 %: 18.91 race: 6615 %: 7.01 avg_swap_length: -34572.51 avg_dist_dec: 2169045.51
+                -- Written by TA
+================================
+testing: 8 threads
+running ans_2opt_sp3
+Working on ./dis_dir/test11.dis
+Naive search space division/Proper/Distance cache:
+Using   8 threads
+Distance @  0:30 = 5238917419180.142578
+Distance @  1:00 = 5238235666586.435547
+Distance @  1:30 = 5237104487830.706055
+Distance @  2:00 = 5235289878134.792969
+Distance @  2:30 = 5233523043366.623047
+Distance @  3:00 = 5232207893676.652344
+Distance @  3:30 = 5230889375986.804688
+Distance @  4:00 = 5230121015642.526367
+Distance @  4:30 = 5229052773798.319336
+Distance @  5:00 = 5228461938163.519531
+Distance @  5:30 = 5227392264769.768555
+Distance @  6:00 = 5225583004085.464844
+Distance @  6:30 = 5223890445036.149414
+Distance @  7:00 = 5222667964778.310547
+Distance @  7:30 = 5221093921638.077148
+Distance @  8:00 = 5219422472589.874023
+Distance @  8:30 = 5217506683138.139648
+Distance @  9:00 = 5216014851917.083984
+Distance @  9:30 = 5214116204030.895508
+Final route distance: 5210623919988.017578
+call:   85482 swap:   12904 %: 15.10 race: 11944 %: 13.97 avg_swap_length: 138013.34 avg_dist_dec: 2281007.52
+                -- Written by TA
+================================
+testing: 16 threads
+running ans_2opt_sp3
+testing: 1 threads
+running ans_2opt_sp3
+Working on ./dis_dir/test11.dis
+Naive search space division/Proper/Distance cache:
+Using   1 threads
+Distance @  0:30 = 5238931505624.613281
+Distance @  1:00 = 5237686130244.219727
+Distance @  1:30 = 5236595566374.012695
+Distance @  2:00 = 5235459164419.328125
+Distance @  2:30 = 5234220319418.816406
+Distance @  3:00 = 5232869976268.990234
+Distance @  3:30 = 5231588642024.910156
+Distance @  4:00 = 5230347702495.228516
+Distance @  4:30 = 5229293932828.610352
+Distance @  5:00 = 5228079648740.111328
+Distance @  5:30 = 5226922260109.626953
+Distance @  6:00 = 5225688750821.433594
+Distance @  6:30 = 5224522014054.299805
+Distance @  7:00 = 5223320182943.238281
+Distance @  7:30 = 5222126896011.798828
+Distance @  8:00 = 5220958227579.174805
+Distance @  8:30 = 5219814434679.297852
+Distance @  9:00 = 5218686362378.843750
+Distance @  9:30 = 5217589942006.389648
+Final route distance: 5216412704796.184570
+call:   28918 swap:   10801 %: 37.35 race:   0 %: 0.00 avg_swap_length: 2.00 avg_dist_dec: 2189180.28
+                -- Written by TA
+================================
+Point 101 repeated.
+
+testing: 2 threads
+running ans_2opt_sp3
+Working on ./dis_dir/test11.dis
+Naive search space division/Proper/Distance cache:
+Using   2 threads
+Distance @  0:30 = 5238914555289.624023
+Distance @  1:00 = 5237725025757.507812
+Distance @  1:30 = 5236658707452.727539
+Distance @  2:00 = 5235466554074.719727
+Distance @  2:30 = 5234192736754.628906
+Distance @  3:00 = 5233017354343.215820
+Distance @  3:30 = 5232077835504.611328
+Distance @  4:00 = 5230881715754.540039
+Distance @  4:30 = 5229996450372.525391
+Distance @  5:00 = 5228909462131.415039
+Distance @  5:30 = 5227773526180.203125
+Distance @  6:00 = 5226687110852.569336
+Distance @  6:30 = 5225632131411.008789
+Distance @  7:00 = 5224459622155.849609
+Distance @  7:30 = 5223204492035.774414
+Distance @  8:00 = 5222230847090.577148
+Distance @  8:30 = 5221001879644.136719
+Distance @  9:00 = 5219678384698.830078
+Distance @  9:30 = 5218322181667.689453
+Final route distance: 5217225040400.344727
+call:   47966 swap:    9568 %: 19.95 race: 490 %: 1.02 avg_swap_length: -16082.44 avg_dist_dec: 2386392.21
+                -- Written by TA
+================================
+testing: 4 threads
+running ans_2opt_sp3
+Working on ./dis_dir/test11.dis
+Naive search space division/Proper/Distance cache:
+Using   4 threads
+Distance @  0:30 = 5237796519966.503906
+Distance @  1:00 = 5235484893420.438477
+Distance @  1:30 = 5233461289818.187500
+Distance @  2:00 = 5231409456357.647461
+Distance @  2:30 = 5229462259940.514648
+Distance @  3:00 = 5227546189009.235352
+Distance @  3:30 = 5225321205076.227539
+Distance @  4:00 = 5223390557848.459961
+Distance @  4:30 = 5221607422577.721680
+Distance @  5:00 = 5219899525101.111328
+Distance @  5:30 = 5218146367737.428711
+Distance @  6:00 = 5216386193863.964844
+Distance @  6:30 = 5214729331335.332031
+Distance @  7:00 = 5213042938228.835938
+Distance @  7:30 = 5211288229057.923828
+Distance @  8:00 = 5209527985450.529297
+Distance @  8:30 = 5207502312844.716797
+Distance @  9:00 = 5205669384416.059570
+Distance @  9:30 = 5203984831956.260742
+Final route distance: 5202372573577.093750
+call:   99568 swap:   17754 %: 17.83 race: 6237 %: 6.26 avg_swap_length: -18464.66 avg_dist_dec: 2122646.58
+                -- Written by TA
+================================
+testing: 8 threads
+running ans_2opt_sp3
+testing: 1 threads
+running ans_2opt_sp3
+Working on ./dis_dir/test11.dis
+Naive search space division/Proper/Distance cache:
+Using   1 threads
+Distance @  0:30 = 5238924512550.045898
+Distance @  1:00 = 5237682513536.188477
+Distance @  1:30 = 5236577019285.936523
+Distance @  2:00 = 5235430568004.836914
+Distance @  2:30 = 5234180013699.541992
+Distance @  3:00 = 5232782148169.421875
+Distance @  3:30 = 5231503928135.340820
+Distance @  4:00 = 5230262900052.595703
+Distance @  4:30 = 5229139216309.029297
+Distance @  5:00 = 5227893531125.169922
+Distance @  5:30 = 5226680913981.249023
+Distance @  6:00 = 5225455131599.184570
+Distance @  6:30 = 5224249859504.481445
+Distance @  7:00 = 5222986392540.511719
+Distance @  7:30 = 5221743878569.232422
+Distance @  8:00 = 5220583776421.624023
+Distance @  8:30 = 5219332355829.087891
+Distance @  9:00 = 5218198617704.077148
+Distance @  9:30 = 5217027195581.228516
+Final route distance: 5215785260402.576172
+call:   29668 swap:   11083 %: 37.36 race:   0 %: 0.00 avg_swap_length: 2.00 avg_dist_dec: 2190091.19
+                -- Written by TA
+================================
+Point 101 repeated.
+
+testing: 2 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 4 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 8 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 16 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Fail to open: ./dis_dir/test16.dis.
+testing: 1 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 2 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 4 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 8 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 16 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 1 threads
+running ans_2opt_sp3
+Working on ./dis_dir/test11.dis
+Naive search space division/Proper/Distance cache:
+Using   1 threads
+Distance @  0:30 = 5238882675992.268555
+Distance @  1:00 = 5237633773515.666992
+Distance @  1:30 = 5236536864880.305664
+Distance @  2:00 = 5235372264910.958008
+Distance @  2:30 = 5234128473391.944336
+Distance @  3:00 = 5232733151692.178711
+Distance @  3:30 = 5231458775634.576172
+Distance @  4:00 = 5230231443103.469727
+Distance @  4:30 = 5229087320665.430664
+Distance @  5:00 = 5227833633849.680664
+Distance @  5:30 = 5226645018084.446289
+Distance @  6:00 = 5225404929150.416992
+Distance @  6:30 = 5224206606293.699219
+Distance @  7:00 = 5222921525867.032227
+Distance @  7:30 = 5221711681838.193359
+Distance @  8:00 = 5220518106449.310547
+Distance @  8:30 = 5219285239889.882812
+Distance @  9:00 = 5218162946781.033203
+Distance @  9:30 = 5216981150193.715820
+Final route distance: 5215752375271.825195
+call:   29706 swap:   11096 %: 37.35 race:   0 %: 0.00 avg_swap_length: 2.00 avg_dist_dec: 2190488.98
+                -- Written by TA
+================================
+Pass!
+
+testing: 2 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 4 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 8 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 16 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 2 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 4 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 8 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 16 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 2 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 4 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 8 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 16 threads
+running ans_2opt_sp3
+                -- Written by TA
+================================
+Some points are missing.
+

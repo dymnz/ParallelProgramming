@@ -1,5 +1,5 @@
 /*
-	Balanced search space division/Proper/Distance cache
+	Naive search space division/Proper/Distance cache
 */
 #include <stdio.h>
 #include <pthread.h>
@@ -17,7 +17,7 @@
 //#define KEEP_DIST_LIST    // Save the calculated distance, requires a lot of RAM
 
 #define THREAD_COUNT 16
-#define SECONDS_TO_WAIT 10 * 60
+#define SECONDS_TO_WAIT 10
 #define SECONDS_BUFFER 0
 
 typedef double dist_type;
@@ -30,8 +30,7 @@ struct City {
 
 struct Thread_Param {
 	int start_depth;
-	int skip_depth;
-	int max_depth;
+	int end_depth;
 };
 
 void print_route();
@@ -118,13 +117,13 @@ void two_opt(int start, int end) {
 	/*
 	Calculate original distance and prepare new route
 	*/
-	pthread_rwlock_rdlock(&route_list_rwlock);
+	pthread_rwlock_wrlock(&route_list_rwlock);
 
 	// Copy original route but reverse the middle
- 	memcpy(new_route_list,
-       route_index_list,
-       (num_city + 1) * sizeof(int));
-  for (i = 0; i < end - start + 1; ++i) {
+	memcpy(new_route_list,
+	       route_index_list,
+	       (num_city + 1) * sizeof(int));
+	for (i = 0; i < end - start + 1; ++i) {
 		new_route_list[start + i] = route_index_list[end - i];
 	}
 
@@ -134,37 +133,36 @@ void two_opt(int start, int end) {
 
 	pthread_rwlock_unlock(&route_list_rwlock);
 
-  // Find the distance of the new route
+	// Find the distance of the new route
 	dist_type new_distance = get_route_distance(new_route_list);
 
 	/*
 	Change to new route if the new route is shorter.
-  Race condition here. A better route may be overwriten.
+	Race condition here. A better route may be overwriten.
 	*/
 	if (new_distance < original_distance) {
 		pthread_rwlock_wrlock(&route_list_rwlock);
-   
-    // Check if the route is really shorter to avoid race condition
-    if (new_distance >=  cache_route_distance) {
-      #ifdef ENABLE_2OPT_COUNTER
-      ++race_cond_counter;
-      #endif
-      pthread_rwlock_unlock(&route_list_rwlock);
-      free(new_route_list);
-      return;
-    }
- 
+
+		// Check if the route is really shorter to avoid race condition
+		if (new_distance >=  cache_route_distance) {
+#ifdef ENABLE_2OPT_COUNTER
+			++race_cond_counter;
+#endif
+			pthread_rwlock_unlock(&route_list_rwlock);
+			free(new_route_list);
+			return;
+		}
+
 #ifdef ENABLE_2OPT_COUNTER
 		++swap_counter;
-    total_swap_length += end - start + 1;
-    total_reduced_distance += cache_route_distance - new_distance; 
-#endif 
-       
+		total_swap_length += end - start + 1;
+		total_reduced_distance += cache_route_distance - new_distance;
+#endif
+
 		free(route_index_list);
 		route_index_list = new_route_list;
 		cache_route_distance = new_distance; // Whoever changed the route, update the distance
-  
-    pthread_rwlock_unlock(&route_list_rwlock);
+		pthread_rwlock_unlock(&route_list_rwlock);
 	} else {
 		free(new_route_list);
 	}
@@ -189,8 +187,8 @@ void *parallel_2opt_job(void *param) {
 	// m: Loop control
 	do {
 		for (i = thread_param->start_depth;
-		        go_flag && i < thread_param->max_depth;
-		        i += thread_param->skip_depth)
+		        go_flag && i < thread_param->end_depth;
+		        ++i)
 		{
 			for (m = 1; go_flag && m < num_city - i; ++m) {
 				two_opt(m, m + i);
@@ -212,8 +210,8 @@ void *parallel_2opt_job(void *param) {
 */
 void parallel_2opt() {
 	int i;
-	pthread_t *two_opt_thread_list = 
-    (pthread_t *) malloc(available_threads * sizeof(pthread_t));
+	pthread_t *two_opt_thread_list =
+	    (pthread_t *) malloc(available_threads * sizeof(pthread_t));
 
 	int max_depth = num_city - 1;
 
@@ -222,18 +220,23 @@ void parallel_2opt() {
 	if (max_depth < available_threads)
 		threads_to_use = max_depth;
 
-  printf("Using %3d threads\n", threads_to_use);
+	printf("Using %3d threads\n", threads_to_use);
+
+	int depth_segment_size = max_depth / threads_to_use;
 
 	for (i = 0; i < threads_to_use; ++i) {
 		struct Thread_Param *thread_param =
 		    (struct Thread_Param *) malloc(sizeof(struct Thread_Param));
 
-		thread_param->start_depth = i + 1;
-		thread_param->skip_depth = threads_to_use;
-		thread_param->max_depth = max_depth;
+		thread_param->start_depth = (depth_segment_size * i) + 1;
+
+		if (i < threads_to_use - 1)
+			thread_param->end_depth = (depth_segment_size * (i + 1)) + 1;
+		else
+			thread_param->end_depth = max_depth;   // Last thread gets the remaining depth
 
 #ifdef VERBOSE
-		printf("New thread: %5d:%5d\n", thread_param->start_depth, thread_param->skip_depth);
+		printf("New thread: %5d:%5d\n", thread_param->start_depth, thread_param->end_depth);
 #endif
 
 		pthread_create(&two_opt_thread_list[i],
@@ -242,14 +245,14 @@ void parallel_2opt() {
 
 	// Wait for the time up
 	while (time(NULL) < start_time + SECONDS_TO_WAIT - SECONDS_BUFFER) {
-     #ifdef PRINT_STATUS
-     if ( time(NULL) - start_time > 0 && (time(NULL) - start_time) % 30 == 0 ) {
-       printf("Distance @ %2lu:%02lu = %lf\n", 
-             (unsigned long)(time(NULL) - start_time)/60,  
-             (unsigned long)(time(NULL) - start_time)%60,
-             cache_route_distance);
-     }
-     #endif
+#ifdef PRINT_STATUS
+		if ( time(NULL) - start_time > 0 && (time(NULL) - start_time) % 30 == 0 ) {
+			printf("Distance @ %2lu:%02lu = %lf\n",
+			       (unsigned long)(time(NULL) - start_time) / 60,
+			       (unsigned long)(time(NULL) - start_time) % 60,
+			       cache_route_distance);
+		}
+#endif
 		sleep(1);
 	}
 	// Change go_flag to 0
@@ -297,12 +300,12 @@ dist_type get_city_distance(int index_1, int index_2) {
 
 	return dist_list[array_index];
 #else
-  return distance(
-		        city_list[index_1].x,
-		        city_list[index_1].y,
-		        city_list[index_2].x,
-		        city_list[index_2].y);
-#endif                    
+	return distance(
+	           city_list[index_1].x,
+	           city_list[index_1].y,
+	           city_list[index_2].x,
+	           city_list[index_2].y);
+#endif
 }
 
 
@@ -427,28 +430,25 @@ int main(int argc, char const *argv[])
 		available_threads = atoi(argv[4]);
 	else
 		available_threads = THREAD_COUNT;
-  
-  printf("Working on %s\n", argv[1]);
+
+	printf("Working on %s\n", argv[1]);
 
 	// Read number of city
 	fscanf(fpCoord, "%d", &num_city);
- 
- 
-  #ifdef KEEP_DIST_LIST
-  int i;
-  int num_edge = num_city  * (num_city - 1) / 2;	// C(N, 2)
-  // Distances are reset to -1
+
+#ifdef KEEP_DIST_LIST
+	int i;
+	int num_edge = num_city  * (num_city - 1) / 2;	// C(N, 2)
+	// Distances are reset to -1
 	dist_list = (dist_type *) malloc(num_edge * sizeof(dist_type));
 	if (dist_list == NULL) {
 		printf("dist_list malloc() error\n");
 		exit(12);
 	}
-  for (i = 0; i < num_edge; ++i) {
+	for (i = 0; i < num_edge; ++i) {
 		dist_list[i] = -1;
 	}
-  #endif
-
-	
+#endif
 
 	// Read city coord and default route
 	pthread_create(&fp_thread_list[0], NULL, read_coord, (void*)fpCoord);
@@ -473,7 +473,7 @@ int main(int argc, char const *argv[])
 	printf("Original route distance: %lf\n", get_route_distance(route_index_list));
 #endif
 
-	printf("Balanced search space division/Proper/Distance cache:\n");
+	printf("Naive search space division/Proper/Distance cache:\n");
 	parallel_2opt();
 
 #ifdef VERBOSE
@@ -486,14 +486,14 @@ int main(int argc, char const *argv[])
 	write_route(fpOutput);
 
 #ifdef ENABLE_2OPT_COUNTER
-	printf("call: %7d swap: %7d %%: %.2f race: %3d %%: %.2f avg_swap_length: %.2f avg_dist_dec: %.2f\n", 
-    opt_counter, 
-    swap_counter, 
-    swap_counter*100.0f/opt_counter,
-    race_cond_counter,
-    race_cond_counter*100.0f/opt_counter,
-    (float)total_swap_length/swap_counter,
-    total_reduced_distance/swap_counter);
+	printf("call: %7d swap: %7d %%: %.2f race: %3d %%: %.2f avg_swap_length: %.2f avg_dist_dec: %.2f\n",
+	       opt_counter,
+	       swap_counter,
+	       swap_counter * 100.0f / opt_counter,
+	       race_cond_counter,
+	       race_cond_counter * 100.0f / opt_counter,
+	       (float)total_swap_length / swap_counter,
+	       total_reduced_distance / swap_counter);
 #endif
 
 
