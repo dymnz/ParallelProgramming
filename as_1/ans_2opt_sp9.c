@@ -508,6 +508,7 @@ int main(int argc, char const *argv[])
 	write_route(fpOutput);
 
 #ifdef ENABLE_2OPT_COUNTER
+	int i;
 	int total_opt_count = 0;
 	for (i = 0; i < available_threads; ++i)
 		total_opt_count += opt_counter_list[i];
