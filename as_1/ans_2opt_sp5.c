@@ -9,7 +9,6 @@
 #include <time.h>
 #include <unistd.h>
 
-
 //#define VERBOSE
 //#define DEBUG
 #define PRINT_STATUS
@@ -74,7 +73,7 @@ pthread_rwlock_t	go_flag_rwlock;
 int opt_counter = 0;
 int swap_counter = 0;
 int race_cond_counter = 0;
-int total_swap_length = 0;
+double total_swap_length = 0;
 double total_reduced_distance = 0;
 pthread_rwlock_t	counter_rwlock;
 #endif
@@ -486,15 +485,16 @@ int main(int argc, char const *argv[])
 	write_route(fpOutput);
 
 #ifdef ENABLE_2OPT_COUNTER
-	printf("call: %7d swap: %7d %%: %.2f race: %3d %%: %.2f avg_swap_length: %.2f avg_dist_dec: %.2f\n", 
-    opt_counter, 
-    swap_counter, 
-    swap_counter*100.0f/opt_counter,
-    race_cond_counter,
-    race_cond_counter*100.0f/opt_counter,
-    (float)total_swap_length/swap_counter,
-    total_reduced_distance/swap_counter);
+	printf("call: %7d swap: %7d %%: %.2f race: %3d %%: %.2f avg_swap_length: %.2lf avg_dist_dec: %.2lf\n",
+	       opt_counter,
+	       swap_counter,
+	       swap_counter * 100.0f / opt_counter,
+	       race_cond_counter,
+	       race_cond_counter * 100.0f / opt_counter,
+	       total_swap_length / swap_counter,
+	       total_reduced_distance / swap_counter);
 #endif
+
 
 
 	/* Cleanup */

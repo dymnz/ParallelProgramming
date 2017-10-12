@@ -1,5 +1,5 @@
 /*
-	Balanced search space division/Proper/Distance cache
+	Balanced search space division/Proper/Distance cache/Partial distance compare
 */
 #include <stdio.h>
 #include <pthread.h>
@@ -8,7 +8,6 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
-
 
 //#define VERBOSE
 //#define DEBUG
@@ -75,7 +74,7 @@ pthread_rwlock_t	go_flag_rwlock;
 int opt_counter = 0;
 int swap_counter = 0;
 int race_cond_counter = 0;
-int total_swap_length = 0;
+double total_swap_length = 0;
 double total_reduced_distance = 0;
 pthread_rwlock_t	counter_rwlock;
 #endif
@@ -325,9 +324,7 @@ inline dist_type get_route_distance(int *route_index_list) {
 }
 
 /*
-	Use the integral distance of original route to calcualte part of
-	the distance. Only update the distance between index start
-	and end.
+	Calculate the distance between index start and end.
 */
 inline dist_type get_updated_route_distance(
     int *route_index_list,
@@ -499,7 +496,7 @@ int main(int argc, char const *argv[])
 	printf("Original route distance: %lf\n", get_route_distance(route_index_list));
 #endif
 
-	printf("Balanced search space division/Proper/Distance cache:\n");
+	printf("Balanced search space division/Proper/Distance cache/Partial distance compare:\n");
 	parallel_2opt();
 
 #ifdef VERBOSE
@@ -512,13 +509,13 @@ int main(int argc, char const *argv[])
 	write_route(fpOutput);
 
 #ifdef ENABLE_2OPT_COUNTER
-	printf("call: %7d swap: %7d %%: %.2f race: %3d %%: %.2f avg_swap_length: %.2f avg_dist_dec: %.2f\n",
+	printf("call: %7d swap: %7d %%: %.2f race: %3d %%: %.2f avg_swap_length: %.2lf avg_dist_dec: %.2lf\n",
 	       opt_counter,
 	       swap_counter,
 	       swap_counter * 100.0f / opt_counter,
 	       race_cond_counter,
 	       race_cond_counter * 100.0f / opt_counter,
-	       (float)total_swap_length / swap_counter,
+	       total_swap_length / swap_counter,
 	       total_reduced_distance / swap_counter);
 #endif
 
