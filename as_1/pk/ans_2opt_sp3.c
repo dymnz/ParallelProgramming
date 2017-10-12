@@ -17,7 +17,7 @@
 //#define KEEP_DIST_LIST    // Save the calculated distance, requires a lot of RAM
 
 #define THREAD_COUNT 16
-#define SECONDS_TO_WAIT 10
+#define SECONDS_TO_WAIT 60 * 10
 #define SECONDS_BUFFER 0
 
 typedef double dist_type;
@@ -29,6 +29,7 @@ struct City {
 };
 
 struct Thread_Param {
+	int rank;
 	int start_depth;
 	int end_depth;
 };
@@ -70,12 +71,11 @@ time_t start_time;
 pthread_rwlock_t	go_flag_rwlock;
 
 #ifdef ENABLE_2OPT_COUNTER
-int opt_counter = 0;
+int *opt_counter_list;
 int swap_counter = 0;
 int race_cond_counter = 0;
-int total_swap_length = 0;
+double total_swap_length = 0;
 double total_reduced_distance = 0;
-pthread_rwlock_t	counter_rwlock;
 #endif
 
 // Casting coord(int) to coord(double) so they don't overflow while computing
@@ -88,12 +88,6 @@ void two_opt(int start, int end) {
 
 #ifdef VERBOSE
 	printf("two_opt: %3d : %3d\n", start, end);
-#endif
-
-#ifdef ENABLE_2OPT_COUNTER
-	pthread_rwlock_wrlock(&counter_rwlock);
-	++opt_counter;
-	pthread_rwlock_unlock(&counter_rwlock);
 #endif
 
 	// Do not process the node at the start and the end
@@ -191,6 +185,9 @@ void *parallel_2opt_job(void *param) {
 		        ++i)
 		{
 			for (m = 1; go_flag && m < num_city - i; ++m) {
+#ifdef ENABLE_2OPT_COUNTER
+				++opt_counter_list[thread_param->rank];
+#endif
 				two_opt(m, m + i);
 			}
 		}
@@ -213,6 +210,10 @@ void parallel_2opt() {
 	pthread_t *two_opt_thread_list =
 	    (pthread_t *) malloc(available_threads * sizeof(pthread_t));
 
+#ifdef ENABLE_2OPT_COUNTER
+	opt_counter_list = (int *) malloc(available_threads * sizeof(pthread_t));
+#endif
+
 	int max_depth = num_city - 1;
 
 	// In case there's too many thread available
@@ -228,6 +229,7 @@ void parallel_2opt() {
 		struct Thread_Param *thread_param =
 		    (struct Thread_Param *) malloc(sizeof(struct Thread_Param));
 
+		thread_param->rank = i;
 		thread_param->start_depth = (depth_segment_size * i) + 1;
 
 		if (i < threads_to_use - 1)
@@ -463,10 +465,6 @@ int main(int argc, char const *argv[])
 	// Init the cache_route_distance
 	cache_route_distance = get_route_distance(route_index_list);
 
-#ifdef ENABLE_2OPT_COUNTER
-	pthread_rwlock_init(&counter_rwlock, NULL);
-#endif
-
 #ifdef VERBOSE
 	printf("Original route:\n");
 	print_route();
@@ -486,16 +484,20 @@ int main(int argc, char const *argv[])
 	write_route(fpOutput);
 
 #ifdef ENABLE_2OPT_COUNTER
-	printf("call: %7d swap: %7d %%: %.2f race: %3d %%: %.2f avg_swap_length: %.2f avg_dist_dec: %.2f\n",
-	       opt_counter,
+	int i;
+	int total_opt_count = 0;
+	for (i = 0; i < available_threads; ++i)
+		total_opt_count += opt_counter_list[i];
+
+	printf("call: %7d swap: %7d %%: %.2f race: %3d %%: %.2f avg_swap_length: %.2lf avg_dist_dec: %.2lf\n",
+	       total_opt_count,
 	       swap_counter,
-	       swap_counter * 100.0f / opt_counter,
+	       swap_counter * 100.0f / total_opt_count,
 	       race_cond_counter,
-	       race_cond_counter * 100.0f / opt_counter,
-	       (float)total_swap_length / swap_counter,
+	       race_cond_counter * 100.0f / total_opt_count,
+	       total_swap_length / swap_counter,
 	       total_reduced_distance / swap_counter);
 #endif
-
 
 	/* Cleanup */
 	fclose(fpOutput);
@@ -507,10 +509,6 @@ int main(int argc, char const *argv[])
 
 	pthread_rwlock_destroy(&route_list_rwlock);
 	pthread_rwlock_destroy(&go_flag_rwlock);
-
-#ifdef ENABLE_2OPT_COUNTER
-	pthread_rwlock_destroy(&counter_rwlock);
-#endif
 
 	return 0;
 }

@@ -1,29 +1,30 @@
 testing: 2 threads
 running ans_2opt_sp7
 Working on ../dis_dir/test11.dis
-Balanced search space division/Proper/Distance cache:
+Balanced search space division/Proper/Distance cache/Partial distance compare:
 Using   2 threads
-Distance @  0:30 = 5236450312860.634766
-Distance @  1:00 = 5232996481244.711914
-Distance @  1:30 = 5229367304503.748047
-Distance @  2:00 = 5225886426883.475586
-Distance @  2:30 = 5222326185565.408203
-Distance @  3:00 = 5218893387373.757812
-Distance @  3:30 = 5215279409999.477539
-Distance @  4:00 = 5211671419787.306641
-Distance @  4:30 = 5208133869738.986328
-Distance @  5:00 = 5204530316519.088867
-Distance @  5:30 = 5201099544912.731445
-Distance @  6:00 = 5198495995357.578125
-Distance @  6:30 = 5196093800633.036133
-Distance @  7:00 = 5192518545832.309570
-Distance @  7:30 = 5189006932364.198242
-Distance @  8:00 = 5185787515745.221680
-Distance @  8:30 = 5182896321831.678711
-Distance @  9:00 = 5179538639001.892578
-Distance @  9:30 = 5175961476415.347656
-Final route distance: 5172530777382.172852
-call:  118287 swap:   29018 %: 24.53 race: 13984 %: 11.82 avg_swap_length: 2.53 avg_dist_dec: 2327081.94
+Distance @  0:30 = 5236343567261.383789
+Distance @  1:00 = 5232726190313.125977
+Distance @  1:30 = 5228963321695.564453
+Distance @  2:00 = 5225249890140.157227
+Distance @  2:30 = 5221580786705.157227
+Distance @  3:00 = 5217862867657.336914
+Distance @  3:30 = 5214070084463.460938
+Distance @  4:00 = 5210281704167.219727
+Distance @  4:30 = 5206521173572.702148
+Distance @  5:00 = 5202786436726.039062
+Distance @  5:30 = 5199567137456.819336
+Distance @  6:00 = 5195915434065.231445
+Distance @  6:30 = 5192327699769.887695
+Distance @  7:00 = 5188683176198.551758
+Distance @  7:30 = 5184921920404.034180
+Distance @  8:00 = 5181244546227.636719
+Distance @  8:30 = 5177557643743.646484
+Distance @  9:00 = 5173769491857.968750
+Distance @  9:30 = 5170083026845.596680
+Final route distance: 5166397146735.813477
+call:  129261 swap:   31758 %: 24.57 race: 15509 %: 12.00 avg_swap_length: 2.53 avg_dist_dec: 2319443.74
                 -- Written by TA
 ================================
-Fail to open: ./output_sp7_2.
+Pass!
+

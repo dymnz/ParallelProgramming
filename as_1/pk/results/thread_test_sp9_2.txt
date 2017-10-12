@@ -1,28 +1,30 @@
 testing: 2 threads
+running ans_2opt_sp9
 Working on ../dis_dir/test11.dis
 Naive search space division/Proper/Distance cache/Partial distance compare:
 Using   2 threads
-Distance @  0:30 = 5237371190607.696289
-Distance @  1:00 = 5234594173514.619141
-Distance @  1:30 = 5231640537485.470703
-Distance @  2:00 = 5228698206652.242188
-Distance @  2:30 = 5225850613231.676758
-Distance @  3:00 = 5223074703625.237305
-Distance @  3:30 = 5220134850508.960938
-Distance @  4:00 = 5217290093730.276367
-Distance @  4:30 = 5214301087202.736328
-Distance @  5:00 = 5211270705230.616211
-Distance @  5:30 = 5208463066159.419922
-Distance @  6:00 = 5205601186181.170898
-Distance @  6:30 = 5202774875557.992188
-Distance @  7:00 = 5199924330341.306641
-Distance @  7:30 = 5197097274257.187500
-Distance @  8:00 = 5194163767505.593750
-Distance @  8:30 = 5191256699103.021484
-Distance @  9:00 = 5188414529481.906250
-Distance @  9:30 = 5185582210711.196289
-Final route distance: 5182739698502.369141
-call:   81396 swap:   25490 %: 31.32 race: 6281 %: 7.72 avg_swap_length: 52011.58 avg_dist_dec: 2248659.97
+Distance @  0:30 = 5237217849413.540039
+Distance @  1:00 = 5234325936746.509766
+Distance @  1:30 = 5231578386169.237305
+Distance @  2:00 = 5228611151817.534180
+Distance @  2:30 = 5225753084152.852539
+Distance @  3:00 = 5222880073241.226562
+Distance @  3:30 = 5219951044084.870117
+Distance @  4:00 = 5217090758963.256836
+Distance @  4:30 = 5214244770243.812500
+Distance @  5:00 = 5211176926606.055664
+Distance @  5:30 = 5208246071534.800781
+Distance @  6:00 = 5205430566804.067383
+Distance @  6:30 = 5202677711940.298828
+Distance @  7:00 = 5199821550558.966797
+Distance @  7:30 = 5196861970844.841797
+Distance @  8:00 = 5193977437682.033203
+Distance @  8:30 = 5190968561956.958984
+Distance @  9:00 = 5188134808758.317383
+Distance @  9:30 = 5185341545046.752930
+Final route distance: 5182413485356.877930
+call:   80953 swap:   25346 %: 31.31 race: 6308 %: 7.79 avg_swap_length: 51417.19 avg_dist_dec: 2274305.83
                 -- Written by TA
 ================================
-Fail to open: ./output_sp9_2.
+Pass!
+

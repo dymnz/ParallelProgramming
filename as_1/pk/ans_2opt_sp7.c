@@ -1,5 +1,5 @@
 /*
-	Balanced search space division/Proper/Distance cache
+	Balanced search space division/Proper/Distance cache/Partial distance compare
 */
 #include <stdio.h>
 #include <pthread.h>
@@ -8,7 +8,6 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
-
 
 //#define VERBOSE
 //#define DEBUG
@@ -29,6 +28,7 @@ struct City {
 };
 
 struct Thread_Param {
+	int rank;
 	int start_depth;
 	int skip_depth;
 	int max_depth;
@@ -72,12 +72,11 @@ time_t start_time;
 pthread_rwlock_t	go_flag_rwlock;
 
 #ifdef ENABLE_2OPT_COUNTER
-int opt_counter = 0;
+int *opt_counter_list;
 int swap_counter = 0;
 int race_cond_counter = 0;
-int total_swap_length = 0;
+double total_swap_length = 0;
 double total_reduced_distance = 0;
-pthread_rwlock_t	counter_rwlock;
 #endif
 
 // Casting coord(int) to coord(double) so they don't overflow while computing
@@ -89,12 +88,6 @@ inline dist_type distance(dist_type x1, dist_type y1, dist_type x2, dist_type y2
 void two_opt(int start, int end) {
 #ifdef VERBOSE
 	printf("two_opt: %3d : %3d\n", start, end);
-#endif
-
-#ifdef ENABLE_2OPT_COUNTER
-	pthread_rwlock_wrlock(&counter_rwlock);
-	++opt_counter;
-	pthread_rwlock_unlock(&counter_rwlock);
 #endif
 
 	// Do not process the node at the start and the end
@@ -130,14 +123,14 @@ void two_opt(int start, int end) {
 
 	// This line is inside rdlock to protect cache_route_distance from being
 	// overwritten.
-	dist_type partial_original_distance 
-		= get_updated_route_distance(route_index_list, start, end);
+	dist_type partial_original_distance
+	    = get_updated_route_distance(route_index_list, start, end);
 
 	pthread_rwlock_unlock(&route_list_rwlock);
 
 	// Find the distance of the new route
-	dist_type partial_new_distance 
-		= get_updated_route_distance(new_route_list, start, end);
+	dist_type partial_new_distance
+	    = get_updated_route_distance(new_route_list, start, end);
 
 	/*
 	Change to new route if the new route is shorter.
@@ -145,7 +138,7 @@ void two_opt(int start, int end) {
 	*/
 	if (partial_new_distance < partial_original_distance) {
 		dist_type new_distance = get_route_distance(new_route_list);
-   
+
 		pthread_rwlock_wrlock(&route_list_rwlock);
 		// Check if the route is really shorter to avoid race condition
 		if (new_distance >=  cache_route_distance) {
@@ -196,6 +189,9 @@ void *parallel_2opt_job(void *param) {
 		        i += thread_param->skip_depth)
 		{
 			for (m = 1; go_flag && m < num_city - i; ++m) {
+#ifdef ENABLE_2OPT_COUNTER
+				++opt_counter_list[thread_param->rank];
+#endif
 				two_opt(m, m + i);
 			}
 		}
@@ -218,6 +214,9 @@ void parallel_2opt() {
 	pthread_t *two_opt_thread_list =
 	    (pthread_t *) malloc(available_threads * sizeof(pthread_t));
 
+#ifdef ENABLE_2OPT_COUNTER
+	opt_counter_list = (int *) malloc(available_threads * sizeof(pthread_t));
+#endif
 	int max_depth = num_city - 1;
 
 	// In case there's too many thread available
@@ -231,6 +230,7 @@ void parallel_2opt() {
 		struct Thread_Param *thread_param =
 		    (struct Thread_Param *) malloc(sizeof(struct Thread_Param));
 
+		thread_param->rank = i;
 		thread_param->start_depth = i + 1;
 		thread_param->skip_depth = threads_to_use;
 		thread_param->max_depth = max_depth;
@@ -325,9 +325,7 @@ inline dist_type get_route_distance(int *route_index_list) {
 }
 
 /*
-	Use the integral distance of original route to calcualte part of
-	the distance. Only update the distance between index start
-	and end.
+	Calculate the distance between index start and end.
 */
 inline dist_type get_updated_route_distance(
     int *route_index_list,
@@ -489,17 +487,13 @@ int main(int argc, char const *argv[])
 	// Init the cache_route_distance
 	cache_route_distance = get_route_distance(route_index_list);
 
-#ifdef ENABLE_2OPT_COUNTER
-	pthread_rwlock_init(&counter_rwlock, NULL);
-#endif
-
 #ifdef VERBOSE
 	printf("Original route:\n");
 	print_route();
 	printf("Original route distance: %lf\n", get_route_distance(route_index_list));
 #endif
 
-	printf("Balanced search space division/Proper/Distance cache:\n");
+	printf("Balanced search space division/Proper/Distance cache/Partial distance compare:\n");
 	parallel_2opt();
 
 #ifdef VERBOSE
@@ -512,13 +506,18 @@ int main(int argc, char const *argv[])
 	write_route(fpOutput);
 
 #ifdef ENABLE_2OPT_COUNTER
-	printf("call: %7d swap: %7d %%: %.2f race: %3d %%: %.2f avg_swap_length: %.2f avg_dist_dec: %.2f\n",
-	       opt_counter,
+	int i;
+	int total_opt_count = 0;
+	for (i = 0; i < available_threads; ++i)
+		total_opt_count += opt_counter_list[i];
+
+	printf("call: %7d swap: %7d %%: %.2f race: %3d %%: %.2f avg_swap_length: %.2lf avg_dist_dec: %.2lf\n",
+	       total_opt_count,
 	       swap_counter,
-	       swap_counter * 100.0f / opt_counter,
+	       swap_counter * 100.0f / total_opt_count,
 	       race_cond_counter,
-	       race_cond_counter * 100.0f / opt_counter,
-	       (float)total_swap_length / swap_counter,
+	       race_cond_counter * 100.0f / total_opt_count,
+	       total_swap_length / swap_counter,
 	       total_reduced_distance / swap_counter);
 #endif
 
@@ -533,10 +532,6 @@ int main(int argc, char const *argv[])
 
 	pthread_rwlock_destroy(&route_list_rwlock);
 	pthread_rwlock_destroy(&go_flag_rwlock);
-
-#ifdef ENABLE_2OPT_COUNTER
-	pthread_rwlock_destroy(&counter_rwlock);
-#endif
 
 	return 0;
 }
