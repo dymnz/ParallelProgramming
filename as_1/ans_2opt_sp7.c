@@ -215,7 +215,7 @@ void parallel_2opt() {
 	    (pthread_t *) malloc(available_threads * sizeof(pthread_t));
 
 #ifdef ENABLE_2OPT_COUNTER
-	pt_counter_list = (int *) malloc(available_threads * sizeof(pthread_t));
+	opt_counter_list = (int *) malloc(available_threads * sizeof(pthread_t));
 #endif
 	int max_depth = num_city - 1;
 
