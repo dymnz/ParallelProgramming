@@ -23,13 +23,13 @@
 typedef double dist_type;
 
 struct City {
-	int rank;
 	int index;
 	int x;
 	int y;
 };
 
 struct Thread_Param {
+	int rank;
 	int start_depth;
 	int end_depth;
 };
