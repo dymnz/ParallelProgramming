@@ -1,0 +1,12 @@
+testing: 9 threads
+                -- Written by TA
+================================
+Fail to open: ./output_sp16_9.
+testing: 9 threads
+                -- Written by TA
+================================
+Fail to open: ./output_sp16_9.
+testing: 9 threads
+                -- Written by TA
+================================
+Fail to open: ./output_sp16_9.

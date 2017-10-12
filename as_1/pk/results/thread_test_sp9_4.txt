@@ -1,0 +1,28 @@
+testing: 4 threads
+Working on ../dis_dir/test11.dis
+Naive search space division/Proper/Distance cache/Partial distance compare:
+Using   4 threads
+Distance @  0:30 = 5237654064140.507812
+Distance @  1:00 = 5235303096465.260742
+Distance @  1:30 = 5232675192040.216797
+Distance @  2:00 = 5230233223925.413086
+Distance @  2:30 = 5227750121450.105469
+Distance @  3:00 = 5225321219457.029297
+Distance @  3:30 = 5222995590957.858398
+Distance @  4:00 = 5220566169252.174805
+Distance @  4:30 = 5217990268537.853516
+Distance @  5:00 = 5215580153009.999023
+Distance @  5:30 = 5213093810714.682617
+Distance @  6:00 = 5210671055644.166016
+Distance @  6:30 = 5208266573260.665039
+Distance @  7:00 = 5205816370070.659180
+Distance @  7:30 = 5203398130785.038086
+Distance @  8:00 = 5200792374209.069336
+Distance @  8:30 = 5198361749506.050781
+Distance @  9:00 = 5196043726164.758789
+Distance @  9:30 = 5193626275292.666016
+Final route distance: 5191119733689.214844
+call:   94278 swap:   20530 %: 21.78 race: 16740 %: 17.76 avg_swap_length: 170301.37 avg_dist_dec: 2383746.10
+                -- Written by TA
+================================
+Fail to open: ./output_sp9_4.
