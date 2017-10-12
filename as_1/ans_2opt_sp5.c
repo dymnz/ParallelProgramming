@@ -228,6 +228,7 @@ void parallel_2opt() {
 		struct Thread_Param *thread_param =
 		    (struct Thread_Param *) malloc(sizeof(struct Thread_Param));
 
+		thread_param->rank = i;
 		thread_param->start_depth = i + 1;
 		thread_param->skip_depth = threads_to_use;
 		thread_param->max_depth = max_depth;

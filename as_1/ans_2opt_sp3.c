@@ -23,6 +23,7 @@
 typedef double dist_type;
 
 struct City {
+	int rank;
 	int index;
 	int x;
 	int y;
@@ -228,6 +229,7 @@ void parallel_2opt() {
 		struct Thread_Param *thread_param =
 		    (struct Thread_Param *) malloc(sizeof(struct Thread_Param));
 
+		thread_param->rank = i;
 		thread_param->start_depth = (depth_segment_size * i) + 1;
 
 		if (i < threads_to_use - 1)
