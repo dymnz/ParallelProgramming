@@ -333,13 +333,12 @@ inline dist_type get_updated_route_distance(
 {
 	int i;
 	int index_1, index_2;
-	dist_type distance_sum = 0;
-
-	for (i = start - 1; i <= end; ++i) {
-		index_1 = route_index_list[i];
-		index_2 = route_index_list[i + 1];
-		distance_sum += get_city_distance(index_1, index_2);
-	}
+	dist_type distance_sum;
+	
+	distance_sum = get_city_distance(route_index_list[start - 1], route_index_list[start]);
+	distance_sum += get_city_distance(route_index_list[start], route_index_list[start + 1]);
+	distance_sum += get_city_distance(route_index_list[end - 1], route_index_list[end]);
+	distance_sum += get_city_distance(route_index_list[end], route_index_list[end + 1]);
 
 	return distance_sum;
 }
