@@ -14,9 +14,9 @@ void main() {
 	{
 		printf("[0] Parallel value = %i\n", i);
 		i = 100+omp_get_thread_num();
-		printf("[1] Parallel value = %i\n", i);
+		printf("[1] Parallel value = %i %ul\n", i, &i);
 	}
-	printf("[2] Serial value = %i\n", i);
+	printf("[2] Serial value = %i %ul\n", i, &i);
 
 
 	printf("copyin...\n");
