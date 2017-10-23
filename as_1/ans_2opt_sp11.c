@@ -331,8 +331,6 @@ inline dist_type get_updated_route_distance(
     int *route_index_list,
     int start, int end)
 {
-	int i;
-	int index_1, index_2;
 	dist_type distance_sum;
 	
 	distance_sum = get_city_distance(route_index_list[start - 1], route_index_list[start]);
