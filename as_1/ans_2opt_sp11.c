@@ -141,16 +141,8 @@ void two_opt(int start, int end) {
 			new_route_list[start + i] = route_index_list[end - i];
 		}
 		dist_type new_distance = get_route_distance_delta(route_index_list, start, end);
-		dist_type new_distance_2 = get_route_distance(new_route_list);
-
-		if (fabs(new_distance-new_distance_2)>1) {
-			printf("shit %lf\t%lf\n", new_distance, new_distance_2);
-			exit(1111);
-		}
 
 		pthread_rwlock_unlock(&route_list_rwlock);
-
-		
 
 		pthread_rwlock_wrlock(&route_list_rwlock);
 		// Check if the route is really shorter to avoid race condition
