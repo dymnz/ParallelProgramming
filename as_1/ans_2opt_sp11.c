@@ -164,8 +164,6 @@ void two_opt(int start, int end) {
 		cache_route_distance = new_distance; // Whoever changed the route, update the distance
 
 		pthread_rwlock_unlock(&route_list_rwlock);
-	} else {
-		free(new_route_list);
 	}
 
 #ifdef DEBUG
