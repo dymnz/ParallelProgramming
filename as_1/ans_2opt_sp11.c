@@ -44,9 +44,9 @@ void *parallel_2opt_job(void *param);
 
 dist_type get_city_distance(int index_1, int index_2);
 dist_type get_route_distance(int *);
-dist_type get_updated_route_distance(int *, int, int);
+dist_type get_partial_route_distance(int *, int, int);
 inline dist_type get_route_distance_delta(int *route_index_list, int start, int end);
-inline dist_type get_swapped_route_distance(int *route_index_list,int start, int end);
+inline dist_type get_swapped_partial_route_distance(int *route_index_list,int start, int end);
 
 void two_opt(int start, int end);
 
@@ -117,13 +117,13 @@ void two_opt(int start, int end) {
 	// This line is inside rdlock to protect cache_route_distance from being
 	// overwritten.
 	dist_type partial_original_distance
-	    = get_updated_route_distance(route_index_list, start, end);
+	    = get_partial_route_distance(route_index_list, start, end);
 
 	pthread_rwlock_unlock(&route_list_rwlock);
 
 	// Find the distance of the new route
 	dist_type partial_new_distance
-	    = get_swapped_route_distance(route_index_list, start, end);
+	    = get_swapped_partial_route_distance(route_index_list, start, end);
 
 	/*
 	Change to new route if the new route is shorter.
@@ -131,9 +131,9 @@ void two_opt(int start, int end) {
 	*/
 	if (partial_new_distance < partial_original_distance) {
 		int *new_route_list = (int *) malloc((num_city + 1) * sizeof(int));
-
+		
+		// Copy and find new distance
 		pthread_rwlock_rdlock(&route_list_rwlock);
-		// Copy
 		memcpy(new_route_list,
 		       route_index_list,
 		       (num_city + 1) * sizeof(int));
@@ -141,7 +141,6 @@ void two_opt(int start, int end) {
 			new_route_list[start + i] = route_index_list[end - i];
 		}
 		dist_type new_distance = get_route_distance_delta(route_index_list, start, end);
-
 		pthread_rwlock_unlock(&route_list_rwlock);
 
 		pthread_rwlock_wrlock(&route_list_rwlock);
@@ -361,7 +360,7 @@ inline dist_type get_route_distance(int *route_index_list) {
 /*
 	Calculate the distance after swapping index start and end.
 */
-inline dist_type get_swapped_route_distance(
+inline dist_type get_swapped_partial_route_distance(
     int *route_index_list,
     int start, int end)
 {
@@ -377,7 +376,7 @@ inline dist_type get_swapped_route_distance(
 /*
 	Calculate the distance between index start and end.
 */
-inline dist_type get_updated_route_distance(
+inline dist_type get_partial_route_distance(
     int *route_index_list,
     int start, int end)
 {
