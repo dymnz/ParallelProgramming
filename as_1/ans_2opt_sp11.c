@@ -137,7 +137,7 @@ void two_opt(int start, int end) {
 	Race condition here. A better route may be overwriten.
 	*/
 	if (partial_new_distance < partial_original_distance) {
-		dist_type new_distance = get_route_distance(new_route_list);
+		dist_type new_distance = get_route_distance_delta(new_route_list, start, end);
 
 		pthread_rwlock_wrlock(&route_list_rwlock);
 		// Check if the route is really shorter to avoid race condition
@@ -308,6 +308,52 @@ dist_type get_city_distance(int index_1, int index_2) {
 #endif
 }
 
+/*
+	Calculate the total route distance when switching start and end index
+*/
+inline dist_type get_route_distance_delta(
+	int *route_index_list, 
+	int start, int end) 
+{
+	dist_type distance_sum = cache_route_distance;
+
+	// Remove old
+	distance_sum -= 
+		get_city_distance(
+			route_index_list[start - 1], 
+			route_index_list[start]);
+	distance_sum -= 
+		get_city_distance(
+			route_index_list[start], 
+			route_index_list[start + 1]);
+	distance_sum -= 
+		get_city_distance(
+			route_index_list[end - 1], 
+			route_index_list[end]);
+	distance_sum -= 
+		get_city_distance(
+			route_index_list[end], 
+			route_index_list[end + 1]);
+
+	// Add new
+	distance_sum +=
+		get_city_distance(
+			route_index_list[start - 1], 
+			route_index_list[end]);
+	distance_sum +=
+		get_city_distance(
+			route_index_list[end], 
+			route_index_list[start + 1]);		
+	distance_sum +=
+		get_city_distance(
+			route_index_list[end - 1], 
+			route_index_list[start]);		
+	distance_sum +=
+		get_city_distance(
+			route_index_list[start], 
+			route_index_list[end + 1]);		
+	return distance_sum;
+}
 
 /*
 	Calculate the total route distance
