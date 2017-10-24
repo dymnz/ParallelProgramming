@@ -322,6 +322,7 @@ inline dist_type get_route_distance_delta(
 {
 	dist_type distance_sum = cache_route_distance;
 
+	// Remove old
 	distance_sum -= 
 		get_city_distance(
 			route_index_list[start - 1], 
@@ -339,6 +340,7 @@ inline dist_type get_route_distance_delta(
 			route_index_list[end], 
 			route_index_list[end + 1]);
 
+	// Add new
 	distance_sum +=
 		get_city_distance(
 			route_index_list[start - 1], 
