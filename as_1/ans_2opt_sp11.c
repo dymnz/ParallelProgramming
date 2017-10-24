@@ -132,6 +132,7 @@ void two_opt(int start, int end) {
 	if (partial_new_distance < partial_original_distance) {
 		int *new_route_list = (int *) malloc((num_city + 1) * sizeof(int));
 		
+		pthread_rwlock_rdlock(&route_list_rwlock);
 		// Copy
 		memcpy(new_route_list,
 		       route_index_list,
@@ -139,6 +140,7 @@ void two_opt(int start, int end) {
 		for (i = 0; i < end - start + 1; ++i) {
 			new_route_list[start + i] = route_index_list[end - i];
 		}
+		pthread_rwlock_unlock(&route_list_rwlock);
 
 		dist_type new_distance = get_route_distance_delta(route_index_list, start, end);
 
