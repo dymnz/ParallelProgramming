@@ -45,6 +45,7 @@ void *parallel_2opt_job(void *param);
 dist_type get_city_distance(int index_1, int index_2);
 dist_type get_route_distance(int *);
 dist_type get_updated_route_distance(int *, int, int);
+inline dist_type get_route_distance_delta(int *route_index_list, int start, int end);
 
 void two_opt(int start, int end);
 
