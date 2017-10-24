@@ -2,12 +2,12 @@
 	Balanced search space division/Proper/Distance cache/Partial distance compare
 */
 #include <stdio.h>
+#include <pthread.h>
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
-#include <omp.h>
 
 //#define VERBOSE
 //#define DEBUG
@@ -46,6 +46,7 @@ dist_type get_city_distance(int index_1, int index_2);
 dist_type get_route_distance(int *);
 dist_type get_updated_route_distance(int *, int, int);
 inline dist_type get_route_distance_delta(int *route_index_list, int start, int end);
+inline dist_type get_swapped_route_distance(int *route_index_list,int start, int end);
 
 void two_opt(int start, int end);
 
@@ -106,13 +107,13 @@ void two_opt(int start, int end) {
 	pthread_rwlock_unlock(&route_list_rwlock);
 #endif
 
-	int i;
-	int *new_route_list = (int *) malloc((num_city + 1) * sizeof(int));
+	int i;	
 
 	/*
-	Calculate original distance and prepare new route
+	Calculate original distance
 	*/
 	pthread_rwlock_rdlock(&route_list_rwlock);
+
 	// This line is inside rdlock to protect cache_route_distance from being
 	// overwritten.
 	dist_type partial_original_distance
@@ -122,14 +123,26 @@ void two_opt(int start, int end) {
 
 	// Find the distance of the new route
 	dist_type partial_new_distance
-	    = get_updated_route_distance(new_route_list, start, end);
+	    = get_swapped_route_distance(route_index_list, start, end);
 
 	/*
 	Change to new route if the new route is shorter.
 	Race condition here. A better route may be overwriten.
 	*/
 	if (partial_new_distance < partial_original_distance) {
-		dist_type new_distance = get_route_distance_delta(new_route_list, start, end);
+		int *new_route_list = (int *) malloc((num_city + 1) * sizeof(int));
+		
+		pthread_rwlock_rdlock(&route_list_rwlock);
+		// Copy
+		memcpy(new_route_list,
+		       route_index_list,
+		       (num_city + 1) * sizeof(int));
+		for (i = 0; i < end - start + 1; ++i) {
+			new_route_list[start + i] = route_index_list[end - i];
+		}
+		pthread_rwlock_unlock(&route_list_rwlock);
+
+		dist_type new_distance = get_route_distance_delta(route_index_list, start, end);
 
 		pthread_rwlock_wrlock(&route_list_rwlock);
 		// Check if the route is really shorter to avoid race condition
@@ -153,8 +166,6 @@ void two_opt(int start, int end) {
 		cache_route_distance = new_distance; // Whoever changed the route, update the distance
 
 		pthread_rwlock_unlock(&route_list_rwlock);
-	} else {
-		free(new_route_list);
 	}
 
 #ifdef DEBUG
@@ -202,7 +213,9 @@ void *parallel_2opt_job(void *param) {
 	Alternative: Balance the workload by comb dividing
 */
 void parallel_2opt() {
-	int i, depth;
+	int i;
+	pthread_t *two_opt_thread_list =
+	    (pthread_t *) malloc(available_threads * sizeof(pthread_t));
 
 #ifdef ENABLE_2OPT_COUNTER
 	opt_counter_list = (int *) malloc(available_threads * sizeof(pthread_t));
@@ -216,32 +229,41 @@ void parallel_2opt() {
 
 	printf("Using %3d threads\n", threads_to_use);
 
-	omp_set_num_threads(threads_to_use);
+	for (i = 0; i < threads_to_use; ++i) {
+		struct Thread_Param *thread_param =
+		    (struct Thread_Param *) malloc(sizeof(struct Thread_Param));
 
-	// Do until times up
+		thread_param->rank = i;
+		thread_param->start_depth = i + 1;
+		thread_param->skip_depth = threads_to_use;
+		thread_param->max_depth = max_depth;
 
-	for (i = 1; i < go_flag & max_depth; ++i) {
-		for (depth = 1; go_flag & depth < num_city - i; ++depth)	 {
-			two_opt(i, i + depth);
-
-			go_flag = time(NULL) < (start_time + SECONDS_TO_WAIT - SECONDS_BUFFER);
-
-#ifdef ENABLE_2OPT_COUNTER
-			++opt_counter_list[omp_get_thread_num()];
+#ifdef VERBOSE
+		printf("New thread: %5d:%5d\n", thread_param->start_depth, thread_param->skip_depth);
 #endif
 
-#ifdef PRINT_STATUS
-			if ( time(NULL) - start_time > 0 && (time(NULL) - start_time) % 30 == 0 ) {
-				printf("Distance @ %2lu:%02lu = %lf\n",
-				       (unsigned long)(time(NULL) - start_time) / 60,
-				       (unsigned long)(time(NULL) - start_time) % 60,
-				       cache_route_distance);
-			}
-#endif
-		}
+		pthread_create(&two_opt_thread_list[i],
+		               NULL, parallel_2opt_job, (void *)thread_param);
 	}
-}
 
+	// Wait for the time up
+	while (time(NULL) < start_time + SECONDS_TO_WAIT - SECONDS_BUFFER) {
+#ifdef PRINT_STATUS
+		if ( time(NULL) - start_time > 0 && (time(NULL) - start_time) % 30 == 0 ) {
+			printf("Distance @ %2lu:%02lu = %lf\n",
+			       (unsigned long)(time(NULL) - start_time) / 60,
+			       (unsigned long)(time(NULL) - start_time) % 60,
+			       cache_route_distance);
+		}
+#endif
+		sleep(1);
+	}
+	// Change go_flag to 0
+	go_flag = 0;
+
+	for (i = 0; i < threads_to_use; ++i)
+		pthread_join(two_opt_thread_list[i], NULL);
+}
 
 /*
 	Distance array is a serialized 2D-array with -1 as default value.
@@ -287,22 +309,6 @@ dist_type get_city_distance(int index_1, int index_2) {
 	           city_list[index_2].x,
 	           city_list[index_2].y);
 #endif
-}
-
-
-/*
-	Calculate the total route distance
-*/
-inline dist_type get_route_distance(int *route_index_list) {
-	int i;
-	int index_1, index_2;
-	dist_type distance_sum = 0.0;
-	for (i = 0; i < num_city; ++i) {
-		index_1 = route_index_list[i];
-		index_2 = route_index_list[i + 1];
-		distance_sum += get_city_distance(index_1, index_2);
-	}
-	return distance_sum;
 }
 
 /*
@@ -353,6 +359,39 @@ inline dist_type get_route_distance_delta(
 }
 
 /*
+	Calculate the total route distance
+*/
+inline dist_type get_route_distance(int *route_index_list) {
+	int i;
+	int index_1, index_2;
+	dist_type distance_sum = 0.0;
+	for (i = 0; i < num_city; ++i) {
+		index_1 = route_index_list[i];
+		index_2 = route_index_list[i + 1];
+		distance_sum += get_city_distance(index_1, index_2);
+	}
+	return distance_sum;
+}
+
+/*
+	Calculate the distance after swapping index start and end.
+*/
+inline dist_type get_swapped_route_distance(
+    int *route_index_list,
+    int start, int end)
+{
+	dist_type distance_sum;
+	
+	distance_sum = get_city_distance(route_index_list[start - 1], route_index_list[end]);
+	distance_sum += get_city_distance(route_index_list[end], route_index_list[start + 1]);
+	distance_sum += get_city_distance(route_index_list[end - 1], route_index_list[start]);
+	distance_sum += get_city_distance(route_index_list[start], route_index_list[end + 1]);
+
+	return distance_sum;
+}
+
+
+/*
 	Calculate the distance between index start and end.
 */
 inline dist_type get_updated_route_distance(
@@ -360,7 +399,7 @@ inline dist_type get_updated_route_distance(
     int start, int end)
 {
 	dist_type distance_sum;
-
+	
 	distance_sum = get_city_distance(route_index_list[start - 1], route_index_list[start]);
 	distance_sum += get_city_distance(route_index_list[start], route_index_list[start + 1]);
 	distance_sum += get_city_distance(route_index_list[end - 1], route_index_list[end]);
@@ -384,7 +423,7 @@ void print_route() {
 /*
 	Print every node to file, not including dummy last node
 */
-void write_route(FILE * fpOutput) {
+void write_route(FILE *fpOutput) {
 	int i;
 
 	fprintf(fpOutput, "%f\n", get_route_distance(route_index_list));
@@ -449,7 +488,7 @@ void *read_coord(void *fp) {
 	return NULL;
 }
 
-int main(int argc, char const * argv[])
+int main(int argc, char const *argv[])
 {
 	pthread_t fp_thread_list[2];
 
@@ -476,8 +515,6 @@ int main(int argc, char const * argv[])
 		available_threads = atoi(argv[4]);
 	else
 		available_threads = THREAD_COUNT;
-
-
 
 	printf("Working on %s\n", argv[1]);
 
