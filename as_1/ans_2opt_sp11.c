@@ -141,7 +141,7 @@ void two_opt(int start, int end) {
 			new_route_list[start + i] = route_index_list[end - i];
 		}
 		dist_type new_distance = get_route_distance_delta(route_index_list, start, end);
-		dist_type new_distance_2 = get_route_distance(route_index_list);
+		dist_type new_distance_2 = get_route_distance(new_route_list);
 
 		if (fabs(new_distance-new_distance_2)>1) {
 			printf("shit %lf\t%lf\n", new_distance, new_distance_2);
