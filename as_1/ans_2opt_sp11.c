@@ -392,7 +392,7 @@ inline dist_type get_updated_route_distance(
 	dist_type distance_sum;
 	
 	distance_sum = get_city_distance(route_index_list[start - 1], route_index_list[start]);
-	distance_sum += get_city_distance(route_index_list[end - 1], route_index_list[end]);
+	distance_sum += get_city_distance(route_index_list[end], route_index_list[end + 1]);
 
 	return distance_sum;
 }
