@@ -16,7 +16,7 @@
 //#define KEEP_DIST_LIST    // Save the calculated distance, requires a lot of RAM
 
 #define THREAD_COUNT 16
-#define SECONDS_TO_WAIT 10
+#define SECONDS_TO_WAIT 10 * 60
 #define SECONDS_BUFFER 0
 
 typedef double dist_type;

@@ -30,3 +30,14 @@ call:  857152 swap:   45622 %: 5.32 race: 214670 %: 25.04 avg_swap_length: 9.76 
 ================================
 Pass!
 
+testing: 16 threads
+running ans_2opt_sp7
+Working on ./dis_dir/test11.dis
+Balanced search space division/Proper/Distance cache/Partial distance compare:
+Using  16 threads
+Final route distance: 5237836113061.209961
+call:   18388 swap:     977 %: 5.31 race: 4817 %: 26.20 avg_swap_length: 10.06 avg_dist_dec: 2274235.38
+                -- Written by TA
+================================
+Pass!
+

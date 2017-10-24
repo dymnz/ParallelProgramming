@@ -28,3 +28,41 @@ call:   63110 swap:   23685 %: 37.53 race:   0 %: 0.00 avg_swap_length: 2.00 avg
 ================================
 Pass!
 
+testing: 1 threads
+running ans_2opt_sp7
+                -- Written by TA
+================================
+Fail to open: ../dis_dir/test11.dis.
+testing: 1 threads
+running ans_2opt_sp7
+Working on ./dis_dir/test11.dis
+Balanced search space division/Proper/Distance cache/Partial distance compare:
+Using   1 threads
+Final route distance: 5239292676345.494141
+call:     958 swap:     372 %: 38.83 race:   0 %: 0.00 avg_swap_length: 2.00 avg_dist_dec: 2057431.93
+                -- Written by TA
+================================
+Pass!
+
+testing: 1 threads
+running ans_2opt_sp7
+Working on ./dis_dir/test4.dis
+Balanced search space division/Proper/Distance cache/Partial distance compare:
+Using   1 threads
+Final route distance: 542204.915087
+call:  474655 swap:    4299 %: 0.91 race:   0 %: 0.00 avg_swap_length: 92.64 avg_dist_dec: 1077.94
+                -- Written by TA
+================================
+Pass!
+
+testing: 1 threads
+running ans_2opt_sp7
+Working on ./dis_dir/test11.dis
+Balanced search space division/Proper/Distance cache/Partial distance compare:
+Using   1 threads
+Final route distance: 5239197536448.653320
+call:    1064 swap:     414 %: 38.91 race:   0 %: 0.00 avg_swap_length: 2.00 avg_dist_dec: 2078513.47
+                -- Written by TA
+================================
+Pass!
+
