@@ -45,6 +45,7 @@ void *parallel_2opt_job(void *param);
 dist_type get_city_distance(int index_1, int index_2);
 dist_type get_route_distance(int *);
 dist_type get_updated_route_distance(int *, int, int);
+inline dist_type get_route_distance_delta(int *route_index_list, int start, int end);
 
 void two_opt(int start, int end);
 
@@ -112,15 +113,6 @@ void two_opt(int start, int end) {
 	Calculate original distance and prepare new route
 	*/
 	pthread_rwlock_rdlock(&route_list_rwlock);
-
-	// Copy original route but reverse the middle
-	memcpy(new_route_list,
-	       route_index_list,
-	       (num_city + 1) * sizeof(int));
-	for (i = 0; i < end - start + 1; ++i) {
-		new_route_list[start + i] = route_index_list[end - i];
-	}
-
 	// This line is inside rdlock to protect cache_route_distance from being
 	// overwritten.
 	dist_type partial_original_distance

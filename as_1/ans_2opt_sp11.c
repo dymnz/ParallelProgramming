@@ -46,6 +46,7 @@ dist_type get_city_distance(int index_1, int index_2);
 dist_type get_route_distance(int *);
 dist_type get_updated_route_distance(int *, int, int);
 inline dist_type get_route_distance_delta(int *route_index_list, int start, int end);
+inline dist_type get_swapped_route_distance(int *route_index_list,int start, int end);
 
 void two_opt(int start, int end);
 
@@ -106,21 +107,12 @@ void two_opt(int start, int end) {
 	pthread_rwlock_unlock(&route_list_rwlock);
 #endif
 
-	int i;
-	int *new_route_list = (int *) malloc((num_city + 1) * sizeof(int));
+	int i;	
 
 	/*
-	Calculate original distance and prepare new route
+	Calculate original distance
 	*/
 	pthread_rwlock_rdlock(&route_list_rwlock);
-
-	// Copy original route but reverse the middle
-	memcpy(new_route_list,
-	       route_index_list,
-	       (num_city + 1) * sizeof(int));
-	for (i = 0; i < end - start + 1; ++i) {
-		new_route_list[start + i] = route_index_list[end - i];
-	}
 
 	// This line is inside rdlock to protect cache_route_distance from being
 	// overwritten.
@@ -131,14 +123,24 @@ void two_opt(int start, int end) {
 
 	// Find the distance of the new route
 	dist_type partial_new_distance
-	    = get_updated_route_distance(new_route_list, start, end);
+	    = get_swapped_route_distance(route_index_list, start, end);
 
 	/*
 	Change to new route if the new route is shorter.
 	Race condition here. A better route may be overwriten.
 	*/
 	if (partial_new_distance < partial_original_distance) {
-		dist_type new_distance = get_route_distance_delta(new_route_list, start, end);
+		int *new_route_list = (int *) malloc((num_city + 1) * sizeof(int));
+		
+		// Copy
+		memcpy(new_route_list,
+		       route_index_list,
+		       (num_city + 1) * sizeof(int));
+		for (i = 0; i < end - start + 1; ++i) {
+			new_route_list[start + i] = route_index_list[end - i];
+		}
+
+		dist_type new_distance = get_route_distance_delta(route_index_list, start, end);
 
 		pthread_rwlock_wrlock(&route_list_rwlock);
 		// Check if the route is really shorter to avoid race condition
@@ -370,6 +372,24 @@ inline dist_type get_route_distance(int *route_index_list) {
 	}
 	return distance_sum;
 }
+
+/*
+	Calculate the distance after swapping index start and end.
+*/
+inline dist_type get_swapped_route_distance(
+    int *route_index_list,
+    int start, int end)
+{
+	dist_type distance_sum;
+	
+	distance_sum = get_city_distance(route_index_list[start - 1], route_index_list[end]);
+	distance_sum += get_city_distance(route_index_list[end], route_index_list[start + 1]);
+	distance_sum += get_city_distance(route_index_list[end - 1], route_index_list[start]);
+	distance_sum += get_city_distance(route_index_list[start], route_index_list[end + 1]);
+
+	return distance_sum;
+}
+
 
 /*
 	Calculate the distance between index start and end.
