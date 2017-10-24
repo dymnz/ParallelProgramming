@@ -335,14 +335,6 @@ inline dist_type get_route_distance_delta(
 			route_index_list[start]);
 	distance_sum -= 
 		get_city_distance(
-			route_index_list[start], 
-			route_index_list[start + 1]);
-	distance_sum -= 
-		get_city_distance(
-			route_index_list[end - 1], 
-			route_index_list[end]);
-	distance_sum -= 
-		get_city_distance(
 			route_index_list[end], 
 			route_index_list[end + 1]);
 
@@ -350,19 +342,12 @@ inline dist_type get_route_distance_delta(
 	distance_sum +=
 		get_city_distance(
 			route_index_list[start - 1], 
-			route_index_list[end]);
-	distance_sum +=
-		get_city_distance(
-			route_index_list[end], 
-			route_index_list[start + 1]);		
-	distance_sum +=
-		get_city_distance(
-			route_index_list[end - 1], 
-			route_index_list[start]);		
+			route_index_list[end]);			
 	distance_sum +=
 		get_city_distance(
 			route_index_list[start], 
 			route_index_list[end + 1]);		
+
 	return distance_sum;
 }
 
@@ -391,8 +376,6 @@ inline dist_type get_swapped_route_distance(
 	dist_type distance_sum;
 	
 	distance_sum = get_city_distance(route_index_list[start - 1], route_index_list[end]);
-	distance_sum += get_city_distance(route_index_list[end], route_index_list[start + 1]);
-	distance_sum += get_city_distance(route_index_list[end - 1], route_index_list[start]);
 	distance_sum += get_city_distance(route_index_list[start], route_index_list[end + 1]);
 
 	return distance_sum;
@@ -409,9 +392,7 @@ inline dist_type get_updated_route_distance(
 	dist_type distance_sum;
 	
 	distance_sum = get_city_distance(route_index_list[start - 1], route_index_list[start]);
-	distance_sum += get_city_distance(route_index_list[start], route_index_list[start + 1]);
 	distance_sum += get_city_distance(route_index_list[end - 1], route_index_list[end]);
-	distance_sum += get_city_distance(route_index_list[end], route_index_list[end + 1]);
 
 	return distance_sum;
 }
