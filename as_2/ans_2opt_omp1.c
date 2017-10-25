@@ -193,6 +193,15 @@ void parallel_2opt() {
 					// Execute 2opt swap at start/edn with the best reduced distance
 					#pragma omp single
 					{
+
+#ifdef VERBOSE
+						for (task_i = 0; task_i < available_threads; ++task_i)
+							printf("th: %3d: s: %8d e: %8d d:%.2f\n",
+							       task_i,
+							       thread_submit_list[task_i].start,
+							       thread_submit_list[task_i].end,
+							       thread_submit_list[task_i].distance_reduced);
+#endif
 						// Find the best distance delta
 						best_thread_num = 0;
 						for (task_i = 1; task_i < available_threads; ++task_i)
