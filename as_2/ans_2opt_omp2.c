@@ -187,8 +187,11 @@ void parallel_2opt() {
 				if (two_opt_check(start, start + depth) > 0)
 					two_opt_swap(start, start + depth);
 
-				#pragma omp single
-				check_time();
+				#pragma omp single 
+				{
+					check_time();
+				}
+				
 
 				// Break stuff because break statement is not allowed
 				if (!go_flag) {
