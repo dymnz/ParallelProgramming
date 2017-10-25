@@ -1,20 +1,22 @@
 /*
-	Balanced search space division/Proper/Distance cache/Partial distance compare/
-	Copy when swapping
+	OpenMP version of ans_2opt_sp11.c
+	* Balanced search space division/Proper/Distance cache/
+	  Partial distance compare/Copy when swapping
+	* OpenMP Distributed range/Free to swap/Contention alert
 */
 #include <stdio.h>
-#include <pthread.h>
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include <omp.h>
 
 //#define VERBOSE
 //#define DEBUG
 #define PRINT_STATUS
 #define ENABLE_2OPT_COUNTER
-//#define KEEP_DIST_LIST    // Save the calculated distance,
+//#define KEEP_DIST_LIST	// Save the calculated distance,
 // requires a lot of RAM
 
 #define THREAD_COUNT 16
@@ -42,7 +44,6 @@ void *read_route(void *fp);
 inline dist_type distance(dist_type x1, dist_type y1, dist_type x2, dist_type y2);
 
 void parallel_2opt();
-void *parallel_2opt_job(void *param);
 
 dist_type get_city_distance(int index_1, int index_2);
 dist_type get_total_route_distance(int *);
@@ -52,30 +53,30 @@ inline dist_type get_swapped_total_route_distance(
 inline dist_type get_swapped_partial_route_distance(
     int *route_index_list, int start, int end);
 
-void two_opt(int start, int end);
+void two_opt_swap(int start, int end);
+dist_type two_opt_check(int start, int end);
 
-int  available_threads = THREAD_COUNT;
-int		num_city;
-dist_type 	default_distance;
+int available_threads = THREAD_COUNT;
+int num_city;
+dist_type default_distance;
 
 /* Arrays */
 int  *route_index_list;
 struct City	*city_list;
 
+
 #ifdef KEEP_DIST_LIST
-dist_type	*dist_list;
+dist_type *dist_list;
 #endif
 
 // If cache_route_distance == 0, update it; If not, use that value
 // This value is change if and only if route_index_list is changed.
 dist_type cache_route_distance = 0;
 
-pthread_rwlock_t	route_list_rwlock;
 
 /* Time control*/
 int go_flag = 1;
 time_t start_time;
-pthread_rwlock_t	go_flag_rwlock;
 
 #ifdef ENABLE_2OPT_COUNTER
 int *opt_counter_list;
@@ -90,36 +91,37 @@ inline dist_type distance(dist_type x1, dist_type y1, dist_type x2, dist_type y2
 	return sqrt(((x1 - x2) * (x1 - x2)) + ((y1 - y2) * (y1 - y2)));
 }
 
-// A single 2-opt swap
-void two_opt(int start, int end) {
+/*
+	Execute 2opt swap from index at start to end
+*/
+void two_opt_swap(int start, int end) {
 #ifdef VERBOSE
-	printf("two_opt: %3d : %3d\n", start, end);
+	printf("two_opt swap: %3d : %3d\n", start, end);
 #endif
 
-	// Do not process the node at the start and the end
-	if (start == 0 || end == num_city) {
-		printf("Please don't do this\n");
-		exit(42);
+	int i, temp;
+
+	#pragma omp parallel for private(temp)
+	for (i = 0; i < end - start; ++i) {
+		temp = route_index_list[end - i];
+		route_index_list[end - i] = route_index_list[start + i];
+		route_index_list[start + i] = temp;
 	}
+}
 
-	// Modifiy the route to check if the new route is shorter
-#ifdef DEBUG
-	pthread_rwlock_rdlock(&route_list_rwlock);
-	printf("Swap route from index: %3d %3d\n", start, end);
-	printf("Before swap:\n");
-	print_route();
-	pthread_rwlock_unlock(&route_list_rwlock);
+/*
+	Return the difference in distance after swapping index at start and end.
+	distance_reduced = original - swapped
+*/
+dist_type two_opt_check(int start, int end) {
+#ifdef VERBOSE
+	printf("two_opt check: %3d : %3d\n", start, end);
 #endif
 
-	int i;
+#ifdef ENABLE_2OPT_COUNTER
+	opt_counter_list[omp_get_thread_num()]++;
+#endif
 
-	/*
-	Calculate original distance
-	*/
-	pthread_rwlock_rdlock(&route_list_rwlock);
-
-	// This line is inside rdlock to protect cache_route_distance from being
-	// overwritten.
 	dist_type partial_original_distance
 	    = get_partial_route_distance(route_index_list, start, end);
 
@@ -127,105 +129,16 @@ void two_opt(int start, int end) {
 	dist_type partial_new_distance
 	    = get_swapped_partial_route_distance(route_index_list, start, end);
 
-	pthread_rwlock_unlock(&route_list_rwlock);
-
-
-
-	/*
-	Change to new route if the new route is shorter.
-	Race condition here. A better route may be overwriten.
-	*/
-	if (partial_new_distance < partial_original_distance) {
-		int *new_route_list = (int *) malloc((num_city + 1) * sizeof(int));
-
-		pthread_rwlock_rdlock(&route_list_rwlock);
-		// Copy
-		memcpy(new_route_list,
-		       route_index_list,
-		       (num_city + 1) * sizeof(int));
-		for (i = 0; i < end - start + 1; ++i) {
-			new_route_list[start + i] = route_index_list[end - i];
-		}
-		pthread_rwlock_unlock(&route_list_rwlock);
-
-		dist_type new_distance = get_swapped_total_route_distance(route_index_list, start, end);
-
-		pthread_rwlock_wrlock(&route_list_rwlock);
-		// Check if the route is really shorter to avoid race condition
-		if (new_distance >=  cache_route_distance) {
-#ifdef ENABLE_2OPT_COUNTER
-			++race_cond_counter;
-#endif
-			pthread_rwlock_unlock(&route_list_rwlock);
-			free(new_route_list);
-			return;
-		}
-
-#ifdef ENABLE_2OPT_COUNTER
-		++swap_counter;
-		total_swap_length += end - start + 1;
-		total_reduced_distance += cache_route_distance - new_distance;
-#endif
-
-		free(route_index_list);
-		route_index_list = new_route_list;
-		cache_route_distance = new_distance; // Whoever changed the route, update the distance
-
-		pthread_rwlock_unlock(&route_list_rwlock);
-	}
-
-#ifdef DEBUG
-	pthread_rwlock_rdlock(&route_list_rwlock);
-	printf("After swap:\n");
-	print_route();
-	pthread_rwlock_unlock(&route_list_rwlock);
-#endif
-
+	return partial_original_distance - partial_new_distance;
 }
-
-/*
-	Search for depth: [start end)
-*/
-void *parallel_2opt_job(void *param) {
-	struct Thread_Param *thread_param = (struct Thread_Param *) param;
-	int i, m;
-
-	// i: Depth control
-	// m: Loop control
-	do {
-		for (i = thread_param->start_depth;
-		        go_flag && i < thread_param->max_depth;
-		        i += thread_param->skip_depth)
-		{
-			for (m = 1; go_flag && m < num_city - i; ++m) {
-#ifdef ENABLE_2OPT_COUNTER
-				++opt_counter_list[thread_param->rank];
-#endif
-				two_opt(m, m + i);
-			}
-		}
-	} while (go_flag);
-
-	free(thread_param);
-
-	return NULL;
-}
-
 
 /*
 	Parallel version of complete 2-opt.
-	Split the search space into segments by dividing chunck of depth
-
-	Alternative: Balance the workload by comb dividing
 */
 void parallel_2opt() {
-	int i;
-	pthread_t *two_opt_thread_list =
-	    (pthread_t *) malloc(available_threads * sizeof(pthread_t));
+	int start, depth;
+	int best_thread_num;
 
-#ifdef ENABLE_2OPT_COUNTER
-	opt_counter_list = (int *) malloc(available_threads * sizeof(pthread_t));
-#endif
 	int max_depth = num_city - 1;
 
 	// In case there's too many thread available
@@ -233,43 +146,71 @@ void parallel_2opt() {
 	if (max_depth < available_threads)
 		threads_to_use = max_depth;
 
+	omp_set_num_threads(threads_to_use);
+
 	printf("Using %3d threads\n", threads_to_use);
 
-	for (i = 0; i < threads_to_use; ++i) {
-		struct Thread_Param *thread_param =
-		    (struct Thread_Param *) malloc(sizeof(struct Thread_Param));
-
-		thread_param->rank = i;
-		thread_param->start_depth = i + 1;
-		thread_param->skip_depth = threads_to_use;
-		thread_param->max_depth = max_depth;
-
-#ifdef VERBOSE
-		printf("New thread: %5d:%5d\n", thread_param->start_depth, thread_param->skip_depth);
+#ifdef ENABLE_2OPT_COUNTER
+	opt_counter_list = (int *) malloc(available_threads * sizeof(pthread_t));
 #endif
 
-		pthread_create(&two_opt_thread_list[i],
-		               NULL, parallel_2opt_job, (void *)thread_param);
-	}
+	int omp_chunk_size = num_city / available_threads;
 
-	// Wait for the time up
-	while (time(NULL) < start_time + SECONDS_TO_WAIT - SECONDS_BUFFER) {
-#ifdef PRINT_STATUS
-		if ( time(NULL) - start_time > 0 && (time(NULL) - start_time) % 30 == 0 ) {
-			printf("Distance @ %2lu:%02lu = %lf\n",
-			       (unsigned long)(time(NULL) - start_time) / 60,
-			       (unsigned long)(time(NULL) - start_time) % 60,
-			       cache_route_distance);
+	// Keep track of the ending position of each thread to avoid contention
+	int thread_process_end_list = (int *)
+	                              malloc((available_threads - 1) * sizeof(int));
+
+	while (go_flag) {
+		#pragma omp parallel for collapse(2) \
+		shared(go_flag, route_index_list) \
+		schedule(static, omp_chunk_size)
+		for (depth = 1; go_flag && depth < max_depth; ++depth) {
+			for (start = 1; go_flag && start < num_city - depth; ) {
+
+				// Keep the list fresh
+				#pragma omp flush(route_index_list)
+
+				/*
+					Check contention status
+					Contention happens when the this thread's end
+					goes over the chunk limit and affects the start of the next thread.
+
+					If contention happens, the next thread moves to the next un-contented
+					pivot.
+				*/
+				#pragma omp flush(thread_process_end_list)
+				if (omp_get_thread_num() > 1 &&
+					thread_process_end_list[omp_get_thread_num() - 1] + 1 >= start)
+					start = thread_process_end_list[omp_get_thread_num() - 1] + 2;
+
+				if (two_opt_check(start, start + depth) > 0)
+					two_opt_swap(start, start + depth);
+
+				#pragma omp single
+				check_time();
+			}
 		}
-#endif
-		sleep(1);
 	}
-	// Change go_flag to 0
-	go_flag = 0;
-
-	for (i = 0; i < threads_to_use; ++i)
-		pthread_join(two_opt_thread_list[i], NULL);
 }
+
+void check_time() {
+	// Check time
+	go_flag = time(NULL) <
+	          start_time + SECONDS_TO_WAIT - SECONDS_BUFFER;
+
+#ifdef PRINT_STATUS
+	if (
+	    (time(NULL) - start_time) % 30 == 0 &&
+	    (time(NULL) - start_time) > 0)
+	{
+		printf("Distance @ %2lu:%02lu = %lf\n",
+		       (unsigned long)(time(NULL) - start_time) / 60,
+		       (unsigned long)(time(NULL) - start_time) % 60,
+		       cache_route_distance);
+	}
+#endif
+}
+
 
 /*
 	Distance array is a serialized 2D-array with -1 as default value.
@@ -392,7 +333,6 @@ inline dist_type get_partial_route_distance(
 
 	return distance_sum;
 }
-
 
 /*
 	Print every node, including dummy last node
@@ -521,22 +461,16 @@ int main(int argc, char const *argv[])
 	}
 #endif
 
-
-
 	// Read city coord and default route
-	pthread_create(&fp_thread_list[0], NULL, read_coord, (void*)fpCoord);
-	pthread_create(&fp_thread_list[1], NULL, read_route, (void*)fpRoute);
-	pthread_join(fp_thread_list[0], NULL);
-	pthread_join(fp_thread_list[1], NULL);
+	read_route(fpRoute);
+	read_coord(fpCoord);
 
-	// Init route_list_rwlock and go_flag_rwlock
-	pthread_rwlock_init(&route_list_rwlock, NULL);
-	pthread_rwlock_init(&go_flag_rwlock, NULL);
+
 
 	// Init the cache_route_distance
 	cache_route_distance = get_total_route_distance(route_index_list);
 
-#ifdef VERBOSE
+#ifdef DEBUG
 	printf("Original route:\n");
 	print_route();
 	printf("Original route distance: %lf\n", get_total_route_distance(route_index_list));
@@ -545,7 +479,7 @@ int main(int argc, char const *argv[])
 	printf("Balanced search space division/Proper/Distance cache/Partial distance compare:\n");
 	parallel_2opt();
 
-#ifdef VERBOSE
+#ifdef DEBUG
 	print_route();
 #endif
 
@@ -578,9 +512,6 @@ int main(int argc, char const *argv[])
 
 	free(city_list);
 	free(route_index_list);
-
-	pthread_rwlock_destroy(&route_list_rwlock);
-	pthread_rwlock_destroy(&go_flag_rwlock);
 
 	return 0;
 }

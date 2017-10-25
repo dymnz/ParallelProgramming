@@ -2,7 +2,7 @@
 	OpenMP version of ans_2opt_sp11.c
 	* Balanced search space division/Proper/Distance cache/
 	  Partial distance compare/Copy when swapping
-	* OpenMP task single
+	* OpenMP task-check single-swap
 */
 #include <stdio.h>
 #include <stdlib.h>
