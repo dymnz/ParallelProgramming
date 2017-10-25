@@ -191,7 +191,8 @@ void parallel_2opt() {
 					          start_time + SECONDS_TO_WAIT - SECONDS_BUFFER;
 
 #ifdef PRINT_STATUS
-					if ((time(NULL) - start_time) % 30 == 0) {
+					if ((time(NULL) - start_time) % 30 == 0 && 
+						(time(NULL) - start_time) > 0) {
 						printf("Distance @ %2lu:%02lu = %lf\n",
 						       (unsigned long)(time(NULL) - start_time) / 60,
 						       (unsigned long)(time(NULL) - start_time) % 60,
