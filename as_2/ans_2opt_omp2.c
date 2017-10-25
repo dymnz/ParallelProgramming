@@ -164,8 +164,8 @@ void parallel_2opt() {
 		#pragma omp parallel for collapse(2) \
 		shared(go_flag, route_index_list) \
 		schedule(static, omp_chunk_size)
-		for (depth = 1; go_flag && depth < max_depth; ++depth) {
-			for (start = 1; go_flag && start < num_city - depth; ) {
+		for (depth = 1; depth < max_depth; ++depth) {
+			for (start = 1; start < num_city - depth; ) {
 
 				// Keep the list fresh
 				#pragma omp flush(route_index_list)
@@ -188,7 +188,10 @@ void parallel_2opt() {
 
 				#pragma omp single
 				check_time();
+
+				if (!go_flag) break;
 			}
+			if (!go_flag) break;
 		}
 	}
 }
