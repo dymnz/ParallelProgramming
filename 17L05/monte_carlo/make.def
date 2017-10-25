@@ -1,0 +1,12 @@
+# copy to make.def
+CC          = gcc
+CLINKER     = $(CC)
+OPTFLAGS    = -fopenmp
+LIBS        =
+PRE         =
+
+CFLAGS	  = $(OPTFLAGS) 
+
+OBJ=o
+EXE=.exe
+RM=del

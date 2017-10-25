@@ -171,3 +171,33 @@ call: 8435322 swap:  971997 %: 11.52 race: 295171 %: 3.50 avg_swap_length: 10.17
 ================================
 Pass!
 
+testing: 16 threads
+running ans_2opt_sp11
+Working on ./dis_dir/test11.dis
+Balanced search space division/Proper/Distance cache/Partial distance compare:
+Using  16 threads
+Distance @  0:30 = 5140651468195.219727
+Distance @  1:00 = 5021143654752.712891
+Distance @  1:30 = 4921120642836.736328
+Distance @  2:00 = 4808255466069.946289
+Distance @  2:30 = 4703959458594.468750
+Distance @  3:00 = 4595013233501.096680
+Distance @  3:30 = 4484015771447.448242
+Distance @  4:00 = 4370174447081.456543
+Distance @  4:30 = 4279083052643.489746
+Distance @  5:00 = 4162445503426.040527
+Distance @  5:30 = 4056091352637.650879
+Distance @  6:00 = 3957370201083.790039
+Distance @  6:30 = 3854973456897.899414
+Distance @  7:00 = 3752381554829.541504
+Distance @  7:30 = 3638654765280.487305
+Distance @  8:00 = 3520689560368.970215
+Distance @  8:30 = 3418083256039.369629
+Distance @  9:00 = 3305591983488.595703
+Distance @  9:30 = 3203886450083.132324
+Final route distance: 3131852526948.444336
+call: 9008731 swap: 1128504 %: 12.53 race: 227657 %: 2.53 avg_swap_length: 6.94 avg_dist_dec: 1895251.99
+                -- Written by TA
+================================
+Pass!
+
