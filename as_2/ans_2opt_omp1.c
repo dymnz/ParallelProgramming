@@ -462,7 +462,7 @@ int main(int argc, char const *argv[])
 	// Init the cache_route_distance
 	cache_route_distance = get_total_route_distance(route_index_list);
 
-#ifdef VERBOSE
+#ifdef DEBUG
 	printf("Original route:\n");
 	print_route();
 	printf("Original route distance: %lf\n", get_total_route_distance(route_index_list));
