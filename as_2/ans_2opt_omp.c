@@ -1,7 +1,8 @@
 /*
 	OpenMP version of ans_2opt_sp11.c
-	Balanced search space division/Proper/Distance cache/Partial distance compare/
-	Copy when swapping
+	* Balanced search space division/Proper/Distance cache/
+	  Partial distance compare/Copy when swapping
+	* OpenMP task single
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,7 +14,7 @@
 
 
 //#define VERBOSE
-//#define DEBUG
+#define DEBUG
 #define PRINT_STATUS
 #define ENABLE_2OPT_COUNTER
 //#define KEEP_DIST_LIST    // Save the calculated distance,
@@ -80,12 +81,10 @@ dist_type	*dist_list;
 // This value is change if and only if route_index_list is changed.
 dist_type cache_route_distance = 0;
 
-pthread_rwlock_t	route_list_rwlock;
 
 /* Time control*/
 int go_flag = 1;
 time_t start_time;
-pthread_rwlock_t	go_flag_rwlock;
 
 #ifdef ENABLE_2OPT_COUNTER
 int *opt_counter_list;
@@ -113,7 +112,7 @@ void two_opt_swap(int start, int end) {
 
 /*
 	Return the difference in distance after swapping index at start and end.
-	distance_reduced = after - original
+	distance_reduced = original - swapped
 */
 dist_type two_opt_check(int start, int end) {
 #ifdef VERBOSE
@@ -150,12 +149,11 @@ void parallel_2opt() {
 
 	#pragma omp parallel {
 	#pragma omp single
-	for (depth = 1; depth < max_depth; ++depth) {
-		for (i = 1; i < num_city - depth; ) {
+	for (depth = 1; go_flag && depth < max_depth; ++depth) {
+		for (i = 1; i < go_flag && num_city - depth; ) {
 			// Spawn available_threads thread with task,
 			// increment i accordingly
 			for (task_i = 0; task_i < available_threads; ++task_i, ++i) {
-
 				#pragma omp task
 				{
 					thread_submit_list[omp_get_thread_num()].start = i;
@@ -178,27 +176,26 @@ void parallel_2opt() {
 						best_thread_num = task_i;
 
 				// Finally, execute 2opt swap
-				two_opt_swap(
-				    thread_submit_list[best_thread_num].start,
-				    thread_submit_list[best_thread_num].end);
-			}
+				if (thread_submit_list[best_thread_num].distance_reduced > 0)
+					two_opt_swap(
+					    thread_submit_list[best_thread_num].start,
+					    thread_submit_list[best_thread_num].end);
 
+				// Check time
+				go_flag = time(NULL) <
+				          start_time + SECONDS_TO_WAIT - SECONDS_BUFFER;
+
+#ifdef PRINT_STATUS
+				if ((time(NULL) - start_time) % 30 == 0) {
+					printf("Distance @ %2lu:%02lu = %lf\n",
+					       (unsigned long)(time(NULL) - start_time) / 60,
+					       (unsigned long)(time(NULL) - start_time) % 60,
+					       cache_route_distance);
+				}
+#endif
+			}
 		}
 	}
-}
-
-// Wait for the time up
-while (time(NULL) < start_time + SECONDS_TO_WAIT - SECONDS_BUFFER) {
-#ifdef PRINT_STATUS
-	if ( time(NULL) - start_time > 0 && (time(NULL) - start_time) % 30 == 0 ) {
-		printf("Distance @ %2lu:%02lu = %lf\n",
-		       (unsigned long)(time(NULL) - start_time) / 60,
-		       (unsigned long)(time(NULL) - start_time) % 60,
-		       cache_route_distance);
-	}
-#endif
-}
-
 }
 
 /*
@@ -263,14 +260,6 @@ inline dist_type get_swapped_total_route_distance(
 	        route_index_list[start]);
 	distance_sum -=
 	    get_city_distance(
-	        route_index_list[start],
-	        route_index_list[start + 1]);
-	distance_sum -=
-	    get_city_distance(
-	        route_index_list[end - 1],
-	        route_index_list[end]);
-	distance_sum -=
-	    get_city_distance(
 	        route_index_list[end],
 	        route_index_list[end + 1]);
 
@@ -279,14 +268,6 @@ inline dist_type get_swapped_total_route_distance(
 	    get_city_distance(
 	        route_index_list[start - 1],
 	        route_index_list[end]);
-	distance_sum +=
-	    get_city_distance(
-	        route_index_list[end],
-	        route_index_list[start + 1]);
-	distance_sum +=
-	    get_city_distance(
-	        route_index_list[end - 1],
-	        route_index_list[start]);
 	distance_sum +=
 	    get_city_distance(
 	        route_index_list[start],
@@ -319,13 +300,10 @@ inline dist_type get_swapped_partial_route_distance(
 	dist_type distance_sum;
 
 	distance_sum = get_city_distance(route_index_list[start - 1], route_index_list[end]);
-	distance_sum += get_city_distance(route_index_list[end], route_index_list[start + 1]);
-	distance_sum += get_city_distance(route_index_list[end - 1], route_index_list[start]);
 	distance_sum += get_city_distance(route_index_list[start], route_index_list[end + 1]);
 
 	return distance_sum;
 }
-
 
 /*
 	Calculate the distance between index start and end.
@@ -337,13 +315,10 @@ inline dist_type get_partial_route_distance(
 	dist_type distance_sum;
 
 	distance_sum = get_city_distance(route_index_list[start - 1], route_index_list[start]);
-	distance_sum += get_city_distance(route_index_list[start], route_index_list[start + 1]);
-	distance_sum += get_city_distance(route_index_list[end - 1], route_index_list[end]);
 	distance_sum += get_city_distance(route_index_list[end], route_index_list[end + 1]);
 
 	return distance_sum;
 }
-
 
 /*
 	Print every node, including dummy last node
@@ -473,9 +448,9 @@ int main(int argc, char const *argv[])
 #endif
 
 	// Read city coord and default route
+	read_route(fpRoute);
+	read_coord(fpCoord);
 
-
-	// Init route_list_rwlock and go_flag_rwlock
 
 
 	// Init the cache_route_distance
@@ -523,9 +498,6 @@ int main(int argc, char const *argv[])
 
 	free(city_list);
 	free(route_index_list);
-
-	pthread_rwlock_destroy(&route_list_rwlock);
-	pthread_rwlock_destroy(&go_flag_rwlock);
 
 	return 0;
 }
