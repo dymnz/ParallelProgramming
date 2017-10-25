@@ -13,7 +13,7 @@
 #include <omp.h>
 
 
-//#define VERBOSE
+#define VERBOSE
 #define DEBUG
 #define PRINT_STATUS
 #define ENABLE_2OPT_COUNTER
@@ -155,8 +155,10 @@ void parallel_2opt() {
 				// increment i accordingly
 				#pragma omp single
 				for (task_i = 0; task_i < available_threads; ++task_i, ++i) {
+#ifdef DEBUG
 					printf("Create thread: %3d s: %8d e: %8d\n",
 					       task_i, i, i + depth);
+#endif
 					#pragma omp task
 					{
 						thread_submit_list[omp_get_thread_num()].start = i;
