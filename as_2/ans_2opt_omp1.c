@@ -14,7 +14,7 @@
 
 
 #define VERBOSE
-#define DEBUG
+//#define DEBUG
 #define PRINT_STATUS
 #define ENABLE_2OPT_COUNTER
 //#define KEEP_DIST_LIST    // Save the calculated distance,
@@ -155,7 +155,7 @@ void parallel_2opt() {
 				// increment i accordingly
 				#pragma omp single
 				for (task_i = 0; task_i < available_threads; ++task_i, ++i) {
-#ifdef DEBUG
+#ifdef VERBOSE
 					printf("Create thread: %3d s: %8d e: %8d\n",
 					       task_i, i, i + depth);
 #endif
@@ -471,7 +471,7 @@ int main(int argc, char const *argv[])
 	printf("Balanced search space division/Proper/Distance cache/Partial distance compare:\n");
 	parallel_2opt();
 
-#ifdef VERBOSE
+#ifdef DEBUG
 	print_route();
 #endif
 
