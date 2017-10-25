@@ -123,11 +123,13 @@ void two_opt(int start, int end) {
 	dist_type partial_original_distance
 	    = get_partial_route_distance(route_index_list, start, end);
 
-	pthread_rwlock_unlock(&route_list_rwlock);
-
 	// Find the distance of the new route
 	dist_type partial_new_distance
 	    = get_swapped_partial_route_distance(route_index_list, start, end);
+
+	pthread_rwlock_unlock(&route_list_rwlock);
+
+
 
 	/*
 	Change to new route if the new route is shorter.
