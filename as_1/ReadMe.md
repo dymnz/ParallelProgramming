@@ -114,3 +114,23 @@ Thread 3: 3/6/9 depth
 	_unlcok
 end
 ```
+
+#### OMP
+
+```
+
+	// Read only
+	// 2opt_check()
+	#task N
+		find delta distance at start and end (distance(original))
+		find delta distance at start and end after swap (distance(swapped))
+		submit delta
+	#taskwait
+
+	// Write only
+	#master
+		check delta
+		copy best route
+	#endmaster
+
+```
