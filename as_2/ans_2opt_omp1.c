@@ -13,7 +13,7 @@
 #include <omp.h>
 
 
-#define VERBOSE
+//#define VERBOSE
 //#define DEBUG
 #define PRINT_STATUS
 #define ENABLE_2OPT_COUNTER
@@ -107,7 +107,12 @@ void two_opt_swap(int start, int end) {
 	printf("two_opt swap: %3d : %3d\n", start, end);
 #endif
 
-
+	int i, temp;
+	for (i = 0; i < end - start + 1; ++i) {
+		temp = route_index_list[end - i];
+		route_index_list[end - i] = route_index_list[start + i];
+		route_index_list[start + i] = temp;
+	}
 }
 
 /*
@@ -118,6 +123,15 @@ dist_type two_opt_check(int start, int end) {
 #ifdef VERBOSE
 	printf("two_opt check: %3d : %3d\n", start, end);
 #endif
+
+	dist_type partial_original_distance
+	    = get_partial_route_distance(route_index_list, start, end);
+
+	// Find the distance of the new route
+	dist_type partial_new_distance
+	    = get_swapped_partial_route_distance(route_index_list, start, end);
+
+	return partial_original_distance - partial_new_distance;
 }
 
 /*
@@ -191,8 +205,8 @@ void parallel_2opt() {
 					          start_time + SECONDS_TO_WAIT - SECONDS_BUFFER;
 
 #ifdef PRINT_STATUS
-					if ((time(NULL) - start_time) % 30 == 0 && 
-						(time(NULL) - start_time) > 0) {
+					if ((time(NULL) - start_time) % 30 == 0 &&
+					        (time(NULL) - start_time) > 0) {
 						printf("Distance @ %2lu:%02lu = %lf\n",
 						       (unsigned long)(time(NULL) - start_time) / 60,
 						       (unsigned long)(time(NULL) - start_time) % 60,
