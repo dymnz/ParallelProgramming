@@ -52,18 +52,19 @@ int main(int argc, char *argv[]) {
    for (i = 0; i < max_thread; ++i) {
       arg_list[i].lower_limit = (i * 2) + 1;
 
+      // Old: 
+      // 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+      // 1       5       9          13
+      //   2       6       10          14
+      //     3       7        11          15
+      //       4       8         12    
+
+      // New:
       // 1 3 5 7 9 11 13 15 17 19 21 23 25
       // 1       9          17          25
       //   3       11          19    
       //     5        13          21     
       //       7         15          23
-
-
-      // 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
-      // 1       5       9          13
-      //   2       6       10          14
-      //     3       7        11          15
-      //       4       8         12     
 
       arg_list[i].upper_limit = max_num; 
       arg_list[i].skip = max_thread * 2;

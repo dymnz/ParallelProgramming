@@ -13,7 +13,8 @@
 //#define DEBUG
 #define PRINT_STATUS
 #define ENABLE_2OPT_COUNTER
-//#define KEEP_DIST_LIST    // Save the calculated distance, requires a lot of RAM
+//#define KEEP_DIST_LIST    // Save the calculated distance, 
+							// requires a lot of RAM
 
 #define THREAD_COUNT 16
 #define SECONDS_TO_WAIT 10
@@ -43,10 +44,10 @@ void parallel_2opt();
 void *parallel_2opt_job(void *param);
 
 dist_type get_city_distance(int index_1, int index_2);
-dist_type get_route_distance(int *);
-dist_type get_updated_route_distance(int *, int, int);
-inline dist_type get_route_distance_delta(int *route_index_list, int start, int end);
-inline dist_type get_swapped_route_distance(int *route_index_list,int start, int end);
+dist_type get_total_route_distance(int *);
+dist_type get_partial_route_distance(int *, int, int);
+inline dist_type get_swapped_total_route_distance(int *route_index_list, int start, int end);
+inline dist_type get_swapped_partial_route_distance(int *route_index_list,int start, int end);
 
 void two_opt(int start, int end);
 
@@ -117,13 +118,13 @@ void two_opt(int start, int end) {
 	// This line is inside rdlock to protect cache_route_distance from being
 	// overwritten.
 	dist_type partial_original_distance
-	    = get_updated_route_distance(route_index_list, start, end);
+	    = get_partial_route_distance(route_index_list, start, end);
 
 	pthread_rwlock_unlock(&route_list_rwlock);
 
 	// Find the distance of the new route
 	dist_type partial_new_distance
-	    = get_swapped_route_distance(route_index_list, start, end);
+	    = get_swapped_partial_route_distance(route_index_list, start, end);
 
 	/*
 	Change to new route if the new route is shorter.
@@ -142,7 +143,7 @@ void two_opt(int start, int end) {
 		}
 		pthread_rwlock_unlock(&route_list_rwlock);
 
-		dist_type new_distance = get_route_distance_delta(route_index_list, start, end);
+		dist_type new_distance = get_swapped_total_route_distance(route_index_list, start, end);
 
 		pthread_rwlock_wrlock(&route_list_rwlock);
 		// Check if the route is really shorter to avoid race condition
@@ -314,7 +315,7 @@ dist_type get_city_distance(int index_1, int index_2) {
 /*
 	Calculate the total route distance when switching start and end index
 */
-inline dist_type get_route_distance_delta(
+inline dist_type get_swapped_total_route_distance(
 	int *route_index_list, 
 	int start, int end) 
 {
@@ -361,7 +362,7 @@ inline dist_type get_route_distance_delta(
 /*
 	Calculate the total route distance
 */
-inline dist_type get_route_distance(int *route_index_list) {
+inline dist_type get_total_route_distance(int *route_index_list) {
 	int i;
 	int index_1, index_2;
 	dist_type distance_sum = 0.0;
@@ -376,7 +377,7 @@ inline dist_type get_route_distance(int *route_index_list) {
 /*
 	Calculate the distance after swapping index start and end.
 */
-inline dist_type get_swapped_route_distance(
+inline dist_type get_swapped_partial_route_distance(
     int *route_index_list,
     int start, int end)
 {
@@ -394,7 +395,7 @@ inline dist_type get_swapped_route_distance(
 /*
 	Calculate the distance between index start and end.
 */
-inline dist_type get_updated_route_distance(
+inline dist_type get_partial_route_distance(
     int *route_index_list,
     int start, int end)
 {
@@ -426,7 +427,7 @@ void print_route() {
 void write_route(FILE *fpOutput) {
 	int i;
 
-	fprintf(fpOutput, "%f\n", get_route_distance(route_index_list));
+	fprintf(fpOutput, "%f\n", get_total_route_distance(route_index_list));
 	for (i = 0; i < num_city; ++i) {
 		fprintf(fpOutput, "%d\n", route_index_list[i] + 1);
 	}
@@ -549,12 +550,12 @@ int main(int argc, char const *argv[])
 	pthread_rwlock_init(&go_flag_rwlock, NULL);
 
 	// Init the cache_route_distance
-	cache_route_distance = get_route_distance(route_index_list);
+	cache_route_distance = get_total_route_distance(route_index_list);
 
 #ifdef VERBOSE
 	printf("Original route:\n");
 	print_route();
-	printf("Original route distance: %lf\n", get_route_distance(route_index_list));
+	printf("Original route distance: %lf\n", get_total_route_distance(route_index_list));
 #endif
 
 	printf("Balanced search space division/Proper/Distance cache/Partial distance compare:\n");
@@ -564,7 +565,7 @@ int main(int argc, char const *argv[])
 	print_route();
 #endif
 
-	printf("Final route distance: %lf\n", get_route_distance(route_index_list));
+	printf("Final route distance: %lf\n", get_total_route_distance(route_index_list));
 
 	// Write to file
 	write_route(fpOutput);
