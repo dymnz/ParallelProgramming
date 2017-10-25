@@ -150,9 +150,11 @@ void parallel_2opt() {
 	#pragma omp parallel
 	{
 		for (depth = 1; go_flag && depth < max_depth; ++depth) {
+			printf("for 1\n");
 			for (i = 1; i < go_flag && num_city - depth; ) {
 				// Spawn available_threads thread with task,
 				// increment i accordingly
+				printf("for 2\n");
 				#pragma omp single
 				for (task_i = 0; task_i < available_threads; ++task_i, ++i) {
 #ifdef VERBOSE
