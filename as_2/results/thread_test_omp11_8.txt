@@ -1,0 +1,5 @@
+testing: 8 threads
+running ans_2opt_omp11
+                -- Written by TA
+================================
+Fail to open: ./output_omp11_8.

@@ -13,7 +13,7 @@
 #include <omp.h>
 
 
-#define VERBOSE
+//#define VERBOSE
 //#define DEBUG
 #define PRINT_STATUS
 #define ENABLE_2OPT_COUNTER
@@ -108,7 +108,9 @@ void two_opt_swap(int start, int end) {
 #endif
 
 	int i, temp;
-	for (i = 0; i < end - start + 1; ++i) {
+
+	#pragma omp parallel for private(temp)
+	for (i = 0; i < end - start; ++i) {
 		temp = route_index_list[end - i];
 		route_index_list[end - i] = route_index_list[start + i];
 		route_index_list[start + i] = temp;
@@ -239,6 +241,7 @@ void parallel_2opt() {
 						}
 #endif
 					}
+					#pragma omp barrier
 				}
 			}
 		}

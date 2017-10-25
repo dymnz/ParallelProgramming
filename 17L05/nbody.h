@@ -75,5 +75,6 @@ typedef struct Body_struct Body;
 Body* init_bodies(unsigned int num_bodies, int init_type);
 int check_simulation(Body *bodies, int num_bodies);
 double elapsed_time(const mytspec t2, const mytspec t1);
+void *compute_job_1(void *param);
 
 #endif /* _NBODY_H */

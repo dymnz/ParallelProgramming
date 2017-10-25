@@ -47,3 +47,27 @@ call:   20999 swap:    1761 %: 8.39 race: 7580 %: 36.10 avg_swap_length: 2.89 av
 ================================
 Pass!
 
+testing: 8 threads
+running ans_2opt_sp11
+testing: 8 threads
+running ans_2opt_sp11
+Working on ./dis_dir/test11.dis
+Balanced search space division/Proper/Distance cache/Partial distance compare:
+Using   8 threads
+Final route distance: 5198721900202.169922
+call:  105657 swap:   19665 %: 18.61 race: 3964 %: 3.75 avg_swap_length: 5.51 avg_dist_dec: 2111386.74
+                -- Written by TA
+================================
+Pass!
+
+testing: 8 threads
+running ans_2opt_sp11
+Working on ./dis_dir/test11.dis
+Balanced search space division/Proper/Distance cache/Partial distance compare:
+Using   8 threads
+Final route distance: 5204351808974.504883
+call:  101299 swap:   17532 %: 17.31 race: 3826 %: 3.78 avg_swap_length: 5.82 avg_dist_dec: 2058992.99
+                -- Written by TA
+================================
+Pass!
+

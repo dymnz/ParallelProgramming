@@ -1,0 +1,11 @@
+testing: 16 threads
+running ans_2opt_omp1
+Working on ../as_1/dis_dir/test11.dis
+Balanced search space division/Proper/Distance cache/Partial distance compare:
+Using  16 threads
+Final route distance: 4972369549461.998047
+call: 1069376 swap:   66830 %: 6.25 race:   0 %: 0.00 avg_swap_length: 2.06 avg_dist_dec: 7709576.28
+                -- Written by TA
+================================
+Pass!
+

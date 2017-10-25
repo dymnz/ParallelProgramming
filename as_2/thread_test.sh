@@ -5,7 +5,7 @@ a=$1
 while [ "$a" -le $2 ]
 do 
 
-screen -dmS test$a ./test.sh $3 $a
+screen -dmS test$a ./test.sh $3 $a $4
 
 a=`expr $a \* 2`
 done
