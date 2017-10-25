@@ -3,6 +3,7 @@
 !/**/
 !*.*
 !verify_2opt
+!makefile
 
 LectureNote/*
 .DS_Store
