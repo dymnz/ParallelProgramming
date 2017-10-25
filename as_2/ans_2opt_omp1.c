@@ -205,7 +205,9 @@ void parallel_2opt() {
 						    thread_submit_list[best_thread_num].start,
 						    thread_submit_list[best_thread_num].end);
 						swap_counter++;
-						total_swap_length += end - start + 1;
+						total_swap_length +=
+						    thread_submit_list[best_thread_num].end -
+						    thread_submit_list[best_thread_num].start + 1;
 						total_reduced_distance +=
 						    thread_submit_list[best_thread_num].distance_reduced;
 					}
