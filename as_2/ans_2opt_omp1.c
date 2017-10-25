@@ -124,6 +124,10 @@ dist_type two_opt_check(int start, int end) {
 	printf("two_opt check: %3d : %3d\n", start, end);
 #endif
 
+#ifdef ENABLE_2OPT_COUNTER
+	opt_counter_list[omp_get_thread_num()]++;
+#endif
+
 	dist_type partial_original_distance
 	    = get_partial_route_distance(route_index_list, start, end);
 
@@ -144,9 +148,6 @@ void parallel_2opt() {
 	int i, depth, task_i;
 	int best_thread_num;
 
-#ifdef ENABLE_2OPT_COUNTER
-	opt_counter_list = (int *) malloc(available_threads * sizeof(pthread_t));
-#endif
 	int max_depth = num_city - 1;
 
 	// In case there's too many thread available
@@ -157,6 +158,10 @@ void parallel_2opt() {
 	omp_set_num_threads(threads_to_use);
 
 	printf("Using %3d threads\n", threads_to_use);
+
+#ifdef ENABLE_2OPT_COUNTER
+	opt_counter_list = (int *) malloc(available_threads * sizeof(pthread_t));
+#endif
 
 	thread_submit_list = (struct Thread_Submit *)
 	                     malloc(available_threads * sizeof(struct Thread_Submit));
@@ -195,10 +200,15 @@ void parallel_2opt() {
 							best_thread_num = task_i;
 
 					// Finally, execute 2opt swap
-					if (thread_submit_list[best_thread_num].distance_reduced > 0)
+					if (thread_submit_list[best_thread_num].distance_reduced > 0) {
 						two_opt_swap(
 						    thread_submit_list[best_thread_num].start,
 						    thread_submit_list[best_thread_num].end);
+						swap_counter++;
+						total_swap_length += end - start + 1;
+						total_reduced_distance +=
+						    thread_submit_list[best_thread_num].distance_reduced;
+					}
 
 					// Check time
 					go_flag = time(NULL) <
