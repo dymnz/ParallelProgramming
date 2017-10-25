@@ -204,7 +204,7 @@ void parallel_2opt() {
 						// Find the best distance delta
 						best_thread_num = 0;
 						for (task_i = 1; task_i < available_threads; ++task_i)
-							if (thread_submit_list[task_i].distance_reduced <
+							if (thread_submit_list[task_i].distance_reduced >
 							        thread_submit_list[best_thread_num].distance_reduced)
 								best_thread_num = task_i;
 #ifdef VERBOSE
