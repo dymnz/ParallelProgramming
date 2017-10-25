@@ -14,7 +14,7 @@
 #include <omp.h>
 
 
-//#define VERBOSE
+#define VERBOSE
 //#define DEBUG
 #define PRINT_STATUS
 #define ENABLE_2OPT_COUNTER
@@ -82,8 +82,8 @@ int go_flag = 1;
 time_t start_time;
 
 #ifdef ENABLE_2OPT_COUNTER
-int *opt_check_counter_list;
-int *opt_swap_counter_list;
+long long *opt_check_counter_list;
+long long *opt_swap_counter_list;
 int race_cond_counter = 0;
 double total_swap_length = 0;
 double total_reduced_distance = 0;
@@ -107,10 +107,12 @@ void two_opt_swap(int start, int end) {
 #endif
 
 	int i, temp;
-	for (i = 0; i < end - start; ++i) {
-		temp = route_index_list[end - i];
-		route_index_list[end - i] = route_index_list[start + i];
-		route_index_list[start + i] = temp;
+
+	int swap_count = (end - start + 1) / 2;
+	for (i = 0; i < swap_count; ++i) {
+		temp = route_index_list[start + i];
+		route_index_list[start + i] = route_index_list[end - i];
+		route_index_list[end - i] = temp;
 	}
 }
 
@@ -155,8 +157,8 @@ void parallel_2opt() {
 	printf("Using %3d threads\n", threads_to_use);
 
 #ifdef ENABLE_2OPT_COUNTER
-	opt_check_counter_list = (int *) malloc(available_threads * sizeof(int));
-	opt_swap_counter_list = (int *) malloc(available_threads * sizeof(int));
+	opt_check_counter_list = (long long *) malloc(available_threads * sizeof(long long));
+	opt_swap_counter_list = (long long *) malloc(available_threads * sizeof(long long));
 #endif
 
 	int omp_chunk_size = num_city / available_threads;
@@ -175,39 +177,64 @@ void parallel_2opt() {
 				#pragma omp flush(go_flag)
 				if (go_flag) {
 #ifdef VERBOSE
-					printf("T: %3d S: %4d E: %4d P: %4d\n", omp_get_thread_num(), start, start + depth, num_city - depth);
+					printf("T: %3d S: %4d E: %4d omp_chunk_size:%5d\n",
+					       omp_get_thread_num(),
+					       start, start + depth,
+					       omp_chunk_size);
 					fflush(stdout);
-#endif				
+#endif
 					/*
 						Check contention status
 						Contention happens when the this thread's end
 						goes over the chunk limit and affects the start of the next thread.
 
-						If contention happens, 
+						If contention happens,
 							1. the next thread moves to the next un-contented
 								pivot.
 							2. wait until the last thread finished
 					*/
 
+
+					thread_process_end_list[omp_get_thread_num()] = start + depth;
+
 					/*
 					// contention protection 1
-					#pragma omp flush(thread_process_end_list)				
-					if (omp_get_thread_num() >= 1 &&
-					        thread_process_end_list[omp_get_thread_num() - 1] + 1 >= start)
-						start = thread_process_end_list[omp_get_thread_num() - 1] + 2;
+					#pragma omp flush(thread_process_end_list)
+					int last_end = thread_process_end_list[omp_get_thread_num() - 1];
+					while (omp_get_thread_num() >= 1 && last_end + 1 >= start) {
+						++start;
+						last_end = thread_process_end_list[omp_get_thread_num() - 1];
+						#pragma omp flush(thread_process_end_list)
+					}
 					*/
 
+
+					/*
 					// contention protection 2
+					#pragma omp flush(thread_process_end_list)
 					if (omp_get_thread_num() >= 1) {
-						#pragma omp flush(thread_process_end_list)
-						while ( thread_process_end_list[omp_get_thread_num() - 1] + 1 >= start) {
-							printf("------Contention: \n");
-							printf("thread: %10d start: %10d", omp_get_thread_num(), start);
-							printf("          last end: %10d", thread_process_end_list[omp_get_thread_num() - 1]);
-							fflush(stdout);
+						while (go_flag &&
+						        thread_process_end_list[omp_get_thread_num() - 1] + 1 >= start) {
 							#pragma omp flush(thread_process_end_list)
+#ifdef VERBOSE
+							printf("------Contention: \n");
+							printf("thread: %10d\tstart   :%10d\n",
+							       omp_get_thread_num(), start);
+							printf("            \t\tlast end:%10d\n",
+							       thread_process_end_list[omp_get_thread_num() - 1]);
+							printf("%d %d\n",
+							       thread_process_end_list[omp_get_thread_num() - 1] + 1 >= start,
+							       omp_chunk_size);
+							printf("T: %3d S: %4d E: %4d omp_chunk_size:%5d\n",
+							       omp_get_thread_num(),
+							       start, start + depth,
+							       omp_chunk_size);
+							fflush(stdout);
+							sleep(1);
+#endif
 						}
-					}
+					}	
+					*/
 
 					// Keep the list fresh
 					#pragma omp flush(route_index_list)
@@ -242,10 +269,10 @@ void check_time() {
 	}
 	*/
 	time_t current_time = time(NULL);
-	if (current_time != last_time) {		
+	if (current_time != last_time) {
 		#pragma omp flush(route_index_list)
 		#pragma omp critical
-		printf("Distance @ %2lu:%02lu = %lf\n",
+		printf("Distance @ %2lu:%02lu = %20lf\n",
 		       (unsigned long)(time(NULL) - start_time) / 60,
 		       (unsigned long)(time(NULL) - start_time) % 60,
 		       get_total_route_distance(route_index_list));
@@ -533,13 +560,13 @@ int main(int argc, char const *argv[])
 
 #ifdef ENABLE_2OPT_COUNTER
 	int i;
-	int total_opt_check_count = 0, total_opt_swap_count = 0;
+	long long total_opt_check_count = 0, total_opt_swap_count = 0;
 	for (i = 0; i < available_threads; ++i) {
 		total_opt_check_count += opt_check_counter_list[i];
 		total_opt_swap_count += opt_swap_counter_list[i];
 	}
 
-	printf("call: %7d swap: %7d %%: %.2f race: %3d %%: %.2f avg_swap_length: %.2lf avg_dist_dec: %.2lf\n",
+	printf("call: %20llu swap: %20llu %%: %.2f race: %3d %%: %.2f avg_swap_length: %.2lf avg_dist_dec: %.2lf\n",
 	       total_opt_check_count,
 	       total_opt_swap_count,
 	       total_opt_swap_count * 100.0f / total_opt_check_count,

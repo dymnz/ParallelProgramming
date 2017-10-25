@@ -21,7 +21,7 @@
 // requires a lot of RAM
 
 #define THREAD_COUNT 16
-#define SECONDS_TO_WAIT 10
+#define SECONDS_TO_WAIT 10 * 3
 #define SECONDS_BUFFER 0
 
 typedef double dist_type;
@@ -51,7 +51,7 @@ void *read_route(void *fp);
 inline dist_type distance(dist_type x1, dist_type y1, dist_type x2, dist_type y2);
 
 void parallel_2opt();
-void *parallel_2opt_job(void *param);
+void check_time();
 
 dist_type get_city_distance(int index_1, int index_2);
 dist_type get_total_route_distance(int *);
@@ -227,25 +227,46 @@ void parallel_2opt() {
 							    thread_submit_list[best_thread_num].distance_reduced;
 						}
 
-						// Check time
-						go_flag = time(NULL) <
-						          start_time + SECONDS_TO_WAIT - SECONDS_BUFFER;
-
-#ifdef PRINT_STATUS
-						if ((time(NULL) - start_time) % 30 == 0 &&
-						        (time(NULL) - start_time) > 0) {
-							printf("Distance @ %2lu:%02lu = %lf\n",
-							       (unsigned long)(time(NULL) - start_time) / 60,
-							       (unsigned long)(time(NULL) - start_time) % 60,
-							       cache_route_distance);
-						}
-#endif
+						check_time();
 					}
 					#pragma omp barrier
 				}
 			}
 		}
 	}
+}
+
+void check_time() {
+	static time_t last_time = 0;
+
+	go_flag = time(NULL) <
+	          start_time + SECONDS_TO_WAIT - SECONDS_BUFFER;
+
+#ifdef PRINT_STATUS
+	/*
+	if (
+	    (time(NULL) - start_time) % 30 == 0 &&
+	    (time(NULL) - start_time) > 0)
+	{
+		printf("Distance @ %2lu:%02lu = %lf\n",
+		       (unsigned long)(time(NULL) - start_time) / 60,
+		       (unsigned long)(time(NULL) - start_time) % 60,
+		       cache_route_distance);
+	}
+	*/
+	time_t current_time = time(NULL);
+	if (current_time != last_time) {		
+		#pragma omp flush(route_index_list)
+		#pragma omp critical
+		printf("Distance @ %2lu:%02lu = %lf\n",
+		       (unsigned long)(time(NULL) - start_time) / 60,
+		       (unsigned long)(time(NULL) - start_time) % 60,
+		       get_total_route_distance(route_index_list));
+		fflush(stdout);
+		last_time = current_time;
+	}
+
+#endif
 }
 
 /*
