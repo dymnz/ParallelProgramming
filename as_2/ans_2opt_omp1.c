@@ -155,12 +155,14 @@ void parallel_2opt() {
 				// increment i accordingly
 				#pragma omp single
 				for (task_i = 0; task_i < available_threads; ++task_i, ++i) {
+					printf("Create thread: %3d s: %8d e: %8d\n",
+					       task_i, i, i + depth);
 					#pragma omp task
 					{
 						thread_submit_list[omp_get_thread_num()].start = i;
 						thread_submit_list[omp_get_thread_num()].end = i + depth;
 						thread_submit_list[omp_get_thread_num()].distance_reduced =
-						two_opt_check(i, i + depth);
+						    two_opt_check(i, i + depth);
 					}
 				}
 				#pragma omp taskwait
