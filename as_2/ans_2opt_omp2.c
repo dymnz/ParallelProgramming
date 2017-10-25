@@ -10,7 +10,9 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include <limits.h>
 #include <omp.h>
+
 
 //#define VERBOSE
 //#define DEBUG
