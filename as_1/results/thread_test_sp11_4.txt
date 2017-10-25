@@ -1,0 +1,49 @@
+testing: 4 threads
+running ans_2opt_sp11
+                -- Written by TA
+================================
+Fail to open: ../dis_dir/test11.dis.
+testing: 4 threads
+running ans_2opt_sp11
+Working on ./dis_dir/test11.dis
+Balanced search space division/Proper/Distance cache/Partial distance compare:
+Using   4 threads
+Final route distance: 5238585481004.687500
+call:    3901 swap:     632 %: 16.20 race: 802 %: 20.56 avg_swap_length: 3.70 avg_dist_dec: 2330000.03
+                -- Written by TA
+================================
+Pass!
+
+testing: 4 threads
+running ans_2opt_sp11
+Working on ./dis_dir/test4.dis
+Balanced search space division/Proper/Distance cache/Partial distance compare:
+Using   4 threads
+Final route distance: 263450.831639
+call: 12144155 swap:    5825 %: 0.05 race: 4169 %: 0.03 avg_swap_length: 111.00 avg_dist_dec: 843.40
+                -- Written by TA
+================================
+Pass!
+
+testing: 4 threads
+running ans_2opt_sp11
+Working on ./dis_dir/test4.dis
+Balanced search space division/Proper/Distance cache/Partial distance compare:
+Using   4 threads
+Final route distance: 897146.870776
+call: 8030114 swap:   10004 %: 0.12 race: 248747 %: 3.10 avg_swap_length: 232.26 avg_dist_dec: 1024.69
+                -- Written by TA
+================================
+Pass!
+
+testing: 4 threads
+running ans_2opt_sp11
+Working on ./dis_dir/test11.dis
+Balanced search space division/Proper/Distance cache/Partial distance compare:
+Using   4 threads
+Final route distance: 5235460865956.808594
+call:   19023 swap:    2636 %: 13.86 race: 5852 %: 30.76 avg_swap_length: 3.40 avg_dist_dec: 3974899.67
+                -- Written by TA
+================================
+Pass!
+

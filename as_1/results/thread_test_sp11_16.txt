@@ -1,0 +1,173 @@
+testing: 16 threads
+running ans_2opt_sp11
+Working on ./dis_dir/test11.dis
+Balanced search space division/Proper/Distance cache/Partial distance compare:
+Using  16 threads
+Final route distance: 5235156574792.560547
+call:   29701 swap:    3038 %: 10.23 race: 8697 %: 29.28 avg_swap_length: 8.12 avg_dist_dec: 3713198.34
+                -- Written by TA
+================================
+Pass!
+
+testing: 16 threads
+running ans_2opt_sp11
+testing: 16 threads
+running ans_2opt_sp11
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 16 threads
+running ans_2opt_sp11
+                -- Written by TA
+================================
+Some points are missing.
+
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 16 threads
+running ans_2opt_sp11
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 16 threads
+running ans_2opt_sp11
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 16 threads
+running ans_2opt_sp11
+Working on ./dis_dir/test11.dis
+Balanced search space division/Proper/Distance cache/Partial distance compare:
+Using  16 threads
+Final route distance: 5223093304024.159180
+call:   96926 swap:   14746 %: 15.21 race: 4647 %: 4.79 avg_swap_length: 9.90 avg_dist_dec: 3739518.16
+                -- Written by TA
+================================
+Pass!
+
+testing: 16 threads
+running ans_2opt_sp11
+Working on ./dis_dir/test11.dis
+Balanced search space division/Proper/Distance cache/Partial distance compare:
+Using  16 threads
+Distance @  0:30 = 4935649490001.434570
+Distance @  1:00 = 4644479407513.332031
+Distance @  1:30 = 4427290462539.058594
+Distance @  2:00 = 4166934013811.516113
+Distance @  2:30 = 3803495787889.248535
+Distance @  3:00 = 3490411439694.525879
+Distance @  3:30 = 3282169166572.466797
+Distance @  4:00 = 2998091345829.699219
+Distance @  4:30 = 2688532576956.574219
+Distance @  5:00 = 2442018557013.970215
+Distance @  5:30 = 2203505177416.524902
+Distance @  6:00 = 1982777246748.318359
+Distance @  6:30 = 1738460602568.373535
+Distance @  7:00 = 1544129083574.476074
+Distance @  7:30 = 1323386804247.953613
+Distance @  8:00 = 1101984240724.395508
+Distance @  8:30 = 757197238878.786743
+Distance @  9:00 = 454175428874.858826
+Distance @  9:30 = 173673871908.994598
+Final route distance: 4433459060590.368164
+call: 5390088 swap: 1007140 %: 18.69 race: 234528 %: 4.35 avg_swap_length: 7.18 avg_dist_dec: 5422717.59
+                -- Written by TA
+================================
+Pass!
+
+testing: 16 threads
+running ans_2opt_sp11
+Working on ./dis_dir/test11.dis
+Balanced search space division/Proper/Distance cache/Partial distance compare:
+Using  16 threads
+shit
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 16 threads
+running ans_2opt_sp11
+Working on ./dis_dir/test11.dis
+Balanced search space division/Proper/Distance cache/Partial distance compare:
+Using  16 threads
+shit 5240037102643.698242	5240058041024.161133
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 16 threads
+running ans_2opt_sp11
+Working on ./dis_dir/test11.dis
+Balanced search space division/Proper/Distance cache/Partial distance compare:
+Using  16 threads
+shit 5240061640909.835938	5240058041024.161133
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 16 threads
+running ans_2opt_sp11
+Working on ./dis_dir/test11.dis
+Balanced search space division/Proper/Distance cache/Partial distance compare:
+Using  16 threads
+shit 5240058028057.150391	5240058041024.161133
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 16 threads
+running ans_2opt_sp11
+Working on ./dis_dir/test11.dis
+Balanced search space division/Proper/Distance cache/Partial distance compare:
+Using  16 threads
+shit 5240052245154.126953	5240058041024.161133
+                -- Written by TA
+================================
+Some points are missing.
+
+testing: 16 threads
+running ans_2opt_sp11
+Working on ./dis_dir/test11.dis
+Balanced search space division/Proper/Distance cache/Partial distance compare:
+Using  16 threads
+Final route distance: 5238956915594.450195
+call:    1772 swap:     466 %: 26.30 race:  42 %: 2.37 avg_swap_length: 7.74 avg_dist_dec: 2362930.11
+                -- Written by TA
+================================
+Pass!
+
+testing: 16 threads
+running ans_2opt_sp11
+Working on ./dis_dir/test11.dis
+Balanced search space division/Proper/Distance cache/Partial distance compare:
+Using  16 threads
+Distance @  0:30 = 5141098485503.948242
+Distance @  1:00 = 5037359937939.656250
+Distance @  1:30 = 4932135132232.635742
+Distance @  2:00 = 4841236562022.728516
+Distance @  2:30 = 4770642929937.382812
+Distance @  3:00 = 4683868242459.838867
+Distance @  3:30 = 4615651780510.140625
+Distance @  4:00 = 4511267862694.166992
+Distance @  4:30 = 4439608824839.191406
+Distance @  5:00 = 4352526453846.420898
+Distance @  5:30 = 4271779956024.865234
+Distance @  6:00 = 4204853123488.148926
+Distance @  6:30 = 4093988363968.116699
+Distance @  7:00 = 3994746438582.867188
+Distance @  7:30 = 3892008664978.391113
+Distance @  8:00 = 3798804825364.907715
+Distance @  8:30 = 3724462412995.283203
+Distance @  9:00 = 3639340748927.109863
+Distance @  9:30 = 3545308975332.280762
+Final route distance: 3446440440071.575195
+call: 8435322 swap:  971997 %: 11.52 race: 295171 %: 3.50 avg_swap_length: 10.17 avg_dist_dec: 1845291.29
+                -- Written by TA
+================================
+Pass!
+
