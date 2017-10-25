@@ -162,7 +162,7 @@ void parallel_2opt() {
 					two_opt_check(i, i + depth);
 				}
 			}
-			#pragma omp barrier
+			#pragma omp taskwait
 
 			// Main thread check the delta distance produced by each thread.
 			// Execute 2opt swap at start/edn with the best reduced distance
