@@ -99,10 +99,9 @@ Thread 3: 3/6/9 depth
 2opt_swap(start, end):
 	_read_lock
 		find delta distance at start and end (distance(original))
+		find delta distance at start and end after swap (distance(swapped))
 	_unlock
 	
-	find delta distance at start and end after swap (distance(swapped))
-
 	assert(distance(swapped) < distance(original))
 	
 	_read_lock
