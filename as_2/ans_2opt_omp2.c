@@ -189,9 +189,10 @@ void parallel_2opt() {
 				#pragma omp single
 				check_time();
 
-				if (!go_flag) break;
+				// Break stuff because break statement is not allowed
+				if (!go_flag) start = INT_MAX;
 			}
-			if (!go_flag) break;
+			if (!go_flag) depth = INT_MAX;
 		}
 	}
 }
