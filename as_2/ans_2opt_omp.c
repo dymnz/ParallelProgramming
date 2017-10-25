@@ -147,52 +147,54 @@ void parallel_2opt() {
 	thread_submit_list = (struct Thread_Submit *)
 	                     malloc(available_threads * sizeof(struct Thread_Submit));
 
-	#pragma omp parallel {
-	#pragma omp single
-	for (depth = 1; go_flag && depth < max_depth; ++depth) {
-		for (i = 1; i < go_flag && num_city - depth; ) {
-			// Spawn available_threads thread with task,
-			// increment i accordingly
-			for (task_i = 0; task_i < available_threads; ++task_i, ++i) {
-				#pragma omp task
-				{
-					thread_submit_list[omp_get_thread_num()].start = i;
-					thread_submit_list[omp_get_thread_num()].end = i + depth;
-					thread_submit_list[omp_get_thread_num()].distance_reduced =
-					two_opt_check(i, i + depth);
+	#pragma omp parallel
+	{
+		#pragma omp single
+		for (depth = 1; go_flag && depth < max_depth; ++depth) {
+			for (i = 1; i < go_flag && num_city - depth; ) {
+				// Spawn available_threads thread with task,
+				// increment i accordingly
+				for (task_i = 0; task_i < available_threads; ++task_i, ++i) {
+					#pragma omp task
+					{
+						thread_submit_list[omp_get_thread_num()].start = i;
+						thread_submit_list[omp_get_thread_num()].end = i + depth;
+						thread_submit_list[omp_get_thread_num()].distance_reduced =
+						two_opt_check(i, i + depth);
+					}
 				}
-			}
-			#pragma omp taskwait
+				#pragma omp taskwait
 
-			// Main thread check the delta distance produced by each thread.
-			// Execute 2opt swap at start/edn with the best reduced distance
-			#pragma omp single
-			{
-				// Find the best distance delta
-				best_thread_num = 0;
-				for (task_i = 1; task_i < available_threads; ++task_i)
-					if (thread_submit_list[task_i].distance_reduced <
-					        thread_submit_list[best_thread_num].distance_reduced)
-						best_thread_num = task_i;
+				// Main thread check the delta distance produced by each thread.
+				// Execute 2opt swap at start/edn with the best reduced distance
+				#pragma omp single
+				{
+					// Find the best distance delta
+					best_thread_num = 0;
+					for (task_i = 1; task_i < available_threads; ++task_i)
+						if (thread_submit_list[task_i].distance_reduced <
+						        thread_submit_list[best_thread_num].distance_reduced)
+							best_thread_num = task_i;
 
-				// Finally, execute 2opt swap
-				if (thread_submit_list[best_thread_num].distance_reduced > 0)
-					two_opt_swap(
-					    thread_submit_list[best_thread_num].start,
-					    thread_submit_list[best_thread_num].end);
+					// Finally, execute 2opt swap
+					if (thread_submit_list[best_thread_num].distance_reduced > 0)
+						two_opt_swap(
+						    thread_submit_list[best_thread_num].start,
+						    thread_submit_list[best_thread_num].end);
 
-				// Check time
-				go_flag = time(NULL) <
-				          start_time + SECONDS_TO_WAIT - SECONDS_BUFFER;
+					// Check time
+					go_flag = time(NULL) <
+					          start_time + SECONDS_TO_WAIT - SECONDS_BUFFER;
 
 #ifdef PRINT_STATUS
-				if ((time(NULL) - start_time) % 30 == 0) {
-					printf("Distance @ %2lu:%02lu = %lf\n",
-					       (unsigned long)(time(NULL) - start_time) / 60,
-					       (unsigned long)(time(NULL) - start_time) % 60,
-					       cache_route_distance);
-				}
+					if ((time(NULL) - start_time) % 30 == 0) {
+						printf("Distance @ %2lu:%02lu = %lf\n",
+						       (unsigned long)(time(NULL) - start_time) / 60,
+						       (unsigned long)(time(NULL) - start_time) % 60,
+						       cache_route_distance);
+					}
 #endif
+				}
 			}
 		}
 	}
