@@ -192,9 +192,11 @@ void parallel_2opt() {
 				check_time();
 
 				// Break stuff because break statement is not allowed
-				if (!go_flag) start = INT_MAX;
+				if (!go_flag) {
+					start = INT_MAX;
+					depth = INT_MAX;
+				}
 			}
-			if (!go_flag) depth = INT_MAX;
 		}
 	}
 }
