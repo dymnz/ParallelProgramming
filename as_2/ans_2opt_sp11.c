@@ -13,8 +13,8 @@
 //#define DEBUG
 #define PRINT_STATUS
 #define ENABLE_2OPT_COUNTER
-//#define KEEP_DIST_LIST    // Save the calculated distance, 
-							// requires a lot of RAM
+//#define KEEP_DIST_LIST    // Save the calculated distance,
+// requires a lot of RAM
 
 #define THREAD_COUNT 16
 #define SECONDS_TO_WAIT 10
@@ -46,8 +46,10 @@ void *parallel_2opt_job(void *param);
 dist_type get_city_distance(int index_1, int index_2);
 dist_type get_total_route_distance(int *);
 dist_type get_partial_route_distance(int *, int, int);
-inline dist_type get_swapped_total_route_distance(int *route_index_list, int start, int end);
-inline dist_type get_swapped_partial_route_distance(int *route_index_list,int start, int end);
+inline dist_type get_swapped_total_route_distance(
+    int *route_index_list, int start, int end);
+inline dist_type get_swapped_partial_route_distance(
+    int *route_index_list, int start, int end);
 
 void two_opt(int start, int end);
 
@@ -108,7 +110,7 @@ void two_opt(int start, int end) {
 	pthread_rwlock_unlock(&route_list_rwlock);
 #endif
 
-	int i;	
+	int i;
 
 	/*
 	Calculate original distance
@@ -132,7 +134,7 @@ void two_opt(int start, int end) {
 	*/
 	if (partial_new_distance < partial_original_distance) {
 		int *new_route_list = (int *) malloc((num_city + 1) * sizeof(int));
-		
+
 		pthread_rwlock_rdlock(&route_list_rwlock);
 		// Copy
 		memcpy(new_route_list,
@@ -316,46 +318,46 @@ dist_type get_city_distance(int index_1, int index_2) {
 	Calculate the total route distance when switching start and end index
 */
 inline dist_type get_swapped_total_route_distance(
-	int *route_index_list, 
-	int start, int end) 
+    int *route_index_list,
+    int start, int end)
 {
 	dist_type distance_sum = cache_route_distance;
 
 	// Remove old
-	distance_sum -= 
-		get_city_distance(
-			route_index_list[start - 1], 
-			route_index_list[start]);
-	distance_sum -= 
-		get_city_distance(
-			route_index_list[start], 
-			route_index_list[start + 1]);
-	distance_sum -= 
-		get_city_distance(
-			route_index_list[end - 1], 
-			route_index_list[end]);
-	distance_sum -= 
-		get_city_distance(
-			route_index_list[end], 
-			route_index_list[end + 1]);
+	distance_sum -=
+	    get_city_distance(
+	        route_index_list[start - 1],
+	        route_index_list[start]);
+	distance_sum -=
+	    get_city_distance(
+	        route_index_list[start],
+	        route_index_list[start + 1]);
+	distance_sum -=
+	    get_city_distance(
+	        route_index_list[end - 1],
+	        route_index_list[end]);
+	distance_sum -=
+	    get_city_distance(
+	        route_index_list[end],
+	        route_index_list[end + 1]);
 
 	// Add new
 	distance_sum +=
-		get_city_distance(
-			route_index_list[start - 1], 
-			route_index_list[end]);
+	    get_city_distance(
+	        route_index_list[start - 1],
+	        route_index_list[end]);
 	distance_sum +=
-		get_city_distance(
-			route_index_list[end], 
-			route_index_list[start + 1]);		
+	    get_city_distance(
+	        route_index_list[end],
+	        route_index_list[start + 1]);
 	distance_sum +=
-		get_city_distance(
-			route_index_list[end - 1], 
-			route_index_list[start]);		
+	    get_city_distance(
+	        route_index_list[end - 1],
+	        route_index_list[start]);
 	distance_sum +=
-		get_city_distance(
-			route_index_list[start], 
-			route_index_list[end + 1]);		
+	    get_city_distance(
+	        route_index_list[start],
+	        route_index_list[end + 1]);
 	return distance_sum;
 }
 
@@ -382,7 +384,7 @@ inline dist_type get_swapped_partial_route_distance(
     int start, int end)
 {
 	dist_type distance_sum;
-	
+
 	distance_sum = get_city_distance(route_index_list[start - 1], route_index_list[end]);
 	distance_sum += get_city_distance(route_index_list[end], route_index_list[start + 1]);
 	distance_sum += get_city_distance(route_index_list[end - 1], route_index_list[start]);
@@ -400,7 +402,7 @@ inline dist_type get_partial_route_distance(
     int start, int end)
 {
 	dist_type distance_sum;
-	
+
 	distance_sum = get_city_distance(route_index_list[start - 1], route_index_list[start]);
 	distance_sum += get_city_distance(route_index_list[start], route_index_list[start + 1]);
 	distance_sum += get_city_distance(route_index_list[end - 1], route_index_list[end]);
