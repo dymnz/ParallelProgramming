@@ -13,7 +13,7 @@
 #include <omp.h>
 
 
-//#define VERBOSE
+#define VERBOSE
 //#define DEBUG
 #define PRINT_STATUS
 #define ENABLE_2OPT_COUNTER
@@ -193,7 +193,6 @@ void parallel_2opt() {
 					// Execute 2opt swap at start/edn with the best reduced distance
 					#pragma omp single
 					{
-
 #ifdef VERBOSE
 						for (task_i = 0; task_i < available_threads; ++task_i)
 							printf("th: %3d: s: %8d e: %8d d:%.2f\n",
@@ -208,12 +207,16 @@ void parallel_2opt() {
 							if (thread_submit_list[task_i].distance_reduced <
 							        thread_submit_list[best_thread_num].distance_reduced)
 								best_thread_num = task_i;
-
+#ifdef VERBOSE
+							printf("Best thread: %3d\n", best_thread_num);
+#endif							
 						// Finally, execute 2opt swap
-						if (thread_submit_list[best_thread_num].distance_reduced > 0) {
+						if (thread_submit_list[best_thread_num].distance_reduced 
+							> 0) {
 							two_opt_swap(
 							    thread_submit_list[best_thread_num].start,
 							    thread_submit_list[best_thread_num].end);
+
 							swap_counter++;
 							total_swap_length +=
 							    thread_submit_list[best_thread_num].end -
