@@ -149,11 +149,11 @@ void parallel_2opt() {
 
 	#pragma omp parallel
 	{
-		#pragma omp single
 		for (depth = 1; go_flag && depth < max_depth; ++depth) {
 			for (i = 1; i < go_flag && num_city - depth; ) {
 				// Spawn available_threads thread with task,
 				// increment i accordingly
+				#pragma omp single
 				for (task_i = 0; task_i < available_threads; ++task_i, ++i) {
 					#pragma omp task
 					{
