@@ -1,6 +1,7 @@
 /*
 	OpenMP version of ans_2opt_sp11.c
-	Balanced search space division/Proper/Distance cache/Partial distance compare
+	Balanced search space division/Proper/Distance cache/Partial distance compare/
+	Copy when swapping
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -100,15 +101,6 @@ void two_opt(int start, int end) {
 		printf("Please don't do this\n");
 		exit(42);
 	}
-
-	// Modifiy the route to check if the new route is shorter
-#ifdef DEBUG
-	pthread_rwlock_rdlock(&route_list_rwlock);
-	printf("Swap route from index: %3d %3d\n", start, end);
-	printf("Before swap:\n");
-	print_route();
-	pthread_rwlock_unlock(&route_list_rwlock);
-#endif
 
 	int i;
 

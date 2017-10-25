@@ -93,3 +93,25 @@ Thread 3: 3/6/9 depth
 #### Note
 
 * The bottleneck in my program is the new_route distance calculation
+
+#### sp11 Modification
+```
+2opt_swap(start, end):
+	_read_lock
+		find delta distance at start and end (distance(original))
+	_unlock
+	
+	find delta distance at start and end after swap (distance(swapped))
+
+	assert(distance(swapped) < distance(original))
+	
+	_read_lock
+		copy the route with partial reversed route
+		find the total distance of new_route
+	_unlock
+						<------- race condtion here
+	_write_lock
+		current_route = new_route
+	_unlcok
+end
+```

@@ -1,5 +1,6 @@
 /*
-	Balanced search space division/Proper/Distance cache/Partial distance compare
+	Balanced search space division/Proper/Distance cache/Partial distance compare/
+	Copy when swapping
 */
 #include <stdio.h>
 #include <pthread.h>
