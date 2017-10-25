@@ -46,6 +46,7 @@ void *read_route(void *fp);
 inline dist_type distance(dist_type x1, dist_type y1, dist_type x2, dist_type y2);
 
 void parallel_2opt();
+void check_time();
 
 dist_type get_city_distance(int index_1, int index_2);
 dist_type get_total_route_distance(int *);
@@ -139,8 +140,6 @@ dist_type two_opt_check(int start, int end) {
 */
 void parallel_2opt() {
 	int start, depth;
-	int best_thread_num;
-
 	int max_depth = num_city - 1;
 
 	// In case there's too many thread available
@@ -167,7 +166,7 @@ void parallel_2opt() {
 		shared(go_flag, route_index_list) \
 		schedule(static, omp_chunk_size)
 		for (depth = 1; depth < max_depth; ++depth) {
-			for (start = 1; start < num_city - depth; ) {
+			for (start = 1; start < num_city - depth; ++start) {
 
 				// Keep the list fresh
 				#pragma omp flush(route_index_list)
@@ -202,7 +201,6 @@ void parallel_2opt() {
 }
 
 void check_time() {
-	// Check time
 	go_flag = time(NULL) <
 	          start_time + SECONDS_TO_WAIT - SECONDS_BUFFER;
 
