@@ -151,13 +151,13 @@ void parallel_2opt() {
 	printf("Using %3d threads\n", threads_to_use);
 
 #ifdef ENABLE_2OPT_COUNTER
-	opt_counter_list = (int *) malloc(available_threads * sizeof(pthread_t));
+	opt_counter_list = (int *) malloc(available_threads * sizeof(int));
 #endif
 
 	int omp_chunk_size = num_city / available_threads;
 
 	// Keep track of the ending position of each thread to avoid contention
-	int thread_process_end_list = (int *)
+	int *thread_process_end_list = (int *)
 	                              malloc((available_threads - 1) * sizeof(int));
 
 	while (go_flag) {
@@ -415,8 +415,6 @@ void *read_coord(void *fp) {
 
 int main(int argc, char const *argv[])
 {
-	pthread_t fp_thread_list[2];
-
 	if (argc < 4) {
 		printf("not enough input\n");
 		exit(69);

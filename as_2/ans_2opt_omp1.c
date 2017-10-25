@@ -162,7 +162,7 @@ void parallel_2opt() {
 	printf("Using %3d threads\n", threads_to_use);
 
 #ifdef ENABLE_2OPT_COUNTER
-	opt_counter_list = (int *) malloc(available_threads * sizeof(pthread_t));
+	opt_counter_list = (int *) malloc(available_threads * sizeof(int));
 #endif
 
 	thread_submit_list = (struct Thread_Submit *)
@@ -451,8 +451,6 @@ void *read_coord(void *fp) {
 
 int main(int argc, char const *argv[])
 {
-	pthread_t fp_thread_list[2];
-
 	if (argc < 4) {
 		printf("not enough input\n");
 		exit(69);
