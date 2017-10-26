@@ -285,15 +285,16 @@ void check_time() {
 
 #ifdef PRINT_CALC_PROGRESS
 	///*
+	time_t current_time = time(NULL);
 	if (
-	    (time(NULL) - start_time) % 30 == 0 &&
-	    (time(NULL) - start_time) > 0)
+	    (current_time - start_time) % 30 == 0 &&
+	    (current_time - start_time) > 0)
 	{
 		#pragma omp flush(route_index_list)
 		#pragma omp critical
 		printf("Distance @ %2lu:%02lu = %lf\n",
-		       (unsigned long)(time(NULL) - start_time) / 60,
-		       (unsigned long)(time(NULL) - start_time) % 60,
+		       (unsigned long)(current_time - start_time) / 60,
+		       (unsigned long)(current_time - start_time) % 60,
 		       get_total_route_distance(route_index_list));
 	}
 	//*/
