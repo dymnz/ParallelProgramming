@@ -578,7 +578,7 @@ int main(int argc, char const *argv[])
 		total_contention_count += contention_counter_list[i];
 	}
 
-	printf("call: %20llu swap: %20llu %%: %.2f contention: %3d %%: %.2f avg_swap_length: %.2lf avg_dist_dec: %.2lf\n",
+	printf("call: %20llu swap: %20llu %%: %.2f contention: %20llu %%: %.2f avg_swap_length: %.2lf avg_dist_dec: %.2lf\n",
 	       total_opt_check_count,
 	       total_opt_swap_count,
 	       total_opt_swap_count * 100.0f / total_opt_check_count,
