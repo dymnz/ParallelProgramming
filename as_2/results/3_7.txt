@@ -1,0 +1,14 @@
+testing: 7 threads
+running ans_2opt_omp3
+Working on ../as_1/dis_dir/test0.dis
+OpenMP version of ans_2opt_sp11.c
+* Balanced search space division/Proper/* OpenMP Distributed route/Free to swap/Contention pause/Depth space limit
+* To test multi-threading/single-thread consistency
+Using   7 threads
+Final route distance: 477.441112
+call:                   15 swap:                    8 %: 53.33 contention:                   11 %: 73.33
+avg_swap_length: 0.00 avg_dist_dec: 0.00
+                -- Written by TA
+================================
+Pass!
+
