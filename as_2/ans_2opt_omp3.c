@@ -193,7 +193,8 @@ void parallel_2opt() {
 			#pragma omp parallel for default(none)\
 			private(start) \
 			shared(depth, go_flag, route_index_list, num_city, omp_chunk_size, \
-			       stdout, available_threads, thread_process_start_list) \
+			       stdout, available_threads, thread_process_start_list, \
+			       contention_counter_list) \
 			schedule(static, omp_chunk_size)
 			for (start = 1; start < num_city - depth; ++start) {
 				// Because break statement is not allowed
