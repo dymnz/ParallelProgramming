@@ -2,7 +2,7 @@
 	OpenMP version of ans_2opt_sp11.c
 	* Balanced search space division/Proper/Distance cache/
 	  Partial distance compare/Copy when swapping
-	* OpenMP Distributed range/Free to swap/Contention alert
+	* OpenMP Distributed range/Free to swap/Contention pause
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,9 +14,11 @@
 #include <omp.h>
 
 
-#define VERBOSE
+//#define VERBOSE
 //#define DEBUG
-#define PRINT_STATUS
+#define PRINT_CONTENTION_STATUS
+#define PRINT_THREAD_STATUS
+//#define PRINT_CALC_PROGRESS
 #define ENABLE_2OPT_COUNTER
 //#define KEEP_DIST_LIST	// Save the calculated distance,
 // requires a lot of RAM
@@ -24,6 +26,12 @@
 #define THREAD_COUNT 16
 #define SECONDS_TO_WAIT 10 * 60
 #define SECONDS_BUFFER 0
+
+#ifdef VERBOSE
+#define PRINT_CONTENTION_STATUS
+#define PRINT_THREAD_STATUS
+#define PRINT_CALC_PROGRESS
+#endif
 
 typedef double dist_type;
 
@@ -144,7 +152,7 @@ dist_type two_opt_check(int start, int end) {
 	Parallel version of complete 2-opt.
 */
 void parallel_2opt() {
-	int start, depth;
+	int i, start, depth;
 	int max_depth = num_city - 1;
 
 	// In case there's too many thread available
@@ -161,22 +169,36 @@ void parallel_2opt() {
 	opt_swap_counter_list = (long long *) malloc(available_threads * sizeof(long long));
 #endif
 
-	int omp_chunk_size = num_city / available_threads;
 
-	// Keep track of the ending position of each thread to avoid contention
-	int *thread_process_end_list = (int *)
-	                               malloc((available_threads - 1) * sizeof(int));
+
+	// Keep track of the starting position of each thread to avoid contention
+	int *thread_process_start_list = (int *) malloc(available_threads * sizeof(int));
+
+	// When there's a lot of available_threads with
+	// chunk_size * available_threads > num_city, some thread may not get
+	// work.
+	// Error will occur when the a thread checks the starting
+	// position of the next thread but the next thread does not update
+	// its start position since it does not have one.
+	// To fix this, pre-set the starting position to an impossible number
+	for (i = 0; i < available_threads; ++i)
+		thread_process_start_list[i] = num_city;
 
 	while (go_flag) {
 		for (depth = 1; go_flag && depth < max_depth; ++depth) {
-			#pragma omp parallel for\
-			shared(depth, go_flag, route_index_list) \
+			int starting_pos_count = num_city - depth - 1;
+			int omp_chunk_size = (int) ceil((double)starting_pos_count / available_threads);
+
+			#pragma omp parallel for default(none)\
+			private(start) \
+			shared(depth, go_flag, route_index_list, num_city, omp_chunk_size, \
+			       stdout, available_threads, thread_process_start_list) \
 			schedule(static, omp_chunk_size)
 			for (start = 1; start < num_city - depth; ++start) {
 				// Because break statement is not allowed
 				#pragma omp flush(go_flag)
 				if (go_flag) {
-#ifdef VERBOSE
+#ifdef PRINT_THREAD_STATUS
 					printf("T: %3d S: %4d E: %4d omp_chunk_size:%5d\n",
 					       omp_get_thread_num(),
 					       start, start + depth,
@@ -193,53 +215,59 @@ void parallel_2opt() {
 								pivot.
 							2. wait until the last thread finished
 					*/
+					thread_process_start_list[omp_get_thread_num()] = start;
 
-
-					thread_process_end_list[omp_get_thread_num()] = start + depth;
-
-					/*
-					// contention protection 1
-					#pragma omp flush(thread_process_end_list)
-					int last_end = thread_process_end_list[omp_get_thread_num() - 1];
-					while (omp_get_thread_num() >= 1 && last_end + 1 >= start) {
-						++start;
-						last_end = thread_process_end_list[omp_get_thread_num() - 1];
-						#pragma omp flush(thread_process_end_list)
-					}
-					*/
-
-
-					/*
-					// contention protection 2
-					#pragma omp flush(thread_process_end_list)
-					if (omp_get_thread_num() >= 1) {
-						while (go_flag &&
-						        thread_process_end_list[omp_get_thread_num() - 1] + 1 >= start) {
-							#pragma omp flush(thread_process_end_list)
-#ifdef VERBOSE
-							printf("------Contention: \n");
-							printf("thread: %10d\tstart   :%10d\n",
-							       omp_get_thread_num(), start);
-							printf("            \t\tlast end:%10d\n",
-							       thread_process_end_list[omp_get_thread_num() - 1]);
-							printf("%d %d\n",
-							       thread_process_end_list[omp_get_thread_num() - 1] + 1 >= start,
-							       omp_chunk_size);
-							printf("T: %3d S: %4d E: %4d omp_chunk_size:%5d\n",
-							       omp_get_thread_num(),
-							       start, start + depth,
-							       omp_chunk_size);
-							fflush(stdout);
-							sleep(1);
+					// Wait until the start of the next thread moved
+					// passed the index after end (i.e. end + 1)
+					#pragma omp flush(thread_process_start_list)
+					if (omp_get_thread_num() < available_threads - 1 &&
+					        thread_process_start_list[omp_get_thread_num() + 1]
+					        <= start + depth + 1) {
+#ifdef PRINT_CONTENTION_STATUS
+						printf("Contention \e[1;31mstart \e[0m for "
+						       "thread:%4d end:%8d next-start:%8d depth:%8d\n",
+						       omp_get_thread_num(), start + depth,
+						       thread_process_start_list[omp_get_thread_num() + 1],
+						       depth);
+						fflush(stdout);
+						sleep(1);
 #endif
-						}
-					}	
-					*/
+						do {
+							#pragma omp flush(thread_process_start_list)
+						} while (thread_process_start_list[omp_get_thread_num() + 1]
+						         < start + depth + 1);
+#ifdef PRINT_CONTENTION_STATUS
+						printf("Contention \e[1;34msolved\e[0m for "
+						       "thread:%4d end:%8d next-start:%8d depth:%8d\n",
+						       omp_get_thread_num(), start + depth,
+						       thread_process_start_list[omp_get_thread_num() + 1],
+						       depth);
+						fflush(stdout);
+						sleep(1);
+#endif
+					}
 
-					// Keep the list fresh
+					// Keep the list fresh and execute 2opt_swap
 					#pragma omp flush(route_index_list)
 					if (two_opt_check(start, start + depth) > 0)
 						two_opt_swap(start, start + depth);
+
+					// If the thread has reached the end of the processing,
+					// the starting position is set to an impossible number
+					// for an end index, so the contented thread won't hang.
+					int thread_chunk_start_final_pos =
+					    (omp_get_thread_num() + 1) * omp_chunk_size;
+					if (start == thread_chunk_start_final_pos) {
+						thread_process_start_list[omp_get_thread_num()] = num_city + 1;
+						#pragma omp flush(thread_process_start_list)
+#ifdef PRINT_CONTENTION_STATUS
+						printf("Contention \e[1;33msignal\e[0m for "
+						       "thread:%4d end:%8d depth:%8d\n",
+						       omp_get_thread_num(), start + depth,						      
+						       depth);
+						fflush(stdout);
+#endif						
+					}
 
 					// To circumvent no serial statement in parallel for
 					if (omp_get_thread_num() == 0)
@@ -251,12 +279,11 @@ void parallel_2opt() {
 }
 
 void check_time() {
-	static time_t last_time = 0;
-
 	go_flag = time(NULL) <
 	          start_time + SECONDS_TO_WAIT - SECONDS_BUFFER;
 
-#ifdef PRINT_STATUS
+#ifdef PRINT_CALC_PROGRESS
+	static time_t last_time = 0;
 	/*
 	if (
 	    (time(NULL) - start_time) % 30 == 0 &&
