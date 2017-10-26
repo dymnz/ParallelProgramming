@@ -13,17 +13,16 @@
 #include <limits.h>
 #include <omp.h>
 
-
 //#define VERBOSE
 //#define DEBUG
-#define PRINT_CONTENTION_STATUS
-#define PRINT_THREAD_STATUS
-//#define PRINT_CALC_PROGRESS
-#define ENABLE_2OPT_COUNTER
-//#define KEEP_DIST_LIST	// Save the calculated distance,
-// requires a lot of RAM
+//#define PRINT_CONTENTION_STATUS
+//#define PRINT_THREAD_STATUS
+#define PRINT_CALC_PROGRESS
 
-#define THREAD_COUNT 16
+#define ENABLE_2OPT_COUNTER
+//#define KEEP_DIST_LIST	// Save the calculated distance, requires a lot of RAM
+
+#define DEFAULT_THREAD_COUNT 12
 #define SECONDS_TO_WAIT 10 * 60
 #define SECONDS_BUFFER 0
 
@@ -67,7 +66,7 @@ inline dist_type get_swapped_partial_route_distance(
 void two_opt_swap(int start, int end);
 dist_type two_opt_check(int start, int end);
 
-int available_threads = THREAD_COUNT;
+int available_threads = DEFAULT_THREAD_COUNT;
 int num_city;
 dist_type default_distance;
 
@@ -263,10 +262,10 @@ void parallel_2opt() {
 #ifdef PRINT_CONTENTION_STATUS
 						printf("Contention \e[1;33msignal\e[0m for "
 						       "thread:%4d end:%8d depth:%8d\n",
-						       omp_get_thread_num(), start + depth,						      
+						       omp_get_thread_num(), start + depth,
 						       depth);
 						fflush(stdout);
-#endif						
+#endif
 					}
 
 					// To circumvent no serial statement in parallel for
@@ -536,7 +535,7 @@ int main(int argc, char const *argv[])
 	if (argc > 4)
 		available_threads = atoi(argv[4]);
 	else
-		available_threads = THREAD_COUNT;
+		available_threads = DEFAULT_THREAD_COUNT;
 
 	printf("Working on %s\n", argv[1]);
 
@@ -559,8 +558,16 @@ int main(int argc, char const *argv[])
 #endif
 
 	// Read city coord and default route
-	read_route(fpRoute);
-	read_coord(fpCoord);
+	omp_set_num_threads(2);
+	#pragma omp parallel sections
+	{
+		#pragma omp section
+		read_route(fpRoute);
+
+		#pragma omp section
+		read_coord(fpCoord);
+	}
+
 
 
 
