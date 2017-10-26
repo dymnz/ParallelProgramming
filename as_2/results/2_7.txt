@@ -1,0 +1,17 @@
+testing: 7 threads
+running ans_2opt_omp2
+Working on ../as_1/dis_dir/test0.dis
+OpenMP version of ans_2opt_sp11.c
+* Balanced search space division/Proper/Partial distance compare/Copy when swapping
+* OpenMP Distributed route/Free to swap/Contention pause
+Using   7 threads
+Final route distance: 362.660487
+call:             64729835 
+swap: 	                  15 	%: 0.00 
+contention: 	            31177318 	%: 48.17 
+round reached:1798051 	depth reached:         7
+avg_swap_length: 0.00 	avg_dist_dec: 0.00
+                -- Written by TA
+================================
+Pass!
+
