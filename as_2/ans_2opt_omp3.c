@@ -24,7 +24,7 @@
 //#define KEEP_DIST_LIST	// Save the calculated distance, requires a lot of RAM
 
 #define DEFAULT_THREAD_COUNT 12
-#define DEPTH_LIMIT 2
+#define DEPTH_LIMIT 3
 
 #define SECONDS_TO_WAIT 10 * 3
 #define SECONDS_BUFFER 0
@@ -260,10 +260,15 @@ void parallel_2opt() {
 
 					// If the thread has reached the end of the processing,
 					// the starting position is set to an impossible number
-					// for an end index, so the contented thread won't hang.
-					int thread_chunk_start_final_pos =
-					    (omp_get_thread_num() + 1) * omp_chunk_size;
-					if (start == thread_chunk_start_final_pos) {
+					// for an end index, so the contented thread won't hang.					
+					int thread_chunk_end_final_pos =
+					    (omp_get_thread_num() + 1) * omp_chunk_size + depth;
+
+					// For the thread that got the last segment that is < 
+					// chunk size
+					if (thread_chunk_end_final_pos >= num_city)
+						thread_chunk_end_final_pos = num_city - 1;
+					if (start + depth == thread_chunk_end_final_pos) {
 						thread_process_start_list[omp_get_thread_num()] = num_city + 1;
 						#pragma omp flush(thread_process_start_list)
 #ifdef PRINT_CONTENTION_STATUS
@@ -585,7 +590,7 @@ int main(int argc, char const *argv[])
 		total_contention_count += contention_counter_list[i];
 	}
 
-	printf("call: %20llu swap: %20llu %%: %.2f contention: %20llu %%: %.2f "
+	printf("call: %20llu swap: %20llu %%: %.2f contention: %20llu %%: %.2f\n"
 	       "avg_swap_length: %.2lf avg_dist_dec: %.2lf\n",
 	       total_opt_check_count,
 	       total_opt_swap_count,

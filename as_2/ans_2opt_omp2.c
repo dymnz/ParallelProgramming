@@ -17,7 +17,7 @@
 //#define DEBUG
 //#define PRINT_CONTENTION_STATUS
 //#define PRINT_THREAD_STATUS
-#define PRINT_CALC_PROGRESS
+//#define PRINT_CALC_PROGRESS
 
 #define ENABLE_STAT_COUNTER
 //#define KEEP_DIST_LIST	// Save the calculated distance, requires a lot of RAM
@@ -74,7 +74,6 @@ dist_type default_distance;
 int  *route_index_list;
 struct City	*city_list;
 
-
 #ifdef KEEP_DIST_LIST
 dist_type *dist_list;
 #endif
@@ -87,6 +86,8 @@ time_t start_time;
 long long *opt_check_counter_list;
 long long *opt_swap_counter_list;
 long long *contention_counter_list;
+int depth_reached = 0,
+    round_reached = 0;
 int race_cond_counter = 0;
 double total_swap_length = 0;
 double total_reduced_distance = 0;
@@ -181,6 +182,7 @@ void parallel_2opt() {
 		thread_process_start_list[i] = num_city;
 
 	while (go_flag) {
+		round_reached++;
 		for (depth = 1; go_flag && depth < max_depth; ++depth) {
 			int starting_pos_count = num_city - depth - 1;
 			int omp_chunk_size = (int) ceil((double)starting_pos_count / available_threads);
@@ -189,7 +191,7 @@ void parallel_2opt() {
 			private(start) \
 			shared(depth, go_flag, route_index_list, num_city, omp_chunk_size, \
 			       stdout, available_threads, thread_process_start_list, \
-			       contention_counter_list) \
+			       contention_counter_list, depth_reached) \
 			schedule(static, omp_chunk_size)
 			for (start = 1; start < num_city - depth; ++start) {
 				// Because break statement is not allowed
@@ -256,9 +258,14 @@ void parallel_2opt() {
 					// If the thread has reached the end of the processing,
 					// the starting position is set to an impossible number
 					// for an end index, so the contented thread won't hang.
-					int thread_chunk_start_final_pos =
-					    (omp_get_thread_num() + 1) * omp_chunk_size;
-					if (start == thread_chunk_start_final_pos) {
+					int thread_chunk_end_final_pos =
+					    (omp_get_thread_num() + 1) * omp_chunk_size + depth;
+
+					// For the thread that got the last segment that is <
+					// chunk size
+					if (thread_chunk_end_final_pos >= num_city)
+						thread_chunk_end_final_pos = num_city - 1;
+					if (start + depth == thread_chunk_end_final_pos) {
 						thread_process_start_list[omp_get_thread_num()] = num_city + 1;
 						#pragma omp flush(thread_process_start_list)
 #ifdef PRINT_CONTENTION_STATUS
@@ -271,8 +278,10 @@ void parallel_2opt() {
 					}
 
 					// To circumvent no serial statement in parallel for
-					if (omp_get_thread_num() == 0)
+					if (omp_get_thread_num() == 0) {
+						depth_reached = depth;
 						check_time();
+					}
 				}
 			}
 		}
@@ -284,7 +293,7 @@ void check_time() {
 	          start_time + SECONDS_TO_WAIT - SECONDS_BUFFER;
 
 #ifdef PRINT_CALC_PROGRESS
-	///*
+	/*
 	time_t current_time = time(NULL);
 	if (
 	    (current_time - start_time) % 30 == 0 &&
@@ -297,14 +306,15 @@ void check_time() {
 		       (unsigned long)(current_time - start_time) % 60,
 		       get_total_route_distance(route_index_list));
 	}
-	//*/
+	*/
 
-	/*
+	///*
 	static time_t last_time = 0;
 	time_t current_time = time(NULL);
 	if (current_time != last_time) {
 		#pragma omp flush(route_index_list)
 		#pragma omp critical
+		printf("Depth:%8d\n", depth_reached);
 		printf("Distance @ %2lu:%02lu = %20lf\n",
 		       (unsigned long)(time(NULL) - start_time) / 60,
 		       (unsigned long)(time(NULL) - start_time) % 60,
@@ -312,7 +322,7 @@ void check_time() {
 		fflush(stdout);
 		last_time = current_time;
 	}
-	*/
+	//*/
 #endif
 }
 
@@ -578,13 +588,15 @@ int main(int argc, char const *argv[])
 		total_contention_count += contention_counter_list[i];
 	}
 
-	printf("call: %20llu swap: %20llu %%: %.2f contention: %20llu %%: %.2f "
-	       "avg_swap_length: %.2lf avg_dist_dec: %.2lf\n",
+	printf("call: %20llu \nswap: \t%20llu \t%%: %.2f \ncontention: \t%20llu \t%%: %.2f \n"
+	       "round reached:%4d \tdepth reached:%10d\n"
+	       "avg_swap_length: %.2lf \tavg_dist_dec: %.2lf\n",
 	       total_opt_check_count,
 	       total_opt_swap_count,
 	       total_opt_swap_count * 100.0f / total_opt_check_count,
 	       total_contention_count,
 	       total_contention_count * 100.0f / total_opt_check_count,
+	       round_reached, depth_reached,
 	       total_swap_length / total_opt_swap_count,
 	       total_reduced_distance / total_opt_swap_count);
 #endif
