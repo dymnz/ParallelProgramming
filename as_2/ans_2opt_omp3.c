@@ -1,8 +1,9 @@
 /*
 	OpenMP version of ans_2opt_sp11.c
-	* Balanced search space division/Proper/Distance cache/
+	* Balanced search space division/Proper/
 	  Partial distance compare/Copy when swapping
-	* OpenMP Distributed range/Free to swap/Contention pause/Depth space limit
+	* OpenMP Distributed route/Free to swap/Contention pause/Depth space limit
+	* To test multi-threading/single-thread consistency
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,20 +14,22 @@
 #include <limits.h>
 #include <omp.h>
 
-
 //#define VERBOSE
 //#define DEBUG
 //#define PRINT_CONTENTION_STATUS
 //#define PRINT_THREAD_STATUS
 #define PRINT_CALC_PROGRESS
-#define ENABLE_2OPT_COUNTER
-//#define KEEP_DIST_LIST	// Save the calculated distance,
-// requires a lot of RAM
 
-#define THREAD_COUNT 16
-#define SECONDS_TO_WAIT 10 * 60
+#define ENABLE_2OPT_COUNTER
+//#define KEEP_DIST_LIST	// Save the calculated distance, requires a lot of RAM
+
+#define DEFAULT_THREAD_COUNT 12
+#define DEPTH_LIMIT 2
+
+#define SECONDS_TO_WAIT 10 * 3
 #define SECONDS_BUFFER 0
-#define DEPTH_LIMIT 8
+
+
 
 #ifdef VERBOSE
 #define PRINT_CONTENTION_STATUS
@@ -68,7 +71,7 @@ inline dist_type get_swapped_partial_route_distance(
 void two_opt_swap(int start, int end);
 dist_type two_opt_check(int start, int end);
 
-int available_threads = THREAD_COUNT;
+int available_threads = DEFAULT_THREAD_COUNT;
 int num_city;
 dist_type default_distance;
 
@@ -80,11 +83,6 @@ struct City	*city_list;
 #ifdef KEEP_DIST_LIST
 dist_type *dist_list;
 #endif
-
-// If cache_route_distance == 0, update it; If not, use that value
-// This value is change if and only if route_index_list is changed.
-dist_type cache_route_distance = 0;
-
 
 /* Time control*/
 int go_flag = 1;
@@ -223,7 +221,7 @@ void parallel_2opt() {
 					#pragma omp flush(thread_process_start_list)
 					if (omp_get_thread_num() < available_threads - 1 &&
 					        thread_process_start_list[omp_get_thread_num() + 1]
-					        < start + depth + 1) {
+					        <= start + depth + 1) {
 #ifdef PRINT_CONTENTION_STATUS
 						printf("Contention \e[1;31mstart \e[0m for "
 						       "thread:%4d end:%8d next-start:%8d depth:%8d\n",
@@ -261,6 +259,13 @@ void parallel_2opt() {
 					if (start == thread_chunk_start_final_pos) {
 						thread_process_start_list[omp_get_thread_num()] = num_city + 1;
 						#pragma omp flush(thread_process_start_list)
+#ifdef PRINT_CONTENTION_STATUS
+						printf("Contention \e[1;33msignal\e[0m for "
+						       "thread:%4d end:%8d depth:%8d\n",
+						       omp_get_thread_num(), start + depth,
+						       depth);
+						fflush(stdout);
+#endif
 					}
 
 					// To circumvent no serial statement in parallel for
@@ -269,6 +274,8 @@ void parallel_2opt() {
 				}
 			}
 		}
+		check_time();
+		break;
 	}
 }
 
@@ -277,18 +284,22 @@ void check_time() {
 	          start_time + SECONDS_TO_WAIT - SECONDS_BUFFER;
 
 #ifdef PRINT_CALC_PROGRESS
-	static time_t last_time = 0;
-	/*
+	///*
 	if (
 	    (time(NULL) - start_time) % 30 == 0 &&
 	    (time(NULL) - start_time) > 0)
 	{
+		#pragma omp flush(route_index_list)
+		#pragma omp critical
 		printf("Distance @ %2lu:%02lu = %lf\n",
 		       (unsigned long)(time(NULL) - start_time) / 60,
 		       (unsigned long)(time(NULL) - start_time) % 60,
-		       cache_route_distance);
+		       get_total_route_distance(route_index_list));
 	}
-	*/
+	//*/
+
+	/*
+	static time_t last_time = 0;
 	time_t current_time = time(NULL);
 	if (current_time != last_time) {
 		#pragma omp flush(route_index_list)
@@ -300,7 +311,7 @@ void check_time() {
 		fflush(stdout);
 		last_time = current_time;
 	}
-
+	*/
 #endif
 }
 
@@ -349,37 +360,6 @@ dist_type get_city_distance(int index_1, int index_2) {
 	           city_list[index_2].x,
 	           city_list[index_2].y);
 #endif
-}
-
-/*
-	Calculate the total route distance when switching start and end index
-*/
-inline dist_type get_swapped_total_route_distance(
-    int *route_index_list,
-    int start, int end)
-{
-	dist_type distance_sum = cache_route_distance;
-
-	// Remove old
-	distance_sum -=
-	    get_city_distance(
-	        route_index_list[start - 1],
-	        route_index_list[start]);
-	distance_sum -=
-	    get_city_distance(
-	        route_index_list[end],
-	        route_index_list[end + 1]);
-
-	// Add new
-	distance_sum +=
-	    get_city_distance(
-	        route_index_list[start - 1],
-	        route_index_list[end]);
-	distance_sum +=
-	    get_city_distance(
-	        route_index_list[start],
-	        route_index_list[end + 1]);
-	return distance_sum;
 }
 
 /*
@@ -530,7 +510,7 @@ int main(int argc, char const *argv[])
 	if (argc > 4)
 		available_threads = atoi(argv[4]);
 	else
-		available_threads = THREAD_COUNT;
+		available_threads = DEFAULT_THREAD_COUNT;
 
 	printf("Working on %s\n", argv[1]);
 
@@ -553,13 +533,15 @@ int main(int argc, char const *argv[])
 #endif
 
 	// Read city coord and default route
-	read_route(fpRoute);
-	read_coord(fpCoord);
+	omp_set_num_threads(2);
+	#pragma omp parallel sections
+	{
+		#pragma omp section
+		read_route(fpRoute);
 
-
-
-	// Init the cache_route_distance
-	cache_route_distance = get_total_route_distance(route_index_list);
+		#pragma omp section
+		read_coord(fpCoord);
+	}
 
 #ifdef DEBUG
 	printf("Original route:\n");
@@ -567,7 +549,12 @@ int main(int argc, char const *argv[])
 	printf("Original route distance: %lf\n", get_total_route_distance(route_index_list));
 #endif
 
-	printf("Balanced search space division/Proper/Distance cache/Partial distance compare:\n");
+	printf(
+	    "OpenMP version of ans_2opt_sp11.c\n"
+	    "* Balanced search space division/Proper/"
+	    "* OpenMP Distributed route/Free to swap/Contention pause/Depth space limit\n"
+	    "* To test multi-threading/single-thread consistency\n");
+
 	parallel_2opt();
 
 #ifdef DEBUG
