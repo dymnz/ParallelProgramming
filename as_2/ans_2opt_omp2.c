@@ -19,7 +19,7 @@
 //#define PRINT_THREAD_STATUS
 #define PRINT_CALC_PROGRESS
 
-#define ENABLE_2OPT_COUNTER
+#define ENABLE_STAT_COUNTER
 //#define KEEP_DIST_LIST	// Save the calculated distance, requires a lot of RAM
 
 #define DEFAULT_THREAD_COUNT 12
@@ -83,9 +83,10 @@ dist_type *dist_list;
 int go_flag = 1;
 time_t start_time;
 
-#ifdef ENABLE_2OPT_COUNTER
+#ifdef ENABLE_STAT_COUNTER
 long long *opt_check_counter_list;
 long long *opt_swap_counter_list;
+long long *contention_counter_list;
 int race_cond_counter = 0;
 double total_swap_length = 0;
 double total_reduced_distance = 0;
@@ -104,7 +105,7 @@ void two_opt_swap(int start, int end) {
 	printf("two_opt swap: %3d : %3d\n", start, end);
 	fflush(stdout);
 #endif
-#ifdef ENABLE_2OPT_COUNTER
+#ifdef ENABLE_STAT_COUNTER
 	opt_swap_counter_list[omp_get_thread_num()]++;
 #endif
 
@@ -128,7 +129,7 @@ dist_type two_opt_check(int start, int end) {
 	fflush(stdout);
 #endif
 
-#ifdef ENABLE_2OPT_COUNTER
+#ifdef ENABLE_STAT_COUNTER
 	opt_check_counter_list[omp_get_thread_num()]++;
 #endif
 
@@ -158,9 +159,10 @@ void parallel_2opt() {
 
 	printf("Using %3d threads\n", threads_to_use);
 
-#ifdef ENABLE_2OPT_COUNTER
+#ifdef ENABLE_STAT_COUNTER
 	opt_check_counter_list = (long long *) malloc(available_threads * sizeof(long long));
 	opt_swap_counter_list = (long long *) malloc(available_threads * sizeof(long long));
+	contention_counter_list = (long long *) malloc(available_threads * sizeof(long long));
 #endif
 
 
@@ -217,6 +219,9 @@ void parallel_2opt() {
 					if (omp_get_thread_num() < available_threads - 1 &&
 					        thread_process_start_list[omp_get_thread_num() + 1]
 					        <= start + depth + 1) {
+#ifdef ENABLE_STAT_COUNTER
+						contention_counter_list[omp_get_thread_num()]++;
+#endif
 #ifdef PRINT_CONTENTION_STATUS
 						printf("Contention \e[1;31mstart \e[0m for "
 						       "thread:%4d end:%8d next-start:%8d depth:%8d\n",
@@ -226,6 +231,7 @@ void parallel_2opt() {
 						fflush(stdout);
 						sleep(1);
 #endif
+						// Wait it out
 						do {
 							#pragma omp flush(thread_process_start_list)
 						} while (thread_process_start_list[omp_get_thread_num() + 1]
@@ -560,20 +566,23 @@ int main(int argc, char const *argv[])
 	// Write to file
 	write_route(fpOutput);
 
-#ifdef ENABLE_2OPT_COUNTER
+#ifdef ENABLE_STAT_COUNTER
 	int i;
-	long long total_opt_check_count = 0, total_opt_swap_count = 0;
+	long long total_opt_check_count = 0,
+	          total_opt_swap_count = 0,
+	          total_contention_count = 0;
 	for (i = 0; i < available_threads; ++i) {
 		total_opt_check_count += opt_check_counter_list[i];
 		total_opt_swap_count += opt_swap_counter_list[i];
+		total_contention_count += contention_counter_list[i];
 	}
 
-	printf("call: %20llu swap: %20llu %%: %.2f race: %3d %%: %.2f avg_swap_length: %.2lf avg_dist_dec: %.2lf\n",
+	printf("call: %20llu swap: %20llu %%: %.2f contention: %3d %%: %.2f avg_swap_length: %.2lf avg_dist_dec: %.2lf\n",
 	       total_opt_check_count,
 	       total_opt_swap_count,
 	       total_opt_swap_count * 100.0f / total_opt_check_count,
-	       race_cond_counter,
-	       race_cond_counter * 100.0f / total_opt_check_count,
+	       total_contention_count,
+	       total_contention_count * 100.0f / total_opt_check_count,
 	       total_swap_length / total_opt_swap_count,
 	       total_reduced_distance / total_opt_swap_count);
 #endif
