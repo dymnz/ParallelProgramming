@@ -179,7 +179,7 @@ void parallel_2opt() {
 	// its start position since it does not have one.
 	// To fix this, pre-set the starting position to an impossible number
 	for (i = 0; i < available_threads; ++i)
-		thread_process_start_list[i] = num_city;
+		thread_process_start_list[i] = num_city + 1;
 
 	while (go_flag) {
 		round_reached++;

@@ -14,17 +14,17 @@
 #include <limits.h>
 #include <omp.h>
 
-//#define VERBOSE
+#define VERBOSE
 //#define DEBUG
-//#define PRINT_CONTENTION_STATUS
-//#define PRINT_THREAD_STATUS
+#define PRINT_CONTENTION_STATUS
+#define PRINT_THREAD_STATUS
 #define PRINT_CALC_PROGRESS
 
 #define ENABLE_STAT_COUNTER
 //#define KEEP_DIST_LIST	// Save the calculated distance, requires a lot of RAM
 
 #define DEFAULT_THREAD_COUNT 12
-#define DEPTH_LIMIT 3
+#define DEPTH_LIMIT 2
 
 #define SECONDS_TO_WAIT 10 * 3
 #define SECONDS_BUFFER 0
@@ -183,7 +183,7 @@ void parallel_2opt() {
 	// its start position since it does not have one.
 	// To fix this, pre-set the starting position to an impossible number
 	for (i = 0; i < available_threads; ++i)
-		thread_process_start_list[i] = num_city;
+		thread_process_start_list[i] = num_city + 1;
 
 	while (go_flag) {
 		for (depth = 1; go_flag && depth < DEPTH_LIMIT; ++depth) {
@@ -201,7 +201,7 @@ void parallel_2opt() {
 				#pragma omp flush(go_flag)
 				if (go_flag) {
 #ifdef PRINT_THREAD_STATUS
-					printf("T: %3d S: %4d E: %4d omp_chunk_size:%5d\n",
+					printf("Thread: %3d start: %4d end: %4d omp_chunk_size:%5d\n",
 					       omp_get_thread_num(),
 					       start, start + depth,
 					       omp_chunk_size);
