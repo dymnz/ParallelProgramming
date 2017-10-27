@@ -109,7 +109,6 @@ void two_opt_swap(int start, int end) {
 #ifdef ENABLE_STAT_COUNTER
 	opt_swap_counter_list[omp_get_thread_num()]++;
 #endif
-
 	int i, temp;
 
 	int swap_count = (end - start + 1) / 2;

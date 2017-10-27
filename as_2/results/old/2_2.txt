@@ -1,0 +1,391 @@
+testing: 2 threads
+running ans_2opt_omp2
+testing: 2 threads
+running ans_2opt_omp2
+testing: 2 threads
+running ans_2opt_omp2
+testing: 2 threads
+running ans_2opt_omp2
+testing: 2 threads
+running ans_2opt_omp2
+testing: 2 threads
+running ans_2opt_omp2
+testing: 2 threads
+running ans_2opt_omp2
+testing: 2 threads
+running ans_2opt_omp2
+testing: 2 threads
+running ans_2opt_omp2
+testing: 2 threads
+running ans_2opt_omp2
+Working on ../as_1/dis_dir/test11.dis
+OpenMP version of ans_2opt_sp11.c
+* Balanced search space division/Proper/Partial distance compare/Copy when swapping
+* OpenMP Distributed route/Free to swap/Contention pause
+Using   2 threads
+Final route distance: 801980444945.752319
+call:            165706874 
+swap: 	             3551433 	%: 2.14 
+contention: 	                   0 	%: 0.00 
+round reached:   1 	depth reached:       166
+avg_swap_length: 0.00 	avg_dist_dec: 0.00
+                -- Written by TA
+================================
+Pass!
+
+Working on ../as_1/dis_dir/test11.dis
+OpenMP version of ans_2opt_sp11.c
+* Balanced search space division/Proper/Partial distance compare/Copy when swapping
+* OpenMP Distributed route/Free to swap/Contention pause
+Using   2 threads
+Final route distance: 741289773108.801758
+call:            194564333 
+swap: 	             3699776 	%: 1.90 
+contention: 	                   0 	%: 0.00 
+round reached:   1 	depth reached:       195
+avg_swap_length: 0.00 	avg_dist_dec: 0.00
+                -- Written by TA
+================================
+Fail to open: ./output_omp2_2.
+Working on ../as_1/dis_dir/test11.dis
+OpenMP version of ans_2opt_sp11.c
+* Balanced search space division/Proper/Partial distance compare/Copy when swapping
+* OpenMP Distributed route/Free to swap/Contention pause
+Using   2 threads
+Final route distance: 950304931003.560059
+call:            116833091 
+swap: 	             3231667 	%: 2.77 
+contention: 	                   0 	%: 0.00 
+round reached:   1 	depth reached:       117
+avg_swap_length: 0.00 	avg_dist_dec: 0.00
+                -- Written by TA
+================================
+Fail to open: ./output_omp2_2.
+Working on ../as_1/dis_dir/test11.dis
+OpenMP version of ans_2opt_sp11.c
+* Balanced search space division/Proper/Partial distance compare/Copy when swapping
+* OpenMP Distributed route/Free to swap/Contention pause
+Using   2 threads
+Final route distance: 740596749304.667236
+call:            194934897 
+swap: 	             3701548 	%: 1.90 
+contention: 	                   0 	%: 0.00 
+round reached:   1 	depth reached:       195
+avg_swap_length: 0.00 	avg_dist_dec: 0.00
+                -- Written by TA
+================================
+Fail to open: ./output_omp2_2.
+Working on ../as_1/dis_dir/test11.dis
+OpenMP version of ans_2opt_sp11.c
+* Balanced search space division/Proper/Partial distance compare/Copy when swapping
+* OpenMP Distributed route/Free to swap/Contention pause
+Using   2 threads
+Final route distance: 743666370282.301880
+call:            193329528 
+swap: 	             3693761 	%: 1.91 
+contention: 	                   0 	%: 0.00 
+round reached:   1 	depth reached:       193
+avg_swap_length: 0.00 	avg_dist_dec: 0.00
+                -- Written by TA
+================================
+Fail to open: ./output_omp2_2.
+Working on ../as_1/dis_dir/test11.dis
+OpenMP version of ans_2opt_sp11.c
+* Balanced search space division/Proper/Partial distance compare/Copy when swapping
+* OpenMP Distributed route/Free to swap/Contention pause
+Using   2 threads
+Final route distance: 748944411357.705933
+call:            190511429 
+swap: 	             3680290 	%: 1.93 
+contention: 	                   0 	%: 0.00 
+round reached:   1 	depth reached:       191
+avg_swap_length: 0.00 	avg_dist_dec: 0.00
+                -- Written by TA
+================================
+Fail to open: ./output_omp2_2.
+Working on ../as_1/dis_dir/test11.dis
+OpenMP version of ans_2opt_sp11.c
+* Balanced search space division/Proper/Partial distance compare/Copy when swapping
+* OpenMP Distributed route/Free to swap/Contention pause
+Using   2 threads
+Final route distance: 746145125931.356201
+call:            192005812 
+swap: 	             3687462 	%: 1.92 
+contention: 	                   0 	%: 0.00 
+round reached:   1 	depth reached:       192
+avg_swap_length: 0.00 	avg_dist_dec: 0.00
+                -- Written by TA
+================================
+Fail to open: ./output_omp2_2.
+Working on ../as_1/dis_dir/test11.dis
+OpenMP version of ans_2opt_sp11.c
+* Balanced search space division/Proper/Partial distance compare/Copy when swapping
+* OpenMP Distributed route/Free to swap/Contention pause
+Using   2 threads
+Final route distance: 754829448747.050293
+call:            187515835 
+swap: 	             3665592 	%: 1.95 
+contention: 	                   0 	%: 0.00 
+round reached:   1 	depth reached:       188
+avg_swap_length: 0.00 	avg_dist_dec: 0.00
+                -- Written by TA
+================================
+Fail to open: ./output_omp2_2.
+Working on ../as_1/dis_dir/test11.dis
+OpenMP version of ans_2opt_sp11.c
+* Balanced search space division/Proper/Partial distance compare/Copy when swapping
+* OpenMP Distributed route/Free to swap/Contention pause
+Using   2 threads
+Final route distance: 748914792360.583008
+call:            190527132 
+swap: 	             3680342 	%: 1.93 
+contention: 	                   0 	%: 0.00 
+round reached:   1 	depth reached:       191
+avg_swap_length: 0.00 	avg_dist_dec: 0.00
+                -- Written by TA
+================================
+Fail to open: ./output_omp2_2.
+Working on ../as_1/dis_dir/test11.dis
+OpenMP version of ans_2opt_sp11.c
+* Balanced search space division/Proper/Partial distance compare/Copy when swapping
+* OpenMP Distributed route/Free to swap/Contention pause
+Using   2 threads
+Final route distance: 776456049155.780029
+call:            176866007 
+swap: 	             3612137 	%: 2.04 
+contention: 	                   0 	%: 0.00 
+round reached:   1 	depth reached:       177
+avg_swap_length: 0.00 	avg_dist_dec: 0.00
+                -- Written by TA
+================================
+Fail to open: ./output_omp2_2.
+testing: 2 threads
+running ans_2opt_omp2
+testing: 2 threads
+running ans_2opt_omp2
+testing: 2 threads
+running ans_2opt_omp2
+testing: 2 threads
+running ans_2opt_omp2
+Working on ../as_1/dis_dir/test11.dis
+OpenMP version of ans_2opt_sp11.c
+* Balanced search space division/Proper/Partial distance compare/Copy when swapping
+* OpenMP Distributed route/Free to swap/Contention pause
+Using   2 threads
+Final route distance: 695902417496.543213
+call:            220700652 
+swap: 	             3819323 	%: 1.73 
+contention: 	                   0 	%: 0.00 
+round reached:   1 	depth reached:       221
+avg_swap_length: 0.00 	avg_dist_dec: 0.00
+                -- Written by TA
+================================
+Pass!
+
+testing: 2 threads
+running ans_2opt_omp2
+testing: 2 threads
+running ans_2opt_omp2
+testing: 2 threads
+running ans_2opt_omp2
+testing: 2 threads
+running ans_2opt_omp2
+testing: 2 threads
+running ans_2opt_omp2
+testing: 2 threads
+running ans_2opt_omp2
+testing: 2 threads
+running ans_2opt_omp2
+Working on ../as_1/dis_dir/test11.dis
+OpenMP version of ans_2opt_sp11.c
+* Balanced search space division/Proper/Partial distance compare/Copy when swapping
+* OpenMP Distributed route/Free to swap/Contention pause
+Using   2 threads
+Final route distance: 720971123018.978271
+call:            205688510 
+swap: 	             3752145 	%: 1.82 
+contention: 	                   0 	%: 0.00 
+round reached:   1 	depth reached:       206
+avg_swap_length: 0.00 	avg_dist_dec: 0.00
+                -- Written by TA
+================================
+Some points are missing.
+
+Working on ../as_1/dis_dir/test11.dis
+OpenMP version of ans_2opt_sp11.c
+* Balanced search space division/Proper/Partial distance compare/Copy when swapping
+* OpenMP Distributed route/Free to swap/Contention pause
+Using   2 threads
+Final route distance: 733310490758.668213
+call:            198918799 
+swap: 	             3720250 	%: 1.87 
+contention: 	                   0 	%: 0.00 
+round reached:   1 	depth reached:       199
+avg_swap_length: 0.00 	avg_dist_dec: 0.00
+                -- Written by TA
+================================
+Fail to open: ./output_omp2_2.
+Working on ../as_1/dis_dir/test11.dis
+OpenMP version of ans_2opt_sp11.c
+* Balanced search space division/Proper/Partial distance compare/Copy when swapping
+* OpenMP Distributed route/Free to swap/Contention pause
+Using   2 threads
+Final route distance: 715204309301.083862
+call:            208977571 
+swap: 	             3767507 	%: 1.80 
+contention: 	                   0 	%: 0.00 
+round reached:   1 	depth reached:       209
+avg_swap_length: 0.00 	avg_dist_dec: 0.00
+                -- Written by TA
+================================
+Fail to open: ./output_omp2_2.
+Working on ../as_1/dis_dir/test11.dis
+OpenMP version of ans_2opt_sp11.c
+* Balanced search space division/Proper/Partial distance compare/Copy when swapping
+* OpenMP Distributed route/Free to swap/Contention pause
+Using   2 threads
+Final route distance: 723218210612.263428
+call:            204476657 
+swap: 	             3746407 	%: 1.83 
+contention: 	                   0 	%: 0.00 
+round reached:   1 	depth reached:       205
+avg_swap_length: 0.00 	avg_dist_dec: 0.00
+                -- Written by TA
+================================
+Fail to open: ./output_omp2_2.
+Working on ../as_1/dis_dir/test11.dis
+OpenMP version of ans_2opt_sp11.c
+* Balanced search space division/Proper/Partial distance compare/Copy when swapping
+* OpenMP Distributed route/Free to swap/Contention pause
+Using   2 threads
+Final route distance: 820642249268.105225
+call:            158066800 
+swap: 	             3507973 	%: 2.22 
+contention: 	                   0 	%: 0.00 
+round reached:   1 	depth reached:       158
+avg_swap_length: 0.00 	avg_dist_dec: 0.00
+                -- Written by TA
+================================
+Fail to open: ./output_omp2_2.
+Working on ../as_1/dis_dir/test11.dis
+OpenMP version of ans_2opt_sp11.c
+* Balanced search space division/Proper/Partial distance compare/Copy when swapping
+* OpenMP Distributed route/Free to swap/Contention pause
+Using   2 threads
+Final route distance: 767511147470.555298
+call:            181136911 
+swap: 	             3634201 	%: 2.01 
+contention: 	                   0 	%: 0.00 
+round reached:   1 	depth reached:       181
+avg_swap_length: 0.00 	avg_dist_dec: 0.00
+                -- Written by TA
+================================
+Fail to open: ./output_omp2_2.
+Working on ../as_1/dis_dir/test11.dis
+OpenMP version of ans_2opt_sp11.c
+* Balanced search space division/Proper/Partial distance compare/Copy when swapping
+* OpenMP Distributed route/Free to swap/Contention pause
+Using   2 threads
+Final route distance: 799651353028.709717
+call:            166702056 
+swap: 	             3556857 	%: 2.13 
+contention: 	                   0 	%: 0.00 
+round reached:   1 	depth reached:       167
+avg_swap_length: 0.00 	avg_dist_dec: 0.00
+                -- Written by TA
+================================
+Fail to open: ./output_omp2_2.
+Working on ../as_1/dis_dir/test11.dis
+OpenMP version of ans_2opt_sp11.c
+* Balanced search space division/Proper/Partial distance compare/Copy when swapping
+* OpenMP Distributed route/Free to swap/Contention pause
+Using   2 threads
+Final route distance: 737301627711.363159
+call:            196732518 
+swap: 	             3709964 	%: 1.89 
+contention: 	                   0 	%: 0.00 
+round reached:   1 	depth reached:       197
+avg_swap_length: 0.00 	avg_dist_dec: 0.00
+                -- Written by TA
+================================
+Fail to open: ./output_omp2_2.
+Working on ../as_1/dis_dir/test11.dis
+OpenMP version of ans_2opt_sp11.c
+* Balanced search space division/Proper/Partial distance compare/Copy when swapping
+* OpenMP Distributed route/Free to swap/Contention pause
+Using   2 threads
+Final route distance: 725716053950.976196
+call:            203110448 
+swap: 	             3740010 	%: 1.84 
+contention: 	                   0 	%: 0.00 
+round reached:   1 	depth reached:       203
+avg_swap_length: 0.00 	avg_dist_dec: 0.00
+                -- Written by TA
+================================
+Fail to open: ./output_omp2_2.
+Working on ../as_1/dis_dir/test11.dis
+OpenMP version of ans_2opt_sp11.c
+* Balanced search space division/Proper/Partial distance compare/Copy when swapping
+* OpenMP Distributed route/Free to swap/Contention pause
+Using   2 threads
+Final route distance: 877601069371.607178
+call:            137781192 
+swap: 	             3381624 	%: 2.45 
+contention: 	                   0 	%: 0.00 
+round reached:   1 	depth reached:       138
+avg_swap_length: 0.00 	avg_dist_dec: 0.00
+                -- Written by TA
+================================
+Fail to open: ./output_omp2_2.
+testing: 2 threads
+running ans_2opt_omp2
+testing: 2 threads
+running ans_2opt_omp2
+Working on ../as_1/dis_dir/test11.dis
+OpenMP version of ans_2opt_sp11.c
+* Balanced search space division/Proper/Partial distance compare/Copy when swapping
+* OpenMP Distributed route/Free to swap/Contention pause
+Using   2 threads
+Final route distance: 771086600094.885498
+call:            179389173 
+swap: 	             3625293 	%: 2.02 
+contention: 	                   0 	%: 0.00 
+round reached:   1 	depth reached:       179
+avg_swap_length: 0.00 	avg_dist_dec: 0.00
+                -- Written by TA
+================================
+Pass!
+
+Working on ../as_1/dis_dir/test11.dis
+OpenMP version of ans_2opt_sp11.c
+* Balanced search space division/Proper/Partial distance compare/Copy when swapping
+* OpenMP Distributed route/Free to swap/Contention pause
+Using   2 threads
+Final route distance: 769597269928.177124
+call:            180114520 
+swap: 	             3629073 	%: 2.01 
+contention: 	                   0 	%: 0.00 
+round reached:   1 	depth reached:       180
+avg_swap_length: 0.00 	avg_dist_dec: 0.00
+                -- Written by TA
+================================
+Fail to open: ./output_omp2_2.
+testing: 2 threads
+running ans_2opt_omp2
+Working on ../as_1/dis_dir/test11.dis
+OpenMP version of ans_2opt_sp11.c
+* Balanced search space division/Proper/Partial distance compare/Copy when swapping
+* OpenMP Distributed route/Free to swap/Contention pause
+Using   2 threads
+Final route distance: 722006241816.806641
+call:            205135525 
+swap: 	             3749540 	%: 1.83 
+contention: 	                   0 	%: 0.00 
+round reached:   1 	depth reached:       205
+avg_swap_length: 0.00 	avg_dist_dec: 0.00
+                -- Written by TA
+================================
+Pass!
+
+testing: 2 threads
+running ans_2opt_omp2
