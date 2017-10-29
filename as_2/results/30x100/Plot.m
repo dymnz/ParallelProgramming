@@ -9,7 +9,7 @@ call_num_list = str2double(call_num_strings);
 
 call_min = min(call_num_list);
 call_max = max(call_num_list);
-call_mean = mean(call_num_list);
+call_mean = round(mean(call_num_list));
 
 %%
 plot(call_num_list);
@@ -17,7 +17,7 @@ xlim([1 100]);
 ylim([0.7*call_min 1.2*call_max]);
 
 hold on;
-refline(0, mean(call_num_list));
+refline(0, call_mean);
 xlabel('test', 'FontSize', 20);
 ylabel('2opt\_swap()', 'FontSize', 20);
 title(title_text, 'FontSize', 20);
@@ -34,3 +34,7 @@ text(index_max, call_max, strmax, 'HorizontalAlignment', 'right', 'FontSize', 15
 
 stravg = [num2str(call_mean)];
 text(length(call_num_list), call_mean, stravg, 'HorizontalAlignment', 'right', 'FontSize', 15);
+
+%%
+
+disp(sprintf("Max: %20d\nMin: %20d\nAvg: %20d\n", call_max, call_min, call_mean));
