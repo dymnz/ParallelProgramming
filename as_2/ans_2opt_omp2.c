@@ -17,13 +17,13 @@
 //#define DEBUG
 //#define PRINT_CONTENTION_STATUS
 //#define PRINT_THREAD_STATUS
-//#define PRINT_CALC_PROGRESS
+#define PRINT_CALC_PROGRESS
 
 #define ENABLE_STAT_COUNTER
 //#define KEEP_DIST_LIST	// Save the calculated distance, requires a lot of RAM
 
 #define DEFAULT_THREAD_COUNT 12
-#define SECONDS_TO_WAIT 10 * 3
+#define SECONDS_TO_WAIT 10 * 60
 #define SECONDS_BUFFER 0
 
 #ifdef VERBOSE
@@ -292,11 +292,12 @@ void check_time() {
 	          start_time + SECONDS_TO_WAIT - SECONDS_BUFFER;
 
 #ifdef PRINT_CALC_PROGRESS
-	/*
+	static time_t last_time = 0;
+	///*
 	time_t current_time = time(NULL);
-	if (
-	    (current_time - start_time) % 30 == 0 &&
-	    (current_time - start_time) > 0)
+	if ((current_time != last_time) &&
+	        (current_time - start_time) % 30 == 0 &&
+	        (current_time - start_time) > 0)
 	{
 		#pragma omp flush(route_index_list)
 		#pragma omp critical
@@ -304,11 +305,12 @@ void check_time() {
 		       (unsigned long)(current_time - start_time) / 60,
 		       (unsigned long)(current_time - start_time) % 60,
 		       get_total_route_distance(route_index_list));
+		fflush(stdout);
+		last_time = current_time;
 	}
-	*/
+	//*/
 
-	///*
-	static time_t last_time = 0;
+	/*
 	time_t current_time = time(NULL);
 	if (current_time != last_time) {
 		#pragma omp flush(route_index_list)
@@ -321,7 +323,7 @@ void check_time() {
 		fflush(stdout);
 		last_time = current_time;
 	}
-	//*/
+	*/
 #endif
 }
 

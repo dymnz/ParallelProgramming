@@ -29,3 +29,38 @@ http://www.cplusplus.com/reference/ctime/time/
     _unlcok
 end
 ```
+
+
+#### 2-opt
+
+##### Concept
+Check if the route can be shorten by reversing a segment of route; if so, reverse the route
+
+##### Make it faster
+* A reversed segment has the same route length, the total route distance is changed at the start and the end of the segment
+* If every segment on a route is only processed by one thread, threads can work on the route simultaneously
+
+#### Route Splitting
+To process 2opt operation on every route:
+```
+for (depth = 1; depth < num_city - 1; ++depth) {
+    for (start = 1; start < num_city - depth; ++start) {
+        2opt_swap(start, start + depth);
+    }
+```
+
+Idea: Split `start` threads, and avoid "contention". The splitting is fair because each thread is processing segments with the same length.
+
+#### Contention
+Contention is where two or more thread works on neighboring/crossed segment, and race condition may happen.
+
+To avoid this, `start` is splitted in chunks, so contention will only happen between two consecutive threads.
+
+With contention only happening between two consecutive threads, it's easy to check if contention happens, and the thread with the smaller thread_num can simply wait until the next thread moves on:
+```
+In thread(i): 
+while (segment_start_index[i + 1] <= segment_end_index[i] + 1)
+    wait;    
+```
+
+

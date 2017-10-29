@@ -15,7 +15,7 @@
 #define ENABLE_2OPT_COUNTER
 //#define KEEP_DIST_LIST    // Save the calculated distance, requires a lot of RAM
 
-#define THREAD_COUNT 16
+#define DEFAULT_THREAD_COUNT 12
 #define SECONDS_TO_WAIT 10
 #define SECONDS_BUFFER 0
 
@@ -48,7 +48,7 @@ dist_type get_updated_route_distance(int *, int, int);
 
 void two_opt(int start, int end);
 
-int  available_threads = THREAD_COUNT;
+int  available_threads = DEFAULT_THREAD_COUNT;
 int		num_city;
 dist_type 	default_distance;
 
@@ -450,7 +450,7 @@ int main(int argc, char const *argv[])
 	if (argc > 4)
 		available_threads = atoi(argv[4]);
 	else
-		available_threads = THREAD_COUNT;
+		available_threads = DEFAULT_THREAD_COUNT;
 
 	printf("Working on %s\n", argv[1]);
 
