@@ -34,7 +34,7 @@ end
 #### 2-opt
 
 ##### Concept
-Check if the route can be shorten by reversing a segment of route; if so, reverse the route
+Check if the route can be shortened by reversing a segment of route; if so, reverse the route
 
 ##### Make it faster
 * A reversed segment has the same route length, the total route distance is changed at the start and the end of the segment
@@ -50,6 +50,14 @@ for (depth = 1; depth < num_city - 1; ++depth) {
 ```
 
 Idea: Split `start` threads, and avoid "contention". The splitting is fair because each thread is processing segments with the same length.
+
+```
+for (depth = 1; depth < num_city - 1; ++depth) {
+    #pragma omp parallel for schedule(static, chunk)
+    for (start = 1; start < num_city - depth; ++start) {
+        2opt_swap(start, start + depth);
+    }
+```
 
 #### Contention
 Contention is where two or more thread works on neighboring/crossed segment, and race condition may happen.
