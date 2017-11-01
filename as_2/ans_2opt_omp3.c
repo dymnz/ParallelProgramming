@@ -190,7 +190,8 @@ void parallel_2opt() {
 			int starting_pos_count = num_city - depth - 1;
 			int omp_chunk_size = (int) ceil((double)starting_pos_count / available_threads);
 
-			#pragma omp parallel for default(none)\
+			#pragma omp parallel for \
+			default(none) \
 			private(start) \
 			shared(depth, go_flag, route_index_list, num_city, omp_chunk_size, \
 			       stdout, available_threads, thread_process_start_list, \
