@@ -3,13 +3,17 @@
 #include <sys/types.h>
 #include <sys/resource.h>
 #include <sys/time.h>
+#include <omp.h>
 
+#define THREAD_NUM 8
 //#define VERBOSE
 
 int main(int argc, char* argv[])
 {
 	struct timeval start, end;
 	gettimeofday( &start, NULL );
+
+	omp_set_num_threads(THREAD_NUM);
 
 	if (argc != 3)
 	{
@@ -27,6 +31,7 @@ int main(int argc, char* argv[])
 	fp = fopen(argv[1], "r");
 
 	fscanf(fp, "%d", &n);
+	
 
 	// input matrix
 	a = malloc((n * 2 + 1) * sizeof(double*));
@@ -34,11 +39,17 @@ int main(int argc, char* argv[])
 		a[i] = malloc((n * 2 + 1) * sizeof(double));
 
 	for (i = 1; i <= n; i++)
-		for (j = 1; j <= n; j++)
+		for (j = 1; j <= n; j++) 
 			fscanf(fp, "%lf", &a[i][j]);
+
 	fclose(fp);
 
-	
+	printf("%d\n", n);
+	for (i = 1; i <= n; i++){
+		for (j = 1; j <= n; j++) 
+			printf("%lf\t", a[i][j]);
+		printf("\n");
+	}
 
 
 	for (i = 1; i <= n; i++)

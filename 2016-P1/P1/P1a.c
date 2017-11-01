@@ -5,9 +5,9 @@
 
 int main(int argc, char* argv[]) 
 { 
-	struct timeval start, end;
-	gettimeofday( &start, NULL );
-	
+    struct timeval start, end;
+    gettimeofday( &start, NULL );
+    
     if(argc > 2 || argc < 2)
     {
         printf("usage: ./[exe] [N]");
@@ -32,14 +32,15 @@ int main(int argc, char* argv[])
     {
         double x = (double) rand() / RAND_MAX;
         double y = (double) rand() / RAND_MAX;
+        //printf("%10.10lf %10.10lf\n", x, y);
         if((x * x + y * y) < 1)
             sum++;
     }
 
     printf("PI = %f\n", (double) 4 * sum / (N - 1));
-	
-	gettimeofday( &end, NULL );
-	float timeuse = end.tv_sec - start.tv_sec + (float)(end.tv_usec - start.tv_usec) / 1000000;
+    
+    gettimeofday( &end, NULL );
+    float timeuse = end.tv_sec - start.tv_sec + (float)(end.tv_usec - start.tv_usec) / 1000000;
     printf("time: %f s\n", timeuse);
 
     return 0;
