@@ -35,8 +35,6 @@ int main(int argc, char* argv[])
 
     //double x[THREAD_NUM], y[THREAD_NUM];
     double x, y;
-
-    int sum_list[THREAD_NUM];
     
     unsigned int seed;
 
@@ -46,17 +44,12 @@ int main(int argc, char* argv[])
     schedule(static)
     for (i = 1; i < N; i++)
     {
-        /*
-        x[omp_get_thread_num()] = (double) rand_r(&seed_list[omp_get_thread_num()]) / RAND_MAX;
-        y[omp_get_thread_num()] = (double) rand_r(&seed_list[omp_get_thread_num()]) / RAND_MAX;*/
         x = (double) rand_r(&seed) / RAND_MAX;
         y = (double) rand_r(&seed) / RAND_MAX;
-        
-        //printf("%10.10lf %10.10lf\n", x, y;
+    
         if ((x * x + y * y) < 1) {
             //#pragma omp critical
             sum++;
-            //sum_list[omp_get_thread_num()]++;
         }
     }
 

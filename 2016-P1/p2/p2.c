@@ -10,7 +10,7 @@
 int main(int argc, char* argv[]){
 	// Read argv
 	if (argc < 3){
-		printf("Usage: ./p2_pth <thread num> <space size>\n");
+		printf("Usage: ./p2 <thread num> <space size>\n");
 		exit(0);
 	}
 	else{
@@ -23,7 +23,7 @@ int main(int argc, char* argv[]){
 	}
 	
 	// Initial Environmental Information
-	printf("\n=======  Brownian Motion Simulation  =======\n");
+	printf("\n=======  Brownian Motion Simulation - Serial =======\n");
 	printf("Serial version.\n");
 	output_file = fopen("answer.txt", "w");
 	

@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <stdio.h>
+#include <stdlib.h>
 #include <omp.h>
 
 int binomial(int n, int k)
@@ -20,12 +20,16 @@ int binomial(int n, int k)
   }
 }
 
-int main()
+int main(int argc, char *argv[])
 {
   int k, n;
 
-  printf("Please input number n and k：");
-  scanf("%d %d", &n, &k);
+  //printf("Please input number n and k：");
+if (argc < 2)
+ return -1;
+  n = atoi(argv[1]);
+	k = atoi(argv[2]);
+  //scanf("%d %d", &n, &k);
   {
     printf ("C(%d,%d)=%d\n", n, k, binomial(n, k));
   }
