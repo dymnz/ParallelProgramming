@@ -28,18 +28,17 @@ struct node* newNode(int data) {
 int getPostorder(struct node* node) {
 	int l = 0, r = 0;
 
+	printf("num_threads: %d\n", omp_get_num_threads());
+
 	// first recur on left subtree
 	if (node->left)
 		#pragma omp task shared(l)
 		l = getPostorder(node->left);
 
-
 	// then recur on right subtree
 	if (node->right)
 		#pragma omp task shared(r)
 		r = getPostorder(node->right);
-
-
 
 	// now deal with the node
 	#pragma omp taskwait
@@ -61,8 +60,12 @@ int main() {
 	root->left->left->right	= newNode(9);
 
 	omp_set_num_threads(12);
+	#pragma omp parallel
+	{
+		#pragma omp single
+		printf("\nBy postorder traversal of binary tree, sum = %d \n\n", getPostorder(root));
+	}
 
-	printf("\nBy postorder traversal of binary tree, sum = %d \n\n", getPostorder(root));
 
 	return 0;
 }

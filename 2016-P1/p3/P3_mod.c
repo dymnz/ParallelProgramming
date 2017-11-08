@@ -9,7 +9,7 @@ int binomial(int n, int k)
   else
   {
     int x, y;
-	printf("%d\n", omp_get_num_threads());
+	  printf("%d\n", omp_get_num_threads());
     #pragma omp task shared(x)
     x = binomial(n - 1, k - 1);
     #pragma omp task shared(y)

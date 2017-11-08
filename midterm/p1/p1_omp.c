@@ -8,55 +8,75 @@
 #include <sys/resource.h>
 #include <assert.h>
 #include <math.h>
+#include <omp.h>
 
 static int verbose;
 static double mods;
 
-int main (int argc, char ** argv){
+int main (int argc, char ** argv) {
 	long n = 0, m, t, res, i;
 	char * sieve;
 	int thread_num;
 
 	/** Parsing argv **/
-	if (argc < 3){
+	if (argc < 3) {
 		printf("Usage: ./%s <thread_num> <number>\n", argv[0]);
 		return 0;
 	}
-	
-	if ((thread_num = atoi (argv[1])) <= 0){
+
+	if ((thread_num = atoi (argv[1])) <= 0) {
 		printf("invalid thread number\n");
 		return -1;
 	}
-	
-	if ((n = atoi (argv[2])) <= 0){
+
+	if ((n = atoi (argv[2])) <= 0) {
 		printf("invalid number\n");
 		return -1;
 	}
 
 
-	
+
 	/** Initialization **/
 	sieve = calloc (n + 1, 1);
 	res = 0;
-	
+
 	/** Setup timer **/
 	struct timeval start, end;
 	gettimeofday(&start, NULL);
-	
-/***************************************************************/
-/******************  Midterm Exam Starts Here  *****************/
+
+	/***************************************************************/
+	/******************  Midterm Exam Starts Here  *****************/
 
 	// set thread num here
+	omp_set_num_threads(thread_num);
 
+	#pragma omp parallel for \
+	ordered \
+	default(none) \
+	shared(m, n, sieve, res) \
+	private(t) //\
+	//reduction(+:res)
 	for (m = 2; m <= n; m++) {
+
+		#pragma omp flush(sieve)
 		if (sieve[m])
 			continue;
-		res++;
-		for (t = 2 * m; t <= n; t += m)
+
+		
+		printf("res: %3d %3d \t %3d\n", omp_get_thread_num(), m, res);
+		#pragma omp atomic
+		++res;
+		
+
+		for (t = 2 * m; t <= n; t += m) {
+			#pragma omp flush(sieve)
 			sieve[t] = 1;
+			printf("thread: %3d %3d \t %3d\n", omp_get_thread_num(), m, t);
+			#pragma omp flush(sieve)
+		}
 	}
-/******************  Midterm Exam Ends Here  *****************/
-/***************************************************************/
+	/******************  Midterm Exam Ends Here  *****************/
+	/***************************************************************/
 
 	/** Calculate Time **/
 	gettimeofday(&end, NULL);
@@ -64,8 +84,8 @@ int main (int argc, char ** argv){
 
 	/** Get memory usage **/
 	struct rusage r_usage;
-	getrusage(RUSAGE_SELF,&r_usage);
-	
+	getrusage(RUSAGE_SELF, &r_usage);
+
 	/** Output performence **/
 	printf("Memory usage: %ld bytes\n", r_usage.ru_maxrss);
 	printf("Time: %lf sec\n", timeInterval);
@@ -73,5 +93,5 @@ int main (int argc, char ** argv){
 	free (sieve);
 	printf ("%d\n", res);
 
-  return 0;
+	return 0;
 }
