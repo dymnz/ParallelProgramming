@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <pthread.h>
 
-#define THREAD_NUM 12
+#define THREAD_NUM 16
 
 typedef struct {
 	int R, G, B;
@@ -22,7 +22,7 @@ void RGB2HSI(int R, int G, int B, float *Hff , float *Sff, float *Iff);
 void HSI2RGB(float H, float S, float I, int *R, int *G, int *B);
 void ScaleUpI(float *I);
 void ScaleDownI(float *I);
-void Equalization(Pixel* pixels, long long pixel_count);
+void Equalization();
 
 
 /** Define Variable **/
@@ -43,6 +43,16 @@ void *thread_RGB2HSI_ScaleUpI_func(void *args) {
 	return 0;
 }
 
+
+void *thread_HSI2RGB_func(void *args) {
+	Thread_StartEnd_Param *param = (Thread_StartEnd_Param *) args;
+
+	int i;
+	for (i = param->index_start; i < param->index_end; ++i) {
+		HSI2RGB (pixels[i].H, pixels[i].S, pixels[i].I, &pixels[i].R, &pixels[i].G, &pixels[i].B);
+	}
+	return 0;
+}
 
 int main(int argc, char* argv[]) {
 
@@ -81,7 +91,7 @@ int main(int argc, char* argv[]) {
 	int segment_size_per_thread = pixel_count / THREAD_NUM;
 
 	Thread_StartEnd_Param *StartEnd_param_list = (Thread_StartEnd_Param *)
-	                                     malloc(THREAD_NUM * sizeof(Thread_StartEnd_Param));
+	        malloc(THREAD_NUM * sizeof(Thread_StartEnd_Param));
 
 	/**  Step1. RGB to HSI  **/
 	// Spawn threads
@@ -101,31 +111,47 @@ int main(int argc, char* argv[]) {
 	for (i = 0; i < THREAD_NUM; ++i)
 		pthread_join(thread_list[i], NULL);
 
-
+	// Combined with above
 	/**  Step2. Pick I and scale up to (0, 1000)  **/
 	// for (idx = 0; idx < pixel_count; idx++) {
 	// 	ScaleUpI(&pixels[idx].I);
 	// }
 
-
 	/**  Step3. Perform Equalization on I  **/
 	Equalization(pixels, pixel_count);
 
 	/**  Step4. RGB to HSI  **/
-	for (idx = 0; idx < pixel_count; idx++) {
-		ScaleDownI(&pixels[idx].I);
-	}
+	// for (idx = 0; idx < pixel_count; idx++) {
+	// 	ScaleDownI(&pixels[idx].I);
+	// }
 
 	/**  Step5. HSI to RGB  **/
-	for (idx = 0; idx < pixel_count; idx++) {
-		HSI2RGB (pixels[idx].H, pixels[idx].S, pixels[idx].I, &pixels[idx].R, &pixels[idx].G, &pixels[idx].B);
+	// for (idx = 0; idx < pixel_count; idx++) {
+	// 	HSI2RGB (pixels[idx].H, pixels[idx].S, pixels[idx].I, &pixels[idx].R, &pixels[idx].G, &pixels[idx].B);
+	// }
+	// Spawn threads
+	for (i = 0; i < THREAD_NUM; ++i) {
+		// Thread runs [index_start index_end)
+		StartEnd_param_list[i].index_start = i * segment_size_per_thread;
+
+		// Last thread process the remainder of the particles
+		if (i < THREAD_NUM - 1)
+			StartEnd_param_list[i].index_end = (i + 1) * segment_size_per_thread;
+		else
+			StartEnd_param_list[i].index_end = pixel_count + 1;
+
+		pthread_create(&thread_list[i], NULL, thread_HSI2RGB_func, &StartEnd_param_list[i]);
 	}
+	// Join the threads
+	for (i = 0; i < THREAD_NUM; ++i)
+		pthread_join(thread_list[i], NULL);
 
 	/******************  Midterm Exam Ends Here  *****************/
 	/***************************************************************/
 
 
-
+	free(thread_list);
+	free(StartEnd_param_list);
 
 	/***************************************************************/
 	/********************  Calculate Performance  ******************/
@@ -165,11 +191,6 @@ int main(int argc, char* argv[]) {
 
 	return 0;
 }
-
-
-
-
-
 
 
 
@@ -263,14 +284,18 @@ void ScaleDownI(float *I) {
 	*I /= 10000;
 }
 
-void Equalization(Pixel* pixels, long long pixel_count) {
-	long long statistic_arry[10001];		// statistic_arry array
+void Equalization() {
+	long long statistic_arry[10001] = {0};		// statistic_arry array
+	float f_statistic_arry[10001];
 	long long idx = 0;					// Index of for loop
 
+
+	// WHY
 	/** Initial the arry **/
+	/*
 	for (idx = 0; idx < 10001; idx++) {
 		statistic_arry[idx] = 0;
-	}
+	}*/
 
 	/** Calculate PDF **/
 	for (idx = 0; idx < pixel_count; idx++) {
@@ -295,13 +320,23 @@ void Equalization(Pixel* pixels, long long pixel_count) {
 	}
 
 	/** Calculate new value in statistic_arry **/
+	// for (idx = 0; idx < 10001; idx++) {
+	// 	statistic_arry[idx] = round((((double)statistic_arry[idx] - cdf_min) / (pixel_count - cdf_min)) * (10000 - 10000 / 255));
+	// }
 	for (idx = 0; idx < 10001; idx++) {
-		statistic_arry[idx] = round((((double)statistic_arry[idx] - cdf_min) / (pixel_count - cdf_min)) * (10000 - 10000 / 255));
+		// statistic_arry[idx] = round(
+		//                           (((double)statistic_arry[idx] - cdf_min)
+		//                            / (pixel_count - cdf_min)) *
+		//                           (10000 - 10000 / 255));
+		f_statistic_arry[idx] = round(
+		                            (((double)statistic_arry[idx] - cdf_min)
+		                             / (pixel_count - cdf_min)) *
+		                            (10000 - 10000 / 255)) / 10000;
 	}
 
 	/** Update I value **/
 	for (idx = 0; idx < pixel_count; idx++) {
-		pixels[idx].I = statistic_arry[(int)(pixels[idx].I)];
+		pixels[idx].I = f_statistic_arry[(int)(pixels[idx].I)];
 	}
 }
 
