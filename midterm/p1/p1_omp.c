@@ -50,32 +50,39 @@ int main (int argc, char ** argv) {
 	// set thread num here
 	omp_set_num_threads(num_thread);
 
-	
+	for (m = 2; m <= num_thread ; m += 2) {
+		if (sieve[m]) {
+			continue;
+		}
+		++res;
+
+		#pragma omp parallel for
+		for (t = 2 * m; t <= n; t += m) {
+			sieve[t] = 1;
+		}
+	}
 
 	#pragma omp parallel for \
 	default(none) \
 	private(m, t) \
-	shared(n, sieve) \
+	shared(n, sieve, num_thread) \
 	reduction(+:res) \
 	schedule(static, 1) \
 	ordered
-	for (m = 2; m <= n; m++) {
+	for (m = num_thread + 1; m <= n; m++) {
 
 		#pragma omp flush(sieve)
-		if (m < num_thread) {
-			
-		}
-		if (sieve[m])
+		if (sieve[m]) {
 			continue;
-		
-		printf("res: %3d %3d \t %3d\n", omp_get_num_thread(), m, res);
-		++res;
-		
-		for (t = 2 * m; t <= n; t += m) {
+		}
 
+		//printf("res: %3d %3d \t %3d\n", omp_get_thread_num(), m, res);
+		++res;
+
+		for (t = 2 * m; t <= n; t += m) {
 			sieve[t] = 1;
 			#pragma omp flush(sieve)
-			printf("thread: %3d %3d \t %3d\n", omp_get_num_thread(), m, t);
+			//printf("thread: %3d %3d \t %3d\n", omp_get_thread_num(), m, t);
 		}
 	}
 	/******************  Midterm Exam Ends Here  *****************/
