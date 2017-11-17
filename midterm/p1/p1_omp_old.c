@@ -16,15 +16,15 @@ static double mods;
 int main (int argc, char ** argv) {
 	long n = 0, m, t, res, i;
 	char * sieve;
-	int thread_num;
+	int num_thread;
 
 	/** Parsing argv **/
 	if (argc < 3) {
-		printf("Usage: ./%s <thread_num> <number>\n", argv[0]);
+		printf("Usage: ./%s <num_thread> <number>\n", argv[0]);
 		return 0;
 	}
 
-	if ((thread_num = atoi (argv[1])) <= 0) {
+	if ((num_thread = atoi (argv[1])) <= 0) {
 		printf("invalid thread number\n");
 		return -1;
 	}
@@ -48,23 +48,43 @@ int main (int argc, char ** argv) {
 	/******************  Midterm Exam Starts Here  *****************/
 
 	// set thread num here
-	omp_set_num_threads(thread_num);
-	int go;
+	omp_set_num_threads(num_thread);
 
-	#pragma omp parallel private(m)
-	for (m = 2; m <= n; m++) {
-		if (!sieve[m]) {
-			#pragma omp for
-			for (t = 2 * m; t <= n; t += m)
-				sieve[t] = 1;
-		}			
+	for (m = 2; m <= num_thread*2 ; m += 2) {
+		if (sieve[m]) {
+			continue;
+		}
+		++res;
+
+		#pragma omp parallel for
+		for (t = 2 * m; t <= n; t += m) {
+			sieve[t] = 1;
+		}
 	}
 
-	#pragma omp parallel for reduction(+:res)
-	for (m = 2; m <= n; m++)
-		if (!sieve[m])
-			++res;
+	int m_start = num_thread*2 + 1;
 
+	#pragma omp parallel for \
+	default(none) \
+	private(m, t) \
+	shared(n, sieve, m_start) \
+	reduction(+:res) \
+	schedule(static, 1) \
+	ordered
+	for (m = m_start; m <= n; m += 2) {
+
+		#pragma omp flush(sieve)
+		if (sieve[m] || (m&1 == 0)) {
+			continue;
+		}
+
+		++res;
+		printf("res: %3d %3d \t %3d\n", omp_get_thread_num(), m, res);
+		for (t = 2 * m; t <= n; t += m) {
+			sieve[t] = 1;
+			//#pragma omp flush(sieve)
+		}
+	}
 	/******************  Midterm Exam Ends Here  *****************/
 	/***************************************************************/
 
