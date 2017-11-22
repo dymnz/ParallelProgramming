@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <pthread.h>
 
-#define THREAD_NUM 16
+#define THREAD_NUM 32
 
 typedef struct {
 	int R, G, B;
