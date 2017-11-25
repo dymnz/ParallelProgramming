@@ -49,7 +49,7 @@ for (depth = 1; depth < num_city - 1; ++depth) {
     }
 ```
 
-Idea: Split `start` threads, and avoid "contention". The splitting is fair because each thread is processing segments with the same length.
+Idea: Split `start` among threads, and avoid "contention". The splitting is fair because each thread is processing segments with the same length.
 
 ```
 for (depth = 1; depth < num_city - 1; ++depth) {

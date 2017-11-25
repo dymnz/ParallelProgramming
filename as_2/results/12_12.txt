@@ -1,5 +1,0 @@
-testing: 12 threads
-running ans_2opt_omp12
-                -- Written by TA
-================================
-Fail to open: ./output_omp12_12.
