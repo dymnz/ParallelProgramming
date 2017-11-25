@@ -25,5 +25,10 @@ void RNN_forward_propagation(
 	Matrix_t *input_vector,
 	Matrix_t *output_vector
 );
+math_t RNN_loss_calculation(
+    RNN_t *RNN_storage,
+    Matrix_t *fp_output_matrix,			// TxO
+    Matrix_t *expected_output_matrix	// TxO
+);
 
 math_t internal_squash_func(math_t value);

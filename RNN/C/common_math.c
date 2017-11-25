@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "common_math.h"
 #include <math.h>
+
 math_t uniform_random_with_seed(
     math_t lower_bound,
     math_t upper_bound,

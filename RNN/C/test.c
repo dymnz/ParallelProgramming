@@ -40,7 +40,7 @@ void matrix_prepare(Matrix_t **m_ptr, int m, int n, math_t *data) {
 void RNN_FP_test() {
 	int T = 4, I = 4;
 	int H = 3;
-	math_t data[] = {
+	math_t data_in[] = {
 		1, 0, 0, 0,
 		0, 1, 0, 0,
 		0, 0, 1, 0,
@@ -48,7 +48,7 @@ void RNN_FP_test() {
 	};
 
 	Matrix_t *input_matrix, *output_matrix;
-	matrix_prepare(&input_matrix, T, I, data);
+	matrix_prepare(&input_matrix, T, I, data_in);
 	output_matrix = matrix_create(T, I);
 
 	printf("-------------input_matrix\n");
@@ -79,9 +79,67 @@ void RNN_FP_test() {
 	printf("-------------output_matrix\n");
 	matrix_print(output_matrix);
 }
+
+void RNN_Loss_test() {
+	int T = 4, I = 4;
+	int H = 3;
+
+	// hell
+	math_t data_in[] = {
+		1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		0, 0, 1, 0
+	};
+
+	// ello
+	math_t data_out[] = {
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		0, 0, 1, 0,
+		0, 0, 0, 1
+	};
+
+
+	Matrix_t *input_matrix, *expected_output_matrix, *RNN_output_matrix;
+	matrix_prepare(&input_matrix, T, I, data_in);
+	matrix_prepare(&expected_output_matrix, T, I, data_out);
+	RNN_output_matrix = matrix_create(T, I);
+
+	printf("-------------input_matrix\n");
+	matrix_print(input_matrix);
+	printf("-------------expected_output_matrix\n");
+	matrix_print(expected_output_matrix);
+
+	RNN_t *RNN_storage
+	    = (RNN_t *) malloc(sizeof(RNN_t));
+
+	RNN_storage->input_vector_len = I;
+	RNN_storage->input_window_len = T;
+
+	RNN_storage->output_vector_len = I;
+	RNN_storage->hidden_layer_vector_len = H;
+	RNN_storage->bptt_truncate_len = 4;
+
+	RNN_init(RNN_storage);
+	RNN_forward_propagation(RNN_storage, input_matrix, RNN_output_matrix);
+
+	printf("-------------RNN_output_matrix\n");
+	matrix_print(RNN_output_matrix);
+
+	math_t total_loss = RNN_loss_calculation(
+		RNN_storage, 
+		RNN_output_matrix, 
+		expected_output_matrix);
+	printf("total_loss: %lf\n", total_loss);
+	printf("expected_loss: %lf\n", log(I));
+}
+
+
 int main()
 {
 
-	RNN_FP_test();
+	//RNN_FP_test();
+	RNN_Loss_test();
 	return 0;
 }
