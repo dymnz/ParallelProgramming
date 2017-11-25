@@ -26,17 +26,17 @@ void uniform_random_with_seed_test() {
 }
 
 void matrix_mult_test() {
-	math_t data_a[] = {1, 2, 3};
-	math_t data_b[] = {3, 5, 7, 9};
+	math_t data_a[] = {1, 2, 3, 3, 2, 1};
+	math_t data_b[] = {3, 5, 7, 9, 8, 6, 4, 2};
 
 	Matrix_t *matrix_a, *matrix_b;
 
-	matrix_a = matrix_create(3, 1);
+	matrix_a = matrix_create(3, 2);
 	if (!matrix_a) {
 		printf("Error");
 		return;
 	}
-	matrix_b = matrix_create(1, 4);
+	matrix_b = matrix_create(2, 4);
 	if (!matrix_b) {
 		printf("Error");
 		return;
@@ -70,7 +70,7 @@ void matrix_mult_test() {
 int main()
 {
 	//uniform_random_with_seed_test();
-	matrix_mult_test();
+	//matrix_mult_test();
 	return 0;
 }
 

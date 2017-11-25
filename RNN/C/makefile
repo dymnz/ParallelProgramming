@@ -9,3 +9,6 @@ TEST_OBJ = test.o common_math.o
 
 test: $(TEST_OBJ)
 	gcc $(CFLAGS) -o $@ $^
+
+clean:
+	rm $(TEST_OBJ)

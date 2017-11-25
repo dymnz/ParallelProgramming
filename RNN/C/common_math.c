@@ -14,7 +14,7 @@ math_t uniform_random_with_seed(
 
 Matrix_t *matrix_create(int m, int n) {
 	Matrix_t *matrix = (Matrix_t *) malloc(sizeof(Matrix_t));
-	if(!matrix)
+	if (!matrix)
 		return NULL;
 
 	matrix->m = m;
@@ -65,14 +65,13 @@ Matrix_t *matrix_mult(Matrix_t *matrix_a, Matrix_t *matrix_b) {
 	if (!matrix_c)
 		return NULL;
 
-	int m, n, r, c;
+	int m, n, c;
 	for (m = 0; m < matrix_a->m; ++m) {
 		for (n = 0; n < matrix_b->n; ++n) {
 			matrix_c->data[m][n] = 0.0;
 			for (c = 0; c < matrix_a->n; ++c) {
-				for (r = 0; r < matrix_b->m; ++r)
-					matrix_c->data[m][n] += 
-						matrix_a->data[m][c] * matrix_b->data[r][n];
+				matrix_c->data[m][n] +=
+				    matrix_a->data[m][c] * matrix_b->data[c][n];
 			}
 		}
 	}
