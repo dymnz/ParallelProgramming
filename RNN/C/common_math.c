@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "common_math.h"
-
+#include <math.h>
 math_t uniform_random_with_seed(
     math_t lower_bound,
     math_t upper_bound,
@@ -12,39 +12,61 @@ math_t uniform_random_with_seed(
 	       lower_bound;
 }
 
-Matrix_t *matrix_create(int m, int n) {
-	Matrix_t *matrix = (Matrix_t *) malloc(sizeof(Matrix_t));
-	if (!matrix)
-		return NULL;
+void matrix_random_with_seed(
+	Matrix_t *matrix,
+    math_t lower_bound,
+    math_t upper_bound,
+    unsigned int *seedp
+) {
+	int m, n;
+	for (m = 0; m < matrix->m; ++m)
+		for (n = 0; n < matrix->n; ++n)
+			matrix->data[m][n] = 
+				uniform_random_with_seed(lower_bound, upper_bound, seedp);
+}
 
-	matrix->m = m;
-	matrix->n = n;
-
-	math_t **row_data = (math_t **) malloc(m * sizeof(math_t *));
-	if (!row_data)
-		return NULL;
-
-	matrix->data = row_data;
+math_t **create_2d(int m, int n) {
+	math_t **data = (math_t **) malloc(m * sizeof(math_t *));
+	if (!data) {
+		exit(69);
+	}
 
 	int i;
 	math_t *col_data;
 	for (i = 0; i < m; ++i) {
 		col_data = (math_t *) malloc(n * sizeof(math_t));
 		if (!col_data)
-			return NULL;
+			exit(69);
 
-		matrix->data[i] = col_data;
+		data[i] = col_data;
 	}
+
+	return data;
+}
+
+Matrix_t *matrix_create(int m, int n) {
+	Matrix_t *matrix = (Matrix_t *) malloc(sizeof(Matrix_t));
+	if (!matrix)
+		exit(69);
+
+	matrix->m = m;
+	matrix->n = n;
+	matrix->data = create_2d(m, n);
 
 	return matrix;
 }
 
-void matrix_destroy(Matrix_t *matrix) {
+void free_2d(math_t **data, int m) {
 	int i;
-	for (i = 0; i < matrix->n; ++i)
-		free(matrix->data[i]);
+	for (i = 0; i < m; ++i) 
+		free(data[i]);
 
-	free(matrix->data);
+	free(data);
+}
+
+void matrix_destroy(Matrix_t *matrix) {
+	free_2d(matrix->data, matrix->m);
+	free(matrix);
 }
 
 void matrix_print(Matrix_t *matrix) {
@@ -57,24 +79,15 @@ void matrix_print(Matrix_t *matrix) {
 	}
 }
 
-Matrix_t *matrix_mult(Matrix_t *matrix_a, Matrix_t *matrix_b) {
-	if (matrix_a->n != matrix_b->m)
-		return NULL;
+void softmax(math_t *vector, math_t *result, int dim) {
+	int i;
 
-	Matrix_t *matrix_c = matrix_create(matrix_a->m, matrix_b->n);
-	if (!matrix_c)
-		return NULL;
-
-	int m, n, c;
-	for (m = 0; m < matrix_a->m; ++m) {
-		for (n = 0; n < matrix_b->n; ++n) {
-			matrix_c->data[m][n] = 0.0;
-			for (c = 0; c < matrix_a->n; ++c) {
-				matrix_c->data[m][n] +=
-				    matrix_a->data[m][c] * matrix_b->data[c][n];
-			}
-		}
+	math_t denom = 0;
+	for (i = 0; i < dim; ++i) {
+		result[i] = exp(vector[i]);
+		denom += result[i];
 	}
 
-	return matrix_c;
+	for (i = 0; i < dim; ++i)
+		result[i] /= denom;
 }

@@ -1,5 +1,5 @@
 #pragma once
-#include <math.h>
+#include "math.h"
 
 typedef double math_t;
 typedef struct
@@ -27,4 +27,20 @@ math_t **create_2d(int m, int n);
 Matrix_t *matrix_create(int m, int n);
 void matrix_destroy(Matrix_t *matrix);
 void matrix_print(Matrix_t *matrix);
-void softmax(math_t *vector, math_t *result, int dim);
+
+int matrix_mult(
+	Matrix_t *matrix_a, 
+	Matrix_t *matrix_b, 
+	Matrix_t *matrix_c,
+	int m_a, int n_a,
+	int m_b, int n_b
+);
+int matrix_mult(
+	math_t **matrix_a, 
+	math_t **matrix_b, 
+	math_t **matrix_c,
+	int m_a, int n_a,
+	int m_b, int n_b
+);
+int matrix_mult(Matrix_t *matrix_a, Matrix_t *matrix_b, Matrix_t *matrix_c);
+Matrix_t *matrix_mult(Matrix_t *matrix_a, Matrix_t *matrix_b);

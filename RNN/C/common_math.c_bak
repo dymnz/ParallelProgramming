@@ -1,0 +1,162 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include "common_math.h"
+
+math_t uniform_random_with_seed(
+    math_t lower_bound,
+    math_t upper_bound,
+    unsigned int *seedp
+) {
+	return ((math_t)rand_r(seedp) / (math_t)RAND_MAX) *
+	       (upper_bound - lower_bound + 1) +
+	       lower_bound;
+}
+
+void matrix_random_with_seed(
+	Matrix_t *matrix,
+    math_t lower_bound,
+    math_t upper_bound,
+    unsigned int *seedp
+) {
+	int m, n;
+	for (m = 0; m < matrix->m; ++m)
+		for (n = 0; n < matrix->n; ++n)
+			matrix->data[m][n] = 
+				uniform_random_with_seed(lower_bound, upper_bound, seedp);
+}
+
+math_t **create_2d(int m, int n) {
+	math_t **data = (math_t **) malloc(m * sizeof(math_t *));
+	if (!data) {
+		exit(69);
+	}
+
+	int i;
+	math_t *col_data;
+	for (i = 0; i < m; ++i) {
+		col_data = (math_t *) malloc(n * sizeof(math_t));
+		if (!col_data)
+			exit(69);
+
+		data[i] = col_data;
+	}
+
+	return data;
+}
+
+Matrix_t *matrix_create(int m, int n) {
+	Matrix_t *matrix = (Matrix_t *) malloc(sizeof(Matrix_t));
+	if (!matrix)
+		exit(69);
+
+	matrix->m = m;
+	matrix->n = n;
+	matrix->data = create_2d(m, n);
+
+	return matrix;
+}
+
+void free_2d(math_t **data) {
+	int i;
+	for (i = 0; i < matrix->n; ++i) 
+		free(data[i]);
+
+	free(data);
+}
+
+void matrix_destroy(Matrix_t *matrix) {
+	free_2d(matrix->data);
+	free(matrix);
+}
+
+void matrix_print(Matrix_t *matrix) {
+	int m, n;
+	for (m = 0; m < matrix->m; ++m) {
+		for (n = 0; n < matrix->n; ++n) {
+			printf("%3.3lf   ", matrix->data[m][n]);
+		}
+		printf("\n");
+	}
+}
+
+Matrix_t *matrix_mult(Matrix_t *matrix_a, Matrix_t *matrix_b) {
+	if (matrix_a->n != matrix_b->m)
+		return NULL;
+
+	Matrix_t *matrix_c = matrix_create(matrix_a->m, matrix_b->n);
+	if (!matrix_c) {
+		printf("Matrix C init error\n");
+		exit(69);
+	}
+
+	if (matrix_mult(matrix_a, matrix_b, matrix_c)) {
+		printf("Mult error\n");
+		matrix_destroy(matrix_c);
+		return NULL;
+	}
+
+	return matrix_c;
+}
+
+int matrix_mult(
+	math_t **matrix_a, 
+	math_t **matrix_b, 
+	math_t **matrix_c,
+	int m_a, int n_a,
+	int m_b, int n_b
+) {
+	if (n_a != m_b)
+		return -1;
+
+	int m, n, c;
+	for (m = 0; m < m_a; ++m) {
+		for (n = 0; n < n_b; ++n) {
+			matrix_c[m][n] = 0.0;
+			for (c = 0; c < n_a; ++c) {
+				matrix_c[m][n] +=
+				    matrix_a[m][c] * matrix_b[c][n];
+			}
+		}
+	}
+	return 0;
+}
+
+int matrix_mult(Matrix_t *matrix_a, Matrix_t *matrix_b, Matrix_t *matrix_c) {
+	if (matrix_a->n != matrix_b->m)
+		return -1;
+
+	if ((matrix_a->m != matrix_c->m) ||
+		(matrix_b->n != matrix_c->n))
+		return -1;
+
+	return matrix_mult(
+		matrix_a->data, 
+		matrix_b->data, 
+		matrix_c->data,
+		matrix_a->m, matrix_a->n,
+		matrix_b->m, matrix_b->n
+	);
+}
+
+int matrix_mult(
+	Matrix_t *matrix_a, 
+	Matrix_t *matrix_b, 
+	Matrix_t *matrix_c,
+	int m_a, int n_a,
+	int m_b, int n_b
+) {
+	if (matrix_a->n != matrix_b->m)
+		return -1;
+
+	if ((matrix_a->m != matrix_c->m) ||
+		(matrix_b->n != matrix_c->n))
+		return -1;
+
+	return matrix_mult(
+		matrix_a->data, 
+		matrix_b->data, 
+		matrix_c->data,
+		m_a, n_a,
+		m_b, n_b
+	);
+}

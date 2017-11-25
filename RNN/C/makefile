@@ -1,14 +1,15 @@
 CC=gcc
 CFLAGS=-Wall
-DEPS = common_math.h
-TEST_OBJ = test.o common_math.o
+LFLAGS=-lm
+DEPS = common_math.h RNN.h
+TEST_OBJ = test.o common_math.o RNN.o
 
 
 %.o: %.c $(DEPS)
-	$(CC) $(CFLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS) -c -o $@ $< $(LFLAGS)
 
 test: $(TEST_OBJ)
-	gcc $(CFLAGS) -o $@ $^
+	gcc $(CFLAGS) -o $@ $^ $(LFLAGS)
 
 clean:
 	rm $(TEST_OBJ)
