@@ -76,7 +76,7 @@ void RNN_forward_propagation(
 		}
 	}
 
-	// S[0] = X[0]*U
+	// S[0] = X[0]*U as S[-1] = [0]
 	// 1xH =  1xI*IxH
 	for (n = 0; n < h_dim; ++n) {
 		for (r = 0; r < i_dim; ++r) {
@@ -110,7 +110,7 @@ void RNN_forward_propagation(
 				// O[t] = S[t] * V
 				temp_vector[n] += S[t][r] * V[r][n]; 
 			}			
-			softmax(temp_vector, O[t], o_dim);
+			stable_softmax(temp_vector, O[t], o_dim);
 		}
 	}
 	free(temp_vector);
@@ -129,11 +129,12 @@ math_t RNN_loss_calculation(
 
 	int t, o;
 	for (t = 0; t < t_dim; ++t) {
-		log_term = 0.0;
-		for (o = 0; o < o_dim; ++o) {			
-			log_term += 
-				expected_output_matrix->data[t][o] * 
-				log(fp_output_matrix->data[t][o]);
+		// expected_output_matrix is an one-hot vector		
+		for (o = 0; o < o_dim; ++o) {
+			if (expected_output_matrix->data[t][o] == 1) {
+				log_term = log(fp_output_matrix->data[t][o]);
+				break;
+			}
 		}
 		total_loss += -1.0 / t_dim * log_term;
 	}

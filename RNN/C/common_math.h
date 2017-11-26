@@ -27,4 +27,6 @@ math_t **create_2d(int m, int n);
 Matrix_t *matrix_create(int m, int n);
 void matrix_destroy(Matrix_t *matrix);
 void matrix_print(Matrix_t *matrix);
+
 void softmax(math_t *vector, math_t *result, int dim);
+void stable_softmax(math_t *vector, math_t *result, int dim);

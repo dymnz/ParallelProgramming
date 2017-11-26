@@ -92,3 +92,23 @@ void softmax(math_t *vector, math_t *result, int dim) {
 	for (i = 0; i < dim; ++i)
 		result[i] /= denom;
 }
+
+
+// Subtract max value from exp for numerical stability
+void stable_softmax(math_t *vector, math_t *result, int dim) {
+	int i;
+	
+	math_t max_val = 0;
+	for (i = 0; i < dim; ++i)
+		if (vector[i] > max_val)
+			max_val = vector[i];
+
+	math_t denom = 0;
+	for (i = 0; i < dim; ++i) {
+		result[i] = exp(vector[i] - max_val);
+		denom += result[i];
+	}
+
+	for (i = 0; i < dim; ++i)
+		result[i] /= denom;
+}
