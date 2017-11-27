@@ -23,9 +23,17 @@ void matrix_random_with_seed(
     unsigned int *seedp
 );
 
-math_t **create_2d(int m, int n);
+
 Matrix_t *matrix_create(int m, int n);
-void matrix_destroy(Matrix_t *matrix);
+void matrix_free(Matrix_t *matrix);
+void matrix_checked_create(Matrix_t **matrix, int m, int n);
+void matrix_resize(Matrix_t *matrix, int m, int n);
+
+
+void free_2d(math_t **data, int m);
+void clear_2d(math_t **data, int m, int n);
+math_t **create_2d(int m, int n);
+
 void matrix_print(Matrix_t *matrix);
 
 void softmax(math_t *vector, math_t *result, int dim);

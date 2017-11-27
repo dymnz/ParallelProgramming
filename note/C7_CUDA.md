@@ -51,5 +51,13 @@ cudaMemcpy(&c, dev_c);                      // Retrieve dev_c from GPU memo
 cudaFree(dev_c);                            // Freeing memory allocated on GPU mem
 ```
 * Copying from and to GPU memory creates many overhead
+
+#### Device
+* Version
+    * e.g. 3.5
+        * 3: major
+        * 5: minor
+
+
 #### Thrust
 * STL for CUDA C

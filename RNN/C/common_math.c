@@ -45,6 +45,15 @@ math_t **create_2d(int m, int n) {
 	return data;
 }
 
+void clear_2d(math_t **data, int m, int n) {
+	int i, r;
+	for (i = 0; i < m; ++i) {
+		for (r = 0; r < n; ++r) {
+			data[i][r] = 0.0;
+		}
+	}
+}
+
 Matrix_t *matrix_create(int m, int n) {
 	Matrix_t *matrix = (Matrix_t *) malloc(sizeof(Matrix_t));
 	if (!matrix)
@@ -57,6 +66,36 @@ Matrix_t *matrix_create(int m, int n) {
 	return matrix;
 }
 
+void matrix_checked_create(Matrix_t **matrix, int m, int n) {
+	if (*matrix != NULL && (*matrix)->m == m && (*matrix)->n == n)
+		return;
+
+	matrix_free(*matrix);
+
+	*matrix = (Matrix_t *) malloc(sizeof(Matrix_t));
+	if (!matrix)
+		exit(69);
+
+	(*matrix)->m = m;
+	(*matrix)->n = n;
+	(*matrix)->data = create_2d(m, n);
+}
+
+void matrix_resize(Matrix_t *matrix, int m, int n) {
+	if (matrix != NULL && matrix->m == m && matrix->n == n)
+		return;
+
+	if (matrix == NULL)
+		exit(77);
+	
+	free_2d(matrix->data, matrix->m);	
+
+	matrix->m = m;
+	matrix->n = n;
+	matrix->data = create_2d(m, n);
+}
+
+
 void free_2d(math_t **data, int m) {
 	int i;
 	for (i = 0; i < m; ++i) 
@@ -65,7 +104,9 @@ void free_2d(math_t **data, int m) {
 	free(data);
 }
 
-void matrix_destroy(Matrix_t *matrix) {
+void matrix_free(Matrix_t *matrix) {
+	if (!matrix)
+		return;
 	free_2d(matrix->data, matrix->m);
 	free(matrix);
 }

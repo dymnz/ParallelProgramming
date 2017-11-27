@@ -4,7 +4,6 @@
 
 void RNN_init(RNN_t *RNN_storage) {
 	int input_vector_len = RNN_storage->input_vector_len;
-	int input_window_len = RNN_storage->input_window_len;
 	int output_vector_len = RNN_storage->output_vector_len;
 	int hidden_layer_vector_len = RNN_storage->hidden_layer_vector_len;
 
@@ -46,8 +45,15 @@ void RNN_init(RNN_t *RNN_storage) {
 	    sqrt(1 / hidden_layer_vector_len),
 	    &seed);
 
-	RNN_storage->internal_state_matrix
-	= matrix_create(input_window_len, hidden_layer_vector_len);
+	RNN_storage->internal_state_matrix = matrix_create(0, 0);
+}
+
+void RNN_destroy(RNN_t *RNN_storage) {
+	matrix_free(RNN_storage->input_weight_matrix);
+	matrix_free(RNN_storage->output_weight_matrix);
+	matrix_free(RNN_storage->internal_weight_matrix);
+	matrix_free(RNN_storage->internal_state_matrix);
+	free(RNN_storage);
 }
 
 void RNN_forward_propagation(
@@ -55,6 +61,16 @@ void RNN_forward_propagation(
     Matrix_t *input_matrix,	// TxI
     Matrix_t *output_matrix	// TxO
 ) {
+	int i_dim = RNN_storage->input_vector_len;
+	int o_dim = RNN_storage->output_vector_len;
+	int t_dim = input_matrix->m;
+	int h_dim = RNN_storage->hidden_layer_vector_len;
+
+	matrix_resize(
+		RNN_storage->internal_state_matrix, 
+		t_dim, 
+		RNN_storage->hidden_layer_vector_len);
+
 	math_t **X = input_matrix->data;
 	math_t **O = output_matrix->data;
 
@@ -62,11 +78,6 @@ void RNN_forward_propagation(
 	math_t **U = RNN_storage->input_weight_matrix->data;	// IxH
 	math_t **V = RNN_storage->output_weight_matrix->data;	// HxO
 	math_t **W = RNN_storage->internal_weight_matrix->data;	// HxH
-
-	int i_dim = RNN_storage->input_vector_len;
-	int o_dim = RNN_storage->output_vector_len;
-	int t_dim = RNN_storage->input_window_len;
-	int h_dim = RNN_storage->hidden_layer_vector_len;
 
 	int m, n, r, t;
 
@@ -82,6 +93,8 @@ void RNN_forward_propagation(
 		for (r = 0; r < i_dim; ++r) {
 			S[0][n] += X[0][r] * U[r][n];
 		}
+	}
+	for (n = 0; n < h_dim; ++n) {
 		S[0][n] = internal_squash_func(S[0][n]);
 	}
 
@@ -95,36 +108,39 @@ void RNN_forward_propagation(
 			}
 			for (r = 0; r < h_dim; ++r) {
 				// S[t] = X[t]*U + S[t-1]*W
-				S[t][n] = S[t-1][r] * W[r][n] + S[t][n]; 
+				S[t][n] += S[t-1][r] * W[r][n]; 
 			}
 			S[t][n] = internal_squash_func(S[t][n]);
 		}
 	}
+
 
 	// O[t] = S[t] * V
 	// 1xO = 1xH * HxO
 	math_t *temp_vector = (math_t *) malloc(o_dim * sizeof(math_t));
 	for (t = 0; t < t_dim; ++t) {
 		for (n = 0; n < o_dim; ++n) {
+			temp_vector[n] = 0.0;
 			for (r = 0; r < h_dim; ++r) {
 				// O[t] = S[t] * V
 				temp_vector[n] += S[t][r] * V[r][n]; 
-			}			
-			stable_softmax(temp_vector, O[t], o_dim);
+			}						
 		}
+		stable_softmax(temp_vector, O[t], o_dim);
 	}
+
 	free(temp_vector);
 }
 
 // Cross entropy loss
 math_t RNN_loss_calculation(
     RNN_t *RNN_storage,
-    Matrix_t *fp_output_matrix,			// TxO
+    Matrix_t *predicted_output_matrix,	// TxO
     Matrix_t *expected_output_matrix	// TxO
 ) {
 	math_t total_loss = 0.0, log_term = 0.0;
 
-	int t_dim = RNN_storage->input_window_len;
+	int t_dim = predicted_output_matrix->m;
 	int o_dim = RNN_storage->output_vector_len;
 
 	int t, o;
@@ -132,7 +148,7 @@ math_t RNN_loss_calculation(
 		// expected_output_matrix is an one-hot vector		
 		for (o = 0; o < o_dim; ++o) {
 			if (expected_output_matrix->data[t][o] == 1) {
-				log_term = log(fp_output_matrix->data[t][o]);
+				log_term = log(predicted_output_matrix->data[t][o]);
 				break;
 			}
 		}
@@ -141,6 +157,94 @@ math_t RNN_loss_calculation(
 
 	return total_loss;
 }
+
+void RNN_BPTT(
+	RNN_t *RNN_storage,
+	Matrix_t *input_matrix,				// TxI
+	Matrix_t *predicted_output_matrix,	// TxO
+	Matrix_t *expected_output_matrix,	// TxO
+	Matrix_t *input_weight_gradient,	// dLdU IxH
+	Matrix_t *output_weight_gradient,	// dLdV HxO
+	Matrix_t *internel_weight_gradient	// dLdW HxH
+) {
+	int t_dim = input_matrix->m;
+	int i_dim = RNN_storage->input_vector_len;
+	int o_dim = RNN_storage->output_vector_len;
+	int h_dim = RNN_storage->hidden_layer_vector_len;
+
+	math_t **delta_o = create_2d(t_dim, o_dim);
+	math_t *delta_t 	// HxH
+		= (math_t *) malloc(h_dim * sizeof(math_t));
+
+	math_t **S = RNN_storage->internal_state_matrix->data;	// TxH
+	math_t **U = RNN_storage->input_weight_matrix->data;	// IxH
+	math_t **V = RNN_storage->output_weight_matrix->data;	// HxO
+	math_t **W = RNN_storage->internal_weight_matrix->data;	// HxH
+
+	math_t **dLdU = input_weight_gradient->data;	// IxH
+	math_t **dLdV = output_weight_gradient->data;	// HxO
+	math_t **dLdW = internel_weight_gradient->data; // HxH
+
+	math_t **O = predicted_output_matrix->data;
+	math_t **Y = expected_output_matrix->data;
+
+	clear_2d(dLdU, i_dim, h_dim);
+	clear_2d(dLdV, h_dim, o_dim);
+	clear_2d(dLdW, h_dim, h_dim);
+
+	int t, o, bptt_t, m, n;
+
+	/*
+		Construct delta_o = (o - y) = (y' - y)
+	 */
+	// Copy O
+	for (t = 0; t < t_dim; ++t) {
+		for (o = 0; o < o_dim; ++o) {
+			delta_o[t][o] = O[t][o];
+		}
+	}
+
+	// For each time step, subtract the one-hot indexc
+	for (t = 0; t < t_dim; ++t) {
+		for (o = 0; o < o_dim; ++o) {
+			if (Y[t][o] == 1){
+				delta_o[t][o] -= 1;
+				break;
+			}
+		}
+	}
+
+	/*
+		BPTT
+	 */
+	// math_t **dLdU = input_weight_gradient->data;		// IxH
+	// math_t **dLdV = output_weight_gradient->data;	// HxO
+	// math_t **dLdW = internel_weight_gradient->data;	// HxH
+	for (t = t_dim - 1; t >= 0; --t) {
+		// Update dLdV += outer(delta_o[t], S[t]')
+		printf("%d\n", t);
+		for (m = 0; m < h_dim; ++m) {
+			for (n = 0; n < o_dim; ++n) {
+				// Outer product
+				dLdV[m][n] += S[t][m] * delta_o[t][n];
+			}
+		}
+
+		// Update delta_t = V' dot delta_o[t] * (1 - S[t]^2)
+		// HxO * Ox1 .* Hx1
+		for (m = 0; m < h_dim; ++m) {
+			delta_t[m] = 0;
+			for (n = 0; n < o_dim; ++n) {
+				delta_t[m] += V[m][n] * delta_o[t][n];
+			}
+			delta_t[m] *= (1 - S[t][m]*S[t][m]);
+		}
+
+		for (bptt_t = t; bptt_t >= 0; t--)
+	}
+
+}
+
 
 math_t internal_squash_func(math_t value) {
 	return tanh(value);
