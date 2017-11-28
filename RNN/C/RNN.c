@@ -2,6 +2,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+void TrainSet_init(TrainSet_t *train_set, int num_matrix) {
+	train_set->num_matrix = num_matrix;
+	train_set->input_matrix_list =
+		(Matrix_t **) malloc(num_matrix * sizeof(Matrix_t *));
+	train_set->output_matrix_list =
+		(Matrix_t **) malloc(num_matrix * sizeof(Matrix_t *));	
+}
+
+void TrainSet_destroy(TrainSet_t *train_set) {
+	int i;
+	for (i = 0; i < train_set->num_matrix; ++i) {
+		matrix_free(train_set->input_matrix_list[i]);
+		matrix_free(train_set->output_matrix_list[i]);
+	}
+	//free(train_set->input_matrix_list);
+	//free(train_set->output_matrix_list);
+}
+
 void RNN_init(RNN_t *RNN_storage) {
 	int input_vector_len = RNN_storage->input_vector_len;
 	int output_vector_len = RNN_storage->output_vector_len;
@@ -28,7 +46,7 @@ void RNN_init(RNN_t *RNN_storage) {
 		exit(69);
 	}
 
-	unsigned int seed = 10;
+	unsigned int seed = 11;
 	matrix_random_with_seed(
 	    RNN_storage->input_weight_matrix,
 	    -sqrt(1 / input_vector_len),
@@ -172,6 +190,8 @@ void RNN_BPTT(
 	int o_dim = RNN_storage->output_vector_len;
 	int h_dim = RNN_storage->hidden_layer_vector_len;
 
+	int bptt_truncate_len = RNN_storage->bptt_truncate_len;
+
 	math_t **delta_o
 	    = create_2d(t_dim, o_dim);
 	math_t *delta_t
@@ -241,7 +261,8 @@ void RNN_BPTT(
 		}
 
 		// BPTT: From t to 0, S[-1] = [0]
-		for (bptt_t = t; bptt_t >= 0; bptt_t--)
+		int bptt_min = t - bptt_truncate_len < 0 ? 0 : t - bptt_truncate_len;
+		for (bptt_t = t; bptt_t >= bptt_min; bptt_t--)
 		{
 			// Update dLdW += outer(delta_t, S[t-1])
 			if (bptt_t - 1 >= 0) {
@@ -275,7 +296,8 @@ void RNN_BPTT(
 		}
 
 	}
-
+	free_2d(delta_o, t_dim);
+	free(delta_t);
 }
 
 void RNN_SGD(
@@ -317,7 +339,6 @@ void RNN_SGD(
 	    internel_weight_gradient	// dLdW HxH
 	);
 
-
 	int m, n;
 
 	// Update U
@@ -339,32 +360,25 @@ void RNN_SGD(
 
 void RNN_train(
     RNN_t *RNN_storage,
-    Matrix_t *input_matrix,
-    Matrix_t *expected_output_matrix,
+    TrainSet_t *train_set,
     Matrix_t *predicted_output_matrix,
     Matrix_t *input_weight_gradient,
     Matrix_t *output_weight_gradient,
     Matrix_t *internel_weight_gradient,
     math_t initial_learning_rate,
     int max_epoch,
-    int print_loss_interval,
-    int batch_size
+    int print_loss_interval
 ) {
-	int t_dim = input_matrix->m;
+	int num_train = train_set->num_matrix;
 
 	int e, t;
 	math_t loss;
-
-	int data_batch_index;
-	Matrix_t *batch_matrix
-	    = (Matrix_t *) malloc(sizeof(Matrix_t));
-	batch_matrix->m = batch_size;
-	batch_matrix->n = RNN_storage->input_vector_len;
-
+	
+	Matrix_t *input_matrix, *expected_output_matrix;
 	math_t learning_rate = initial_learning_rate;
 
 	for (e = 0; e < max_epoch; ++e) {
-		if (e % print_loss_interval == 0) {
+		if (e > 0 && e % print_loss_interval == 0) {
 			loss = RNN_loss_calculation(
 			           RNN_storage,
 			           predicted_output_matrix,
@@ -373,19 +387,9 @@ void RNN_train(
 			printf("loss at epoch: %5d = %10lf\n", e, loss);
 		}
 
-		for (t = 0; t < t_dim; ) {
-
-			/*
-				Splicing the TxI input matrix to fit the batch_size
-				(Abusing the 2d array structure in C)
-			*/
-			data_batch_index = t;
-			batch_matrix->data = &(input_matrix->data[data_batch_index]);
-
-			if (t + batch_size - 1 < t_dim)
-				batch_matrix->m = batch_size;
-			else
-				batch_matrix->m = t_dim - t;
+		for (t = 0; t < num_train; ++t) {
+			input_matrix = train_set->input_matrix_list[t];
+			expected_output_matrix = train_set->output_matrix_list[t];
 
 			RNN_SGD(
 			    RNN_storage,
@@ -398,7 +402,6 @@ void RNN_train(
 			    learning_rate
 			);
 
-			t += batch_matrix->m;
 		}
 
 	}
@@ -406,7 +409,7 @@ void RNN_train(
 
 void RNN_Predict(
     RNN_t *RNN_storage,
-    Matrix_t *input_matrix,    
+    Matrix_t *input_matrix,
     Matrix_t *predicted_output_matrix
 ) {
 	RNN_forward_propagation(

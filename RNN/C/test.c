@@ -230,9 +230,8 @@ void RNN_Train_test() {
 	int H = 4, O = 4;
 
 	math_t initial_learning_rate = 0.005;
-    int max_epoch = 1000;
-    int print_loss_interval = 10;
-    int batch_size = 1;
+    int max_epoch = 10000;
+    int print_loss_interval = 1000;
 
 	// hell
 	math_t data_in[] = {
@@ -242,7 +241,6 @@ void RNN_Train_test() {
 		0, 0, 1, 0,
 		0, 0, 0, 1
 	};
-
 	// ello
 	math_t data_out[] = {
 		0, 1, 0, 0,
@@ -251,17 +249,10 @@ void RNN_Train_test() {
 		0, 0, 0, 1,
 		1, 0, 0, 0
 	};
-
-	Matrix_t *input_matrix, *expected_output_matrix, *predicted_output_matrix;
+	Matrix_t *input_matrix, *expected_output_matrix;
 	matrix_prepare(&input_matrix, T, I, data_in);
 	matrix_prepare(&expected_output_matrix, T, I, data_out);
-	predicted_output_matrix = matrix_create(T, I);
-
-	printf("-------------input_matrix\n");
-	matrix_print(input_matrix);
-	printf("-------------expected_output_matrix\n");
-	matrix_print(expected_output_matrix);
-
+		
 	RNN_t *RNN_storage
 	    = (RNN_t *) malloc(sizeof(RNN_t));
 	RNN_storage->input_vector_len = I;
@@ -270,37 +261,51 @@ void RNN_Train_test() {
 	RNN_storage->bptt_truncate_len = 4;
 	RNN_init(RNN_storage);
 
+	// Storage for RNN_train()
 	Matrix_t *input_weight_gradient;
 	Matrix_t *output_weight_gradient;
 	Matrix_t *internel_weight_gradient;
+	Matrix_t *predicted_output_matrix;
 	input_weight_gradient = matrix_create(I, H);
 	output_weight_gradient = matrix_create(H, O);
 	internel_weight_gradient = matrix_create(H, H);
+	
+	// Prepare test
+	TrainSet_t *train_set = (TrainSet_t *) malloc(sizeof(TrainSet_t));
+	TrainSet_init(train_set, 1);
+	train_set->input_matrix_list[0] = input_matrix;
+	train_set->output_matrix_list[0] = expected_output_matrix;
+
+	train_set->max_matrix_len = T;
+	predicted_output_matrix = matrix_create(train_set->max_matrix_len, O);
 
 	RNN_train(
-	    RNN_storage,
-	    input_matrix,
-	    expected_output_matrix,
+	    RNN_storage,	
+	    train_set,    
 	    predicted_output_matrix,
 	    input_weight_gradient,
 	    output_weight_gradient,
 	    internel_weight_gradient,
 	    initial_learning_rate,
 	    max_epoch,
-	    print_loss_interval,
-	    batch_size
+	    print_loss_interval
 	);
-
-	printf("Prediction:\n");
+	
+	printf("Symbol: ['h', 'e', 'l', 'o']\n");	
+	printf("-------------input_matrix\n");
+	matrix_print(input_matrix);
+	printf("-------------expected_output_matrix\n");
+	matrix_print(expected_output_matrix);
+	printf("-------------predicted_output_matrix\n");
 	RNN_Predict(
 		RNN_storage,
 		input_matrix,
 		predicted_output_matrix
 	);
+	
 
+	TrainSet_destroy(train_set);
 	RNN_destroy(RNN_storage);
-	matrix_free(input_matrix);
-	matrix_free(expected_output_matrix);
 	matrix_free(predicted_output_matrix);
 	matrix_free(input_weight_gradient);
 	matrix_free(output_weight_gradient);
