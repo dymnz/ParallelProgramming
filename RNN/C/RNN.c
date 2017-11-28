@@ -377,6 +377,7 @@ void RNN_train(
 
 			/*
 				Splicing the TxI input matrix to fit the batch_size
+				(Abusing the 2d array structure in C)
 			*/
 			data_batch_index = t;
 			batch_matrix->data = &(input_matrix->data[data_batch_index]);
@@ -385,9 +386,6 @@ void RNN_train(
 				batch_matrix->m = batch_size;
 			else
 				batch_matrix->m = t_dim - t;
-
-			//printf("data_batch_index: %3d  [%3d]\n", data_batch_index, batch_matrix->m);
-			//matrix_print(batch_matrix);
 
 			RNN_SGD(
 			    RNN_storage,
@@ -404,6 +402,19 @@ void RNN_train(
 		}
 
 	}
+}
+
+void RNN_Predict(
+    RNN_t *RNN_storage,
+    Matrix_t *input_matrix,    
+    Matrix_t *predicted_output_matrix
+) {
+	RNN_forward_propagation(
+	    RNN_storage,
+	    input_matrix,
+	    predicted_output_matrix
+	);
+	matrix_print(predicted_output_matrix);
 }
 
 math_t internal_squash_func(math_t value) {

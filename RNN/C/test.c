@@ -291,6 +291,13 @@ void RNN_Train_test() {
 	    batch_size
 	);
 
+	printf("Prediction:\n");
+	RNN_Predict(
+		RNN_storage,
+		input_matrix,
+		predicted_output_matrix
+	);
+
 	RNN_destroy(RNN_storage);
 	matrix_free(input_matrix);
 	matrix_free(expected_output_matrix);
