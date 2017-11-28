@@ -115,7 +115,7 @@ void matrix_print(Matrix_t *matrix) {
 	int m, n;
 	for (m = 0; m < matrix->m; ++m) {
 		for (n = 0; n < matrix->n; ++n) {
-			printf("%3.3lf   ", matrix->data[m][n]);
+			printf("%3.5lf  ", matrix->data[m][n]);
 		}
 		printf("\n");
 	}
