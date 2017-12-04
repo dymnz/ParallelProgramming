@@ -1,5 +1,7 @@
 #pragma once
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 typedef double math_t;
 typedef struct
@@ -26,7 +28,6 @@ void matrix_random_with_seed(
 
 Matrix_t *matrix_create(int m, int n);
 void matrix_free(Matrix_t *matrix);
-void matrix_checked_create(Matrix_t **matrix, int m, int n);
 void matrix_resize(Matrix_t *matrix, int m, int n);
 
 

@@ -1,7 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include "common_math.h"
-#include <math.h>
+
 
 math_t uniform_random_with_seed(
     math_t lower_bound,
@@ -66,21 +64,6 @@ Matrix_t *matrix_create(int m, int n) {
 	return matrix;
 }
 
-void matrix_checked_create(Matrix_t **matrix, int m, int n) {
-	if (*matrix != NULL && (*matrix)->m == m && (*matrix)->n == n)
-		return;
-
-	matrix_free(*matrix);
-
-	*matrix = (Matrix_t *) malloc(sizeof(Matrix_t));
-	if (!matrix)
-		exit(69);
-
-	(*matrix)->m = m;
-	(*matrix)->n = n;
-	(*matrix)->data = create_2d(m, n);
-}
-
 void matrix_resize(Matrix_t *matrix, int m, int n) {
 	if (matrix != NULL && matrix->m == m && matrix->n == n)
 		return;
@@ -95,7 +78,6 @@ void matrix_resize(Matrix_t *matrix, int m, int n) {
 	matrix->data = create_2d(m, n);
 }
 
-
 void free_2d(math_t **data, int m) {
 	int i;
 	for (i = 0; i < m; ++i) 
@@ -105,9 +87,10 @@ void free_2d(math_t **data, int m) {
 }
 
 void matrix_free(Matrix_t *matrix) {
-	if (!matrix)
+	if (!matrix || !(matrix->data))
 		return;
 	free_2d(matrix->data, matrix->m);
+	matrix->data = NULL;
 	free(matrix);
 }
 

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "common_math.h"
 #include "RNN.h"
+#include "file_process.h"
 
 void uniform_random_with_seed_test() {
 	int round = 1000000;
@@ -125,9 +126,9 @@ void RNN_Loss_test() {
 	matrix_print(predicted_output_matrix);
 
 	math_t total_loss = RNN_loss_calculation(
-		RNN_storage, 
-		predicted_output_matrix, 
-		expected_output_matrix);
+	                        RNN_storage,
+	                        predicted_output_matrix,
+	                        expected_output_matrix);
 	printf("total_loss: %lf\n", total_loss);
 	printf("expected_loss: %lf\n", log(I));
 
@@ -185,9 +186,9 @@ void RNN_BPTT_test() {
 	matrix_print(predicted_output_matrix);
 
 	math_t total_loss = RNN_loss_calculation(
-		RNN_storage, 
-		predicted_output_matrix, 
-		expected_output_matrix);
+	                        RNN_storage,
+	                        predicted_output_matrix,
+	                        expected_output_matrix);
 	printf("total_loss: %lf\n", total_loss);
 	printf("expected_loss: %lf\n", log(I));
 
@@ -201,13 +202,13 @@ void RNN_BPTT_test() {
 	printf("RNN_BPTT\n");
 
 	RNN_BPTT(
-		RNN_storage, 
-		input_matrix, 
-		predicted_output_matrix,
-		expected_output_matrix,
-		input_weight_gradient,
-		output_weight_gradient,
-		internel_weight_gradient
+	    RNN_storage,
+	    input_matrix,
+	    predicted_output_matrix,
+	    expected_output_matrix,
+	    input_weight_gradient,
+	    output_weight_gradient,
+	    internel_weight_gradient
 	);
 	printf("-------------input_weight_gradient\n");
 	matrix_print(input_weight_gradient);
@@ -230,8 +231,8 @@ void RNN_Train_test() {
 	int H = 4, O = 4;
 
 	math_t initial_learning_rate = 0.005;
-    int max_epoch = 10000;
-    int print_loss_interval = 1000;
+	int max_epoch = 10000;
+	int print_loss_interval = 1000;
 
 	// hell
 	math_t data_in[] = {
@@ -252,7 +253,7 @@ void RNN_Train_test() {
 	Matrix_t *input_matrix, *expected_output_matrix;
 	matrix_prepare(&input_matrix, T, I, data_in);
 	matrix_prepare(&expected_output_matrix, T, I, data_out);
-		
+
 	RNN_t *RNN_storage
 	    = (RNN_t *) malloc(sizeof(RNN_t));
 	RNN_storage->input_vector_len = I;
@@ -269,19 +270,19 @@ void RNN_Train_test() {
 	input_weight_gradient = matrix_create(I, H);
 	output_weight_gradient = matrix_create(H, O);
 	internel_weight_gradient = matrix_create(H, H);
-	
+
 	// Prepare test
 	TrainSet_t *train_set = (TrainSet_t *) malloc(sizeof(TrainSet_t));
 	TrainSet_init(train_set, 1);
 	train_set->input_matrix_list[0] = input_matrix;
 	train_set->output_matrix_list[0] = expected_output_matrix;
 
-	train_set->max_matrix_len = T;
-	predicted_output_matrix = matrix_create(train_set->max_matrix_len, O);
+	train_set->output_max_m = T;
+	predicted_output_matrix = matrix_create(train_set->output_max_m, O);
 
 	RNN_train(
-	    RNN_storage,	
-	    train_set,    
+	    RNN_storage,
+	    train_set,
 	    predicted_output_matrix,
 	    input_weight_gradient,
 	    output_weight_gradient,
@@ -290,19 +291,75 @@ void RNN_Train_test() {
 	    max_epoch,
 	    print_loss_interval
 	);
-	
-	printf("Symbol: ['h', 'e', 'l', 'o']\n");	
+
+	printf("Symbol: ['h', 'e', 'l', 'o']\n");
 	printf("-------------input_matrix\n");
 	matrix_print(input_matrix);
 	printf("-------------expected_output_matrix\n");
 	matrix_print(expected_output_matrix);
 	printf("-------------predicted_output_matrix\n");
 	RNN_Predict(
-		RNN_storage,
-		input_matrix,
-		predicted_output_matrix
+	    RNN_storage,
+	    input_matrix,
+	    predicted_output_matrix
 	);
-	
+
+
+	TrainSet_destroy(train_set);
+	RNN_destroy(RNN_storage);
+	matrix_free(predicted_output_matrix);
+	matrix_free(input_weight_gradient);
+	matrix_free(output_weight_gradient);
+	matrix_free(internel_weight_gradient);
+}
+
+void read_set_from_file_test() {
+	int H = 10;
+	int bptt_truncate_len = 5;
+
+	math_t initial_learning_rate = 0.005;
+	int max_epoch = 10000;
+	int print_loss_interval = 10;
+
+	TrainSet_t *train_set = read_set_from_file("./test_data/exp.txt");
+	//write_matrix_to_file("./test_data/res2.txt", train_set->input_matrix_list[0]);
+
+	RNN_t *RNN_storage
+	    = (RNN_t *) malloc(sizeof(RNN_t));
+	RNN_storage->input_vector_len = train_set->input_n;
+	RNN_storage->output_vector_len = train_set->output_n;
+	RNN_storage->hidden_layer_vector_len = H;
+	RNN_storage->bptt_truncate_len = bptt_truncate_len;
+	RNN_init(RNN_storage);
+	printf("%d %d %d %d\n", 
+		train_set->input_n, train_set->output_n, 
+		train_set->input_max_m,
+		train_set->output_max_m);
+
+	// Storage for RNN_train()
+	Matrix_t *input_weight_gradient;
+	Matrix_t *output_weight_gradient;
+	Matrix_t *internel_weight_gradient;
+	Matrix_t *predicted_output_matrix;
+	input_weight_gradient = matrix_create(train_set->input_n, H);
+	output_weight_gradient = matrix_create(H, train_set->output_n);
+	internel_weight_gradient = matrix_create(H, H);
+
+	predicted_output_matrix = matrix_create(
+	                              train_set->output_max_m,
+	                              train_set->output_n);
+
+	RNN_train(
+	    RNN_storage,
+	    train_set,
+	    predicted_output_matrix,
+	    input_weight_gradient,
+	    output_weight_gradient,
+	    internel_weight_gradient,
+	    initial_learning_rate,
+	    max_epoch,
+	    print_loss_interval
+	);
 
 	TrainSet_destroy(train_set);
 	RNN_destroy(RNN_storage);
@@ -315,9 +372,10 @@ void RNN_Train_test() {
 int main()
 {
 
-	//RNN_FP_test();	
+	//RNN_FP_test();
 	//RNN_Loss_test();
 	//RNN_BPTT_test();
-	RNN_Train_test();
+	//RNN_Train_test();
+	read_set_from_file_test();
 	return 0;
 }

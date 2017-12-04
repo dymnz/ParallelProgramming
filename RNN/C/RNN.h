@@ -1,4 +1,6 @@
 #pragma once
+#include <stdio.h>
+#include <stdlib.h>
 #include "common_math.h"
 
 typedef struct {
@@ -19,8 +21,13 @@ typedef struct {
 typedef struct {
 	Matrix_t **input_matrix_list;
 	Matrix_t **output_matrix_list;
+    int input_max_m;
+    int input_n;      // This should be the same accoross all input matrix
+
+    int output_max_m;
+    int output_n;      // This should be the same accoross all output matrix
+
 	int num_matrix;
-	int max_matrix_len;
 } TrainSet_t;
 
 void TrainSet_init(TrainSet_t *train_set, int num_matrix);

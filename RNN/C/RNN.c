@@ -1,6 +1,4 @@
 #include "RNN.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 void TrainSet_init(TrainSet_t *train_set, int num_matrix) {
 	train_set->num_matrix = num_matrix;
@@ -16,8 +14,8 @@ void TrainSet_destroy(TrainSet_t *train_set) {
 		matrix_free(train_set->input_matrix_list[i]);
 		matrix_free(train_set->output_matrix_list[i]);
 	}
-	//free(train_set->input_matrix_list);
-	//free(train_set->output_matrix_list);
+	free(train_set->input_matrix_list);
+	free(train_set->output_matrix_list);
 }
 
 void RNN_init(RNN_t *RNN_storage) {
@@ -378,6 +376,7 @@ void RNN_train(
 	math_t learning_rate = initial_learning_rate;
 
 	for (e = 0; e < max_epoch; ++e) {
+		//printf("%d\n", e);
 		if (e > 0 && e % print_loss_interval == 0) {
 			loss = RNN_loss_calculation(
 			           RNN_storage,

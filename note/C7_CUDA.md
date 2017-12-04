@@ -28,7 +28,7 @@ int main (void){
 }
 ```
 
-Kernel function call:
+* Kernel function call:
 ```
 #include <iostream> 
 __global__ void kernel (void){ } 
@@ -41,7 +41,7 @@ int main (void){
 * Qualifier `__global__` to run on GPU
 * Embelishment `<<<1,1>>>` argument to pass at runtime, not compiled in device code
 
-Argument passing:
+* Argument passing:
 ```
 int c;              // For CPU
 int *dev_c;         // Allocated at CPU mem, pointed to GPU global mem
@@ -51,6 +51,18 @@ cudaMemcpy(&c, dev_c);                      // Retrieve dev_c from GPU memo
 cudaFree(dev_c);                            // Freeing memory allocated on GPU mem
 ```
 * Copying from and to GPU memory creates many overhead
+
+
+* Embelishment `<<<N, T>>>`
+    * N: number of blocks
+    * T: number of threas in a block
+    
+* Constant      
+    * gridDim.(x/y/z): number of blocks
+    * blockDim.(x/y/z): number of threads
+* Multi-dimensional `<<<N, T>>>`
+    * `dim3 grid_dim(gx, gy, gz)`/`dim3 block_dim(bx, by, bz)`
+    * `<<<grid_dim, block_dim>>>`
 
 #### Device
 * Version

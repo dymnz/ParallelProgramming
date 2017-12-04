@@ -1,8 +1,8 @@
 CC=gcc
 CFLAGS=-Wall
 LFLAGS=-lm
-DEPS = common_math.h RNN.h
-TEST_OBJ = test.o common_math.o RNN.o
+DEPS = common_math.h RNN.h file_process.h
+TEST_OBJ = test.o common_math.o RNN.o file_process.o
 
 
 %.o: %.c $(DEPS)
