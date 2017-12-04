@@ -3,9 +3,9 @@
 void TrainSet_init(TrainSet_t *train_set, int num_matrix) {
 	train_set->num_matrix = num_matrix;
 	train_set->input_matrix_list =
-	    (Matrix_t **) malloc(num_matrix * sizeof(Matrix_t *));
+		(Matrix_t **) malloc(num_matrix * sizeof(Matrix_t *));
 	train_set->output_matrix_list =
-	    (Matrix_t **) malloc(num_matrix * sizeof(Matrix_t *));
+		(Matrix_t **) malloc(num_matrix * sizeof(Matrix_t *));	
 }
 
 void TrainSet_destroy(TrainSet_t *train_set) {
@@ -142,9 +142,7 @@ void RNN_forward_propagation(
 				temp_vector[n] += S[t][r] * V[r][n];
 			}
 		}
-		//stable_softmax(temp_vector, O[t], o_dim);
-		//O[t][0] = output_squash_func(temp_vector[0]);
-		O[t][0] = temp_vector[0];
+		stable_softmax(temp_vector, O[t], o_dim);
 	}
 
 	free(temp_vector);
@@ -156,28 +154,24 @@ math_t RNN_loss_calculation(
     Matrix_t *predicted_output_matrix,	// TxO
     Matrix_t *expected_output_matrix	// TxO
 ) {
-	math_t total_loss = 0.0, log_term = 0.0, delta;
+	math_t total_loss = 0.0, log_term = 0.0;
 
 	int t_dim = predicted_output_matrix->m;
 	int o_dim = RNN_storage->output_vector_len;
 
-	// printf("----------------\n");
-	// matrix_print(predicted_output_matrix);
-
 	int t, o;
 	for (t = 0; t < t_dim; ++t) {
 		// expected_output_matrix is an one-hot vector
-		log_term = 0;
 		for (o = 0; o < o_dim; ++o) {
-			delta =
-			    expected_output_matrix->data[t][o] -
-			    predicted_output_matrix->data[t][o];
-			log_term += delta * delta;
+			if (expected_output_matrix->data[t][o] == 1) {
+				log_term = log(predicted_output_matrix->data[t][o]);
+				break;
+			}
 		}
-		total_loss += log_term;
+		total_loss += -1.0 / t_dim * log_term;
 	}
 
-	return total_loss / t_dim;;
+	return total_loss;
 }
 
 void RNN_BPTT(
@@ -220,16 +214,22 @@ void RNN_BPTT(
 	int t, o, bptt_t, m, n;
 
 	/*
-		//Construct delta_o = (o - y) = (y' - y)//
-		Construct delta_o = -y / (y') * (1-(y')^2)
-
+		Construct delta_o = (o - y) = (y' - y)
 	 */
-
-	// Delta o
+	// Copy O
 	for (t = 0; t < t_dim; ++t) {
 		for (o = 0; o < o_dim; ++o) {
-			delta_o[t][o] =  -2 * (Y[t][o] - O[t][o]);
-			// printf("%lf\t", -Y[t][o]);
+			delta_o[t][o] = O[t][o];
+		}
+	}
+
+	// For each time step, subtract the one-hot indexc
+	for (t = 0; t < t_dim; ++t) {
+		for (o = 0; o < o_dim; ++o) {
+			if (Y[t][o] == 1) {
+				delta_o[t][o] -= 1;
+				break;
+			}
 		}
 	}
 
@@ -273,14 +273,11 @@ void RNN_BPTT(
 
 			// Update dLdU[x[bptt_step]] += delta_t
 			for (m = 0; m < i_dim; ++m) {
-				// if (X[bptt_t][m] == 1) {
-				// 	for (n = 0; n < h_dim; ++n) {
-				// 		dLdU[m][n] += delta_t[n];
-				// 	}
-				// 	break;
-				// }
-				for (n = 0; n < h_dim; ++n) {
-					dLdU[m][n] += X[bptt_t][m] * delta_t[n];
+				if (X[bptt_t][m] == 1) {
+					for (n = 0; n < h_dim; ++n) {
+						dLdU[m][n] += delta_t[n];
+					}
+					break;
 				}
 			}
 
@@ -342,11 +339,6 @@ void RNN_SGD(
 
 	int m, n;
 
-	// printf("---------------U\n"); matrix_print(RNN_storage->input_weight_matrix);
-	// printf("---------------V\n"); matrix_print(RNN_storage->output_weight_matrix);
-	// printf("---------------W\n"); matrix_print(RNN_storage->internal_weight_matrix);
-	// sleep(1);
-
 	// Update U
 	for (m = 0; m < i_dim; ++m)
 		for (n = 0; n < h_dim; ++n)
@@ -379,18 +371,18 @@ void RNN_train(
 
 	int e, t;
 	math_t loss;
-
+	
 	Matrix_t *input_matrix, *expected_output_matrix;
 	math_t learning_rate = initial_learning_rate;
 
 	for (e = 0; e < max_epoch; ++e) {
+		//printf("%d\n", e);
 		if (e > 0 && e % print_loss_interval == 0) {
 			loss = RNN_loss_calculation(
 			           RNN_storage,
 			           predicted_output_matrix,
 			           expected_output_matrix
 			       );
-			//matrix_print(predicted_output_matrix);
 			printf("loss at epoch: %5d = %10lf\n", e, loss);
 		}
 
@@ -429,12 +421,4 @@ void RNN_Predict(
 
 math_t internal_squash_func(math_t value) {
 	return tanh(value);
-}
-
-math_t output_squash_func(math_t value) {
-	return sigmoid(value);
-}
-
-math_t sigmoid(math_t value) {
-	return 2.0 / (1 + exp(-2 * value)) - 1;
 }

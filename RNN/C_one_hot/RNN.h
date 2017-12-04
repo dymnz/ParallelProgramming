@@ -1,9 +1,7 @@
 #pragma once
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include "common_math.h"
-
 
 typedef struct {
 	int input_vector_len;
@@ -90,5 +88,3 @@ void RNN_Predict(
 );
 
 math_t internal_squash_func(math_t value);
-math_t output_squash_func(math_t value);
-math_t sigmoid(math_t value);

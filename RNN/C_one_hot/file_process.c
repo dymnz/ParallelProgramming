@@ -60,7 +60,7 @@ TrainSet_t *read_set_from_file(char *file_name) {
 }
 
 void write_matrix_to_file(char *file_name, Matrix_t *matrix) {
-	FILE *pFile = fopen (file_name, "a");
+	FILE *pFile = fopen (file_name, "w+");
 	if (!pFile) {
 		printf("%s write error\n", file_name);
 		exit(69);
@@ -74,7 +74,6 @@ void write_matrix_to_file(char *file_name, Matrix_t *matrix) {
 			fprintf(pFile, "%lf\t", matrix->data[i][r]);
 		}
 	}
-	fprintf(pFile, "\n");
 
 	fclose(pFile);
 }

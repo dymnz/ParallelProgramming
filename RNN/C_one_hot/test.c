@@ -314,14 +314,15 @@ void RNN_Train_test() {
 }
 
 void read_set_from_file_test() {
-	int H = 2;
-	int bptt_truncate_len = 10;
+	int H = 10;
+	int bptt_truncate_len = 5;
 
 	math_t initial_learning_rate = 0.005;
-	int max_epoch = 50000;
-	int print_loss_interval = 100;
+	int max_epoch = 10000;
+	int print_loss_interval = 10;
 
 	TrainSet_t *train_set = read_set_from_file("./test_data/exp.txt");
+	//write_matrix_to_file("./test_data/res2.txt", train_set->input_matrix_list[0]);
 
 	RNN_t *RNN_storage
 	    = (RNN_t *) malloc(sizeof(RNN_t));
@@ -330,10 +331,10 @@ void read_set_from_file_test() {
 	RNN_storage->hidden_layer_vector_len = H;
 	RNN_storage->bptt_truncate_len = bptt_truncate_len;
 	RNN_init(RNN_storage);
-	printf("%d %d %d %d\n",
-	       train_set->input_n, train_set->output_n,
-	       train_set->input_max_m,
-	       train_set->output_max_m);
+	printf("%d %d %d %d\n", 
+		train_set->input_n, train_set->output_n, 
+		train_set->input_max_m,
+		train_set->output_max_m);
 
 	// Storage for RNN_train()
 	Matrix_t *input_weight_gradient;
@@ -360,36 +361,6 @@ void read_set_from_file_test() {
 	    print_loss_interval
 	);
 
-
-	FILE *pRes = fopen("./test_data/res.txt", "a");
-	fprintf(pRes, "%d\n", train_set->num_matrix);
-	fclose(pRes);
-
-	FILE *pLoss = fopen("./test_data/loss.txt", "a");
-	
-	
-
-	int i;
-	math_t loss, total_loss = 0.0f;
-	for (i = 0; i < train_set->num_matrix; ++i) {
-		RNN_Predict(
-		    RNN_storage,
-		    train_set->input_matrix_list[i],
-		    predicted_output_matrix
-		);
-		
-		loss = RNN_loss_calculation(
-			RNN_storage, 
-			predicted_output_matrix, 
-			train_set->output_matrix_list[i]);
-		fprintf(pLoss, "%lf\n", loss);
-		total_loss += loss;
-		write_matrix_to_file("./test_data/res.txt", train_set->input_matrix_list[i]);
-		write_matrix_to_file("./test_data/res.txt", predicted_output_matrix);
-	}
-	printf("average loss: %lf\n", total_loss / train_set->num_matrix);
-
-
 	TrainSet_destroy(train_set);
 	RNN_destroy(RNN_storage);
 	matrix_free(predicted_output_matrix);
@@ -404,7 +375,7 @@ int main()
 	//RNN_FP_test();
 	//RNN_Loss_test();
 	//RNN_BPTT_test();
-	//RNN_Train_test();
-	read_set_from_file_test();
+	RNN_Train_test();
+	//read_set_from_file_test();
 	return 0;
 }
