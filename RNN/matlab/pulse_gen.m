@@ -3,7 +3,7 @@ clear; close all;
 
 % Data length %
 NUM_TEST = 10;
-DATA_LENGTH = 500;
+DATA_LENGTH = 100;
 RAND_THRESHOLD = 1;
 
 % Twitch force param %
@@ -18,7 +18,7 @@ fprintf(fileID, '%d\n', NUM_TEST);
 
 
 for i = 1:NUM_TEST
-    RAND_THRESHOLD = rand * 3 + 0.001;
+    RAND_THRESHOLD = rand * 3 - 0.01;
     [pulse_vector, tf_vector, tf_proto] = ...
                 random_twitch_force(DATA_LENGTH, RAND_THRESHOLD, P, CT);
 
