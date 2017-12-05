@@ -369,21 +369,59 @@ void RNN_train(
 ) {
 	int num_train = train_set->num_matrix;
 
-	int e, t;
-	math_t loss;
-	
+	int i, e, t;
+	math_t current_total_loss, last_total_loss = 987654321;
+
 	Matrix_t *input_matrix, *expected_output_matrix;
 	math_t learning_rate = initial_learning_rate;
 
 	for (e = 0; e < max_epoch; ++e) {
-		//printf("%d\n", e);
 		if (e > 0 && e % print_loss_interval == 0) {
-			loss = RNN_loss_calculation(
-			           RNN_storage,
-			           predicted_output_matrix,
-			           expected_output_matrix
-			       );
-			printf("loss at epoch: %5d = %10lf\n", e, loss);
+
+			current_total_loss = 0.0;
+			for (i = 0; i < num_train; ++i) {
+				input_matrix = train_set->input_matrix_list[i];
+				expected_output_matrix = train_set->output_matrix_list[i];
+				RNN_Predict(
+				    RNN_storage,
+				    input_matrix,
+				    predicted_output_matrix
+				);
+
+				current_total_loss += RNN_loss_calculation(
+				                          RNN_storage,
+				                          predicted_output_matrix,
+				                          expected_output_matrix);
+			}
+
+			// Adjust learning rate if the loss increases
+			// if (last_total_loss < current_total_loss) {
+			// 	if (learning_rate / 2 > 1e-4)
+			// 		learning_rate /= 2;
+			// }
+
+
+
+			last_total_loss = current_total_loss;
+
+			sleep(1);
+			matrix_print(predicted_output_matrix);
+			printf("---------------U\n"); matrix_print(RNN_storage->input_weight_matrix);
+			printf("---------------V\n"); matrix_print(RNN_storage->output_weight_matrix);
+			printf("---------------W\n"); matrix_print(RNN_storage->internal_weight_matrix);
+			Gradient_check(
+			    RNN_storage,
+			    train_set,
+			    predicted_output_matrix,
+			    input_weight_gradient,
+			    output_weight_gradient,
+			    internel_weight_gradient,
+			    0.001,
+			    0.01,
+			    0
+			);
+			printf("average loss at epoch: %5d = %10lf LR: %lf\n",
+			       e, current_total_loss / num_train, learning_rate);
 		}
 
 		for (t = 0; t < num_train; ++t) {
@@ -403,6 +441,118 @@ void RNN_train(
 
 		}
 
+	}
+}
+
+void Gradient_check(
+    RNN_t *RNN_storage,
+    TrainSet_t *train_set,
+    Matrix_t *predicted_output_matrix,
+    Matrix_t *input_weight_gradient,
+    Matrix_t *output_weight_gradient,
+    Matrix_t *internel_weight_gradient,
+    math_t h,
+    math_t error_threshold,
+    int index_to_check
+) {
+	Matrix_t *input_matrix, *expected_output_matrix;
+	input_matrix = train_set->input_matrix_list[index_to_check];
+	expected_output_matrix = train_set->output_matrix_list[index_to_check];
+
+	math_t **U = RNN_storage->input_weight_matrix->data;	// IxH
+	math_t **V = RNN_storage->output_weight_matrix->data;	// HxO
+	math_t **W = RNN_storage->internal_weight_matrix->data;	// HxH
+
+	math_t **dLdU = input_weight_gradient->data;	// IxH
+	math_t **dLdV = output_weight_gradient->data;	// HxO
+	math_t **dLdW = internel_weight_gradient->data; // HxH
+
+	RNN_forward_propagation(
+	    RNN_storage,
+	    input_matrix,
+	    predicted_output_matrix
+	);
+
+	RNN_BPTT(
+	    RNN_storage,
+	    input_matrix,				// TxI
+	    predicted_output_matrix,	// TxO
+	    expected_output_matrix,		// TxO
+	    input_weight_gradient,		// dLdU IxH
+	    output_weight_gradient,		// dLdV HxO
+	    internel_weight_gradient	// dLdW HxH
+	);
+
+	int i, m, n;
+	math_t old_model_param;
+	math_t total_loss_plus, total_loss_minus;
+	math_t estimated_gradient, calculated_gradient;
+	math_t gradient_error;
+
+	Matrix_t *testing_model_list[] = {
+		input_weight_gradient,		// U
+		output_weight_gradient,		// V
+		internel_weight_gradient	// W
+	};
+	math_t **UVW[] = {U, V, W};
+	math_t **dLdUVW[] = {dLdU, dLdV, dLdW};
+
+	Matrix_t *testing_model;
+	math_t **testing_matrix;
+	math_t **testing_gradient_matrix;
+
+	for (i = 0; i < 3; ++i) {
+		testing_model = testing_model_list[i];
+		testing_matrix = UVW[i];
+		testing_gradient_matrix = dLdUVW[i];
+
+		for (m = 0; m < testing_model->m; ++m) {
+			for (n = 0; n < testing_model->n; ++n) {
+				old_model_param = testing_matrix[m][n];
+
+				testing_matrix[m][n] = old_model_param + h;
+				RNN_forward_propagation(
+				    RNN_storage,
+				    input_matrix,
+				    predicted_output_matrix
+				);
+				total_loss_plus += RNN_loss_calculation(
+				                       RNN_storage,
+				                       predicted_output_matrix,
+				                       expected_output_matrix);
+
+				testing_matrix[m][n] = old_model_param - h;
+				RNN_forward_propagation(
+				    RNN_storage,
+				    input_matrix,
+				    predicted_output_matrix
+				);
+				total_loss_minus += RNN_loss_calculation(
+				                        RNN_storage,
+				                        predicted_output_matrix,
+				                        expected_output_matrix);
+
+				testing_matrix[m][n] = old_model_param;
+
+				estimated_gradient =
+				    (total_loss_plus - total_loss_minus) /
+				    (2 * h);
+				calculated_gradient = testing_gradient_matrix[m][n];
+				gradient_error =
+				    abs(estimated_gradient - calculated_gradient);
+
+				if (gradient_error > error_threshold) {
+					printf("Gradient check error\n");
+					printf("For matrix %d [%d][%d]\n", i, m, n);
+					printf("+h loss: %lf\n", total_loss_plus);
+					printf("-h loss: %lf\n", total_loss_minus);
+					printf("estimated_gradient: %lf\n", estimated_gradient);
+					printf("calculated_gradient: %lf\n", calculated_gradient);
+					printf("gradient_error: %lf\n", gradient_error);
+					exit(1);
+				}
+			}
+		}
 	}
 }
 

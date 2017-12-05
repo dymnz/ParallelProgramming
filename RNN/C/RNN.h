@@ -89,6 +89,18 @@ void RNN_Predict(
     Matrix_t *predicted_output_matrix
 );
 
+void Gradient_check(
+    RNN_t *RNN_storage,
+    TrainSet_t *train_set,
+    Matrix_t *predicted_output_matrix,
+    Matrix_t *input_weight_gradient,
+    Matrix_t *output_weight_gradient,
+    Matrix_t *internel_weight_gradient,
+    math_t h,
+    math_t error_threshold,
+    int index_to_check
+);
+
 math_t internal_squash_func(math_t value);
 math_t output_squash_func(math_t value);
 math_t sigmoid(math_t value);

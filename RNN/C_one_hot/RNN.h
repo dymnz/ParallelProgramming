@@ -1,6 +1,7 @@
 #pragma once
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "common_math.h"
 
 typedef struct {
@@ -79,6 +80,18 @@ void RNN_train(
     math_t initial_learning_rate,
     int max_epoch,
     int print_loss_interval
+);
+
+void Gradient_check(
+    RNN_t *RNN_storage,
+    TrainSet_t *train_set,
+    Matrix_t *predicted_output_matrix,
+    Matrix_t *input_weight_gradient,
+    Matrix_t *output_weight_gradient,
+    Matrix_t *internel_weight_gradient,
+    math_t h,
+    math_t error_threshold,
+    int index_to_check
 );
 
 void RNN_Predict(
