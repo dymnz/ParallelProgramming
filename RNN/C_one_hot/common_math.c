@@ -52,6 +52,16 @@ void clear_2d(math_t **data, int m, int n) {
 	}
 }
 
+void print_2d(math_t **data, int m, int n) {
+	int i, r;
+	for (i = 0; i < m; ++i) {
+		for (r = 0; r < n; ++r) {
+			printf("%lf\t", data[i][r]);
+		}
+		printf("\n");
+	}
+}
+
 Matrix_t *matrix_create(int m, int n) {
 	Matrix_t *matrix = (Matrix_t *) malloc(sizeof(Matrix_t));
 	if (!matrix)

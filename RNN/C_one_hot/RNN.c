@@ -168,10 +168,10 @@ math_t RNN_loss_calculation(
 				break;
 			}
 		}
-		total_loss += -1.0 / t_dim * log_term;
+		total_loss += -1.0 * log_term;
 	}
 
-	return total_loss;
+	return total_loss / t_dim;
 }
 
 void RNN_BPTT(
@@ -232,6 +232,12 @@ void RNN_BPTT(
 			}
 		}
 	}
+	printf("---------------Y\n");
+	print_2d(Y, t_dim, o_dim);
+	printf("---------------O\n");
+	print_2d(O, t_dim, o_dim);
+	printf("---------------delta_o\n");
+	print_2d(delta_o, t_dim, o_dim);
 
 	/*
 		BPTT
@@ -247,6 +253,11 @@ void RNN_BPTT(
 				dLdV[m][n] += S[t][m] * delta_o[t][n];
 			}
 		}
+		printf("-----------S @ %d\n", t);
+		print_2d(S, t_dim, h_dim);
+
+		printf("-----------dLdV @ %d\n", t);
+		print_2d(dLdV, h_dim, o_dim);
 
 		// Update delta_t = V' dot delta_o[t] * (1 - S[t]^2)
 		// HxO * Ox1 .* Hx1
@@ -292,8 +303,8 @@ void RNN_BPTT(
 					delta_t[m] *= (1 - S[bptt_t - 1][m] * S[bptt_t - 1][m]);
 			}
 		}
-
 	}
+	exit(1);
 	free_2d(delta_o, t_dim);
 	free(delta_t);
 }
@@ -376,7 +387,7 @@ void RNN_train(
 	math_t learning_rate = initial_learning_rate;
 
 	for (e = 0; e < max_epoch; ++e) {
-		if (e > 0 && e % print_loss_interval == 0) {
+		if (/*e > 0 && */e % print_loss_interval == 0) {
 
 			current_total_loss = 0.0;
 			for (i = 0; i < num_train; ++i) {
@@ -416,8 +427,8 @@ void RNN_train(
 			    input_weight_gradient,
 			    output_weight_gradient,
 			    internel_weight_gradient,
-			    0.001,
-			    0.01,
+			    1e-3,
+			    1e-2,
 			    0
 			);
 			printf("average loss at epoch: %5d = %10lf LR: %lf\n",
@@ -536,21 +547,22 @@ void Gradient_check(
 
 				estimated_gradient =
 				    (total_loss_plus - total_loss_minus) /
-				    (2 * h);
+				    (2.0 * h);
 				calculated_gradient = testing_gradient_matrix[m][n];
 				gradient_error =
-				    abs(estimated_gradient - calculated_gradient);
+				    fabs(estimated_gradient - calculated_gradient) / 
+				    (fabs(estimated_gradient) + fabs(calculated_gradient));
 
-				if (gradient_error > error_threshold) {
-					printf("Gradient check error\n");
+				//if (gradient_error > error_threshold) {
+					printf("-------------Gradient check error\n");
 					printf("For matrix %d [%d][%d]\n", i, m, n);
 					printf("+h loss: %lf\n", total_loss_plus);
 					printf("-h loss: %lf\n", total_loss_minus);
 					printf("estimated_gradient: %lf\n", estimated_gradient);
 					printf("calculated_gradient: %lf\n", calculated_gradient);
 					printf("gradient_error: %lf\n", gradient_error);
-					exit(1);
-				}
+				//	exit(1);
+				//}
 			}
 		}
 	}
