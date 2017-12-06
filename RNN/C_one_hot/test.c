@@ -228,7 +228,7 @@ void RNN_BPTT_test() {
 
 void RNN_Train_test() {
 	int T = 5, I = 4;
-	int H = 4, O = 4;
+	int H = 1, O = 4;
 
 	math_t initial_learning_rate = 0.005;
 	int max_epoch = 10000;

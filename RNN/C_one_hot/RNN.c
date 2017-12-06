@@ -232,12 +232,12 @@ void RNN_BPTT(
 			}
 		}
 	}
-	printf("---------------Y\n");
-	print_2d(Y, t_dim, o_dim);
-	printf("---------------O\n");
-	print_2d(O, t_dim, o_dim);
-	printf("---------------delta_o\n");
-	print_2d(delta_o, t_dim, o_dim);
+	// printf("---------------Y\n");
+	// print_2d(Y, t_dim, o_dim);
+	// printf("---------------O\n");
+	// print_2d(O, t_dim, o_dim);
+	// printf("---------------delta_o\n");
+	// print_2d(delta_o, t_dim, o_dim);
 
 	/*
 		BPTT
@@ -253,11 +253,11 @@ void RNN_BPTT(
 				dLdV[m][n] += S[t][m] * delta_o[t][n];
 			}
 		}
-		printf("-----------S @ %d\n", t);
-		print_2d(S, t_dim, h_dim);
+		// printf("-----------S @ %d\n", t);
+		// print_2d(S, t_dim, h_dim);
 
-		printf("-----------dLdV @ %d\n", t);
-		print_2d(dLdV, h_dim, o_dim);
+		// printf("-----------dLdV @ %d\n", t);
+		// print_2d(dLdV, h_dim, o_dim);
 
 		// Update delta_t = V' dot delta_o[t] * (1 - S[t]^2)
 		// HxO * Ox1 .* Hx1
@@ -304,7 +304,7 @@ void RNN_BPTT(
 			}
 		}
 	}
-	exit(1);
+	//exit(1);
 	free_2d(delta_o, t_dim);
 	free(delta_t);
 }
@@ -420,6 +420,9 @@ void RNN_train(
 			printf("---------------U\n"); matrix_print(RNN_storage->input_weight_matrix);
 			printf("---------------V\n"); matrix_print(RNN_storage->output_weight_matrix);
 			printf("---------------W\n"); matrix_print(RNN_storage->internal_weight_matrix);
+
+			int old_bptt_truncate_len = RNN_storage->bptt_truncate_len;
+			RNN_storage->bptt_truncate_len = 10000;
 			Gradient_check(
 			    RNN_storage,
 			    train_set,
@@ -431,6 +434,7 @@ void RNN_train(
 			    1e-2,
 			    0
 			);
+			RNN_storage->bptt_truncate_len = old_bptt_truncate_len;
 			printf("average loss at epoch: %5d = %10lf LR: %lf\n",
 			       e, current_total_loss / num_train, learning_rate);
 		}
