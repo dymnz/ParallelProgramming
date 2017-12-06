@@ -26,17 +26,7 @@ void uniform_random_with_seed_test() {
 		printf("%5d: %5d\n", i + (int)lower_bound, array[i]);
 	}
 }
-void matrix_prepare(Matrix_t **m_ptr, int m, int n, math_t *data) {
 
-	*m_ptr = matrix_create(m, n);
-	Matrix_t *matrix = *m_ptr;
-	if (!matrix)
-		exit(69);
-
-	for (m = 0; m < matrix->m; ++m)
-		for (n = 0; n < matrix->n; ++n)
-			matrix->data[m][n] = data[m * matrix->n + n];
-}
 
 void RNN_FP_test() {
 	int T = 4, I = 4;
@@ -228,7 +218,7 @@ void RNN_BPTT_test() {
 
 void RNN_Train_test() {
 	int T = 5, I = 4;
-	int H = 1, O = 4;
+	int H = 4, O = 4;
 
 	math_t initial_learning_rate = 0.005;
 	int max_epoch = 10000;

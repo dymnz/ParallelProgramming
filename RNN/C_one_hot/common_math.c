@@ -62,6 +62,18 @@ void print_2d(math_t **data, int m, int n) {
 	}
 }
 
+void matrix_prepare(Matrix_t **m_ptr, int m, int n, math_t *data) {
+
+	*m_ptr = matrix_create(m, n);
+	Matrix_t *matrix = *m_ptr;
+	if (!matrix)
+		exit(69);
+
+	for (m = 0; m < matrix->m; ++m)
+		for (n = 0; n < matrix->n; ++n)
+			matrix->data[m][n] = data[m * matrix->n + n];
+}
+
 Matrix_t *matrix_create(int m, int n) {
 	Matrix_t *matrix = (Matrix_t *) malloc(sizeof(Matrix_t));
 	if (!matrix)
