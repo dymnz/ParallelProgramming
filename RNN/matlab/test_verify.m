@@ -5,7 +5,7 @@ P = 1;     % Peak force
 CT = 5;    % Time to peak
 
 file_location = '../C/test_data/';
-file_name = 'demo/res10_2_t10.txt';
+file_name = 'demo/res10_t10.txt';
 
 [num_matrix, input_matrix_list, output_matrix_list] = ...
     read_test_file(strcat(file_location, file_name));

@@ -8,11 +8,11 @@ RAND_THRESHOLD = 1;
 
 % Twitch force param %
 P = 1;     % Peak force
-CT = 5;    % Time to peak
+CT = 2;    % Time to peak
 
 % File
 file_location = '../C/test_data/';
-file_name = 'exp10_2.txt';
+file_name = 'exp10_2_CT_2.txt';
 fileID = fopen(strcat(file_location, file_name),'w');
 fprintf(fileID, '%d\n', NUM_TEST);
 
