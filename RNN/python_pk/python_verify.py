@@ -56,6 +56,58 @@ def bptt(y, s, o):
         dLdV += np.outer(delta_o[t], s[t].T)       
     return [dLdV,dLdV]
 
+
+
+def bptt_UVW(x, y, s, o, U, V, W, bptt_truncate = 4):
+    T = len(y)
+    # We accumulate the gradients in these variables
+    dLdU = np.zeros(U.shape)
+    dLdV = np.zeros(V.shape)
+    dLdW = np.zeros(W.shape)
+    delta_o = np.subtract(o, y)
+    # For each output backwards...
+
+    for t in np.arange(T)[::-1]:
+        dLdV += np.outer(delta_o[t], s[t].T)
+        # Initial delta calculation
+        delta_t = V.T.dot(delta_o[t]) * (1 - (s[t] ** 2))
+        print('for t = {}'.format(t))
+        print('------------delta_t')
+        print(delta_t)
+        # Backpropagation through time (for at most self.bptt_truncate steps)
+        for bptt_step in np.arange(max(0, t-bptt_truncate), t+1)[::-1]:
+            # print "Backpropagation step t=%d bptt step=%d " % (t, bptt_step)
+            dLdW += np.outer(delta_t, s[bptt_step-1])          
+            # print(dLdU[:,x[bptt_step]])            
+            # dLdU[:,x[bptt_step]] += delta_t
+            for r in np.arange(len(x[bptt_step])):
+                if x[bptt_step][r] == 1:
+                    dLdU[:, r] += delta_t 
+
+            # Update delta for next step
+            kkk = W.T.dot(delta_t)
+            delta_t = W.T.dot(delta_t) * (1 - s[bptt_step-1] ** 2)
+
+            print('for t = {} bptt = {}'.format(t, bptt_step))
+            print('------------W.T.dot(delta_t)')
+            print(kkk)
+            print('------------s[{}]'.format(bptt_step-1))
+            print((1 - s[bptt_step-1] ** 2))
+            print('------------delta_t')
+            print(delta_t)
+            # print('------------dLdU')
+            # print(dLdU.T)
+            # print('------------dLdV')
+            # print(dLdV.T)
+            # print('------------dLdW')
+            # print(dLdW.T)
+            #exit()
+
+        #exit()
+        
+    return [dLdU, dLdV, dLdW]
+
+
 def forward_propagation(x, U, V, W):
     # The total number of time steps
     T = len(x)
@@ -80,22 +132,18 @@ def calculate_total_loss(x, y, U, V, W):
     print('------- o/s')
     print(o)
     print(s)
-    for i in np.arange(len(y)):
-       # print(y[i])
-        
-        
+    for i in np.arange(len(y)):       
         # We only care about our prediction of the "correct" words
-
         for r in np.arange(len(y[i])):
             if y[i][r] == 1:
                 correct_word_predictions = o[i][r]
 
         # Add to the loss based on how off we were
         #print(correct_word_predictions)
-        print('L at {}'.format(i))
-        print(L)
+        print('L at {}'.format(i))        
         print(correct_word_predictions)
         L += -1 * np.sum(np.log(correct_word_predictions))
+        print(L)
     return L
 
 def calculate_loss(x, y, U, V, W):
@@ -106,13 +154,14 @@ def calculate_loss(x, y, U, V, W):
 
 def gradient_check(x, y, s, o, U, V, W, h=0.001, error_threshold=0.01):
     # Calculate the gradients using backpropagation. We want to checker if these are correct.
-    bptt_gradients = bptt(y, s, o)
+    #bptt_gradients = bptt(y, s, o)
+    bptt_gradients = bptt_UVW(x, y, s, o, U, V, W, 4)
     # List of all parameters we want to check.
-    model_parameters = ['V']
+    model_parameters = ['W']
     # Gradient check for each parameter
-    pidx = 0
-    pname = 'V'
-    parameter = V
+    pidx = 2
+    pname = 'W'
+    parameter = W
     print "Performing gradient check for parameter %s with size %d." % (pname, np.prod(parameter.shape))
     # Iterate over each element of the parameter matrix, e.g. (0,0), (0,1), ...
     it = np.nditer(parameter, flags=['multi_index'], op_flags=['readwrite'])
@@ -125,12 +174,12 @@ def gradient_check(x, y, s, o, U, V, W, h=0.001, error_threshold=0.01):
         print('=============================total_loss_mplus');
         parameter[ix] = original_value + h
         print('-====UVW')        
-        print(V)        
+        print(U)        
         gradplus = calculate_total_loss([x],[y], U, V, W)
         print('=============================total_loss_minus');
         parameter[ix] = original_value - h
         print('-=====UVW')        
-        print(V)
+        print(U)
         gradminus = calculate_total_loss([x],[y], U, V, W)
         estimated_gradient = (gradplus - gradminus)/(2*h)
         # Reset parameter to original value
@@ -140,7 +189,8 @@ def gradient_check(x, y, s, o, U, V, W, h=0.001, error_threshold=0.01):
         # calculate The relative error: (|x - y|/(|x| + |y|))
         relative_error = np.abs(backprop_gradient - estimated_gradient)/(np.abs(backprop_gradient) + np.abs(estimated_gradient))
         # If the error is to large fail the gradient check
-        if ix == (1, 0): #relative_error > error_threshold:
+        if  relative_error > error_threshold: 
+        #if ix == (0, 0):
             print "Gradient Check ERROR: parameter=%s ix=%s" % (pname, ix)
             print "+h Loss: %f" % gradplus
             print "-h Loss: %f" % gradminus
@@ -163,19 +213,33 @@ W = np.array(w_array).T
 
 [p_o, p_s] = forward_propagation(x, U, V, W)
 
-print('------- o & p_o')
-print(o)
-print(p_o)
+# print('------- o & p_o')
+# print(o)
+# print(p_o)
 
-print('------- s & p_s')
-print(s)
-print(p_s)
+# print('------- s & p_s')
+# print(s)
+# print(p_s)
+# exit()
+# dLdV = bptt(y, s, o)
+# print('------------dLdV')
+# print(dLdV[0])
 
-dLdV = bptt(y, s, o)
+[dLdU, dLdV, dLdW] = bptt_UVW(x, y, p_s, o, U, V, W, 4)
+print('------------U')
+print(U.T)
+print('------------V')
+print(V.T)
+print('------------W')
+print(W.T)
+print('------------dLdU')
+print(dLdU.T)
 print('------------dLdV')
-print(dLdV[0])
+print(dLdV.T)
+print('------------dLdW')
+print(dLdW.T)
+exit()
+gradient_check(x, y, p_s, o, U, V, W)
 
-gradient_check(x, y, s, o, U, V, W)
-
-dLdV = bptt(y, s, o)
+#dLdV = bptt(y, s, o)
 #print(dLdV.T)

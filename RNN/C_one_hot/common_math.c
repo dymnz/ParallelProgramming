@@ -12,7 +12,7 @@ math_t uniform_random_with_seed(
 }
 
 void matrix_random_with_seed(
-	Matrix_t *matrix,
+    Matrix_t *matrix,
     math_t lower_bound,
     math_t upper_bound,
     unsigned int *seedp
@@ -20,8 +20,8 @@ void matrix_random_with_seed(
 	int m, n;
 	for (m = 0; m < matrix->m; ++m)
 		for (n = 0; n < matrix->n; ++n)
-			matrix->data[m][n] = 
-				uniform_random_with_seed(lower_bound, upper_bound, seedp);
+			matrix->data[m][n] =
+			    uniform_random_with_seed(lower_bound, upper_bound, seedp);
 }
 
 math_t **create_2d(int m, int n) {
@@ -52,15 +52,37 @@ void clear_2d(math_t **data, int m, int n) {
 	}
 }
 
+void print_1d(math_t *data, int m) {
+	int i;
+	for (i = 0; i < m; ++i) {
+		printf("[");
+		if (data[i] >= 0)
+			printf(" %3.8lf", data[i]);
+		else
+			printf("%3.8lf", data[i]);
+		if (i < m - 1)
+			printf(" ");
+	}
+	printf("]\n");
+}
+
 void print_2d(math_t **data, int m, int n) {
 	int i, r;
 	for (i = 0; i < m; ++i) {
+		printf("%c[", i > 0 ? ' ' : '[');
 		for (r = 0; r < n; ++r) {
-			printf("%lf\t", data[i][r]);
+			if (data[i][r] >= 0)
+				printf(" %3.8lf", data[i][r]);
+			else
+				printf("%3.8lf", data[i][r]);
+			if (r < n - 1)
+				printf(" ");
 		}
-		printf("\n");
+		printf("]\n");		
 	}
 }
+
+
 
 void matrix_prepare(Matrix_t **m_ptr, int m, int n, math_t *data) {
 
@@ -92,8 +114,8 @@ void matrix_resize(Matrix_t *matrix, int m, int n) {
 
 	if (matrix == NULL)
 		exit(77);
-	
-	free_2d(matrix->data, matrix->m);	
+
+	free_2d(matrix->data, matrix->m);
 
 	matrix->m = m;
 	matrix->n = n;
@@ -102,7 +124,7 @@ void matrix_resize(Matrix_t *matrix, int m, int n) {
 
 void free_2d(math_t **data, int m) {
 	int i;
-	for (i = 0; i < m; ++i) 
+	for (i = 0; i < m; ++i)
 		free(data[i]);
 
 	free(data);
@@ -118,10 +140,18 @@ void matrix_free(Matrix_t *matrix) {
 
 void matrix_print(Matrix_t *matrix) {
 	int m, n;
+
 	for (m = 0; m < matrix->m; ++m) {
+		printf("%c[", m > 0 ? ' ' : '[');
 		for (n = 0; n < matrix->n; ++n) {
-			printf("%3.5lf  ", matrix->data[m][n]);
+			if (matrix->data[m][n] >= 0)
+				printf(" %3.8lf", matrix->data[m][n]);
+			else
+				printf("%3.8lf", matrix->data[m][n]);
+			if (n < matrix->n - 1)
+				printf(" ");
 		}
+		printf("]");
 		printf("\n");
 	}
 }
@@ -143,7 +173,7 @@ void softmax(math_t *vector, math_t *result, int dim) {
 // Subtract max value from exp for numerical stability
 void stable_softmax(math_t *vector, math_t *result, int dim) {
 	int i;
-	
+
 	math_t max_val = 0;
 	for (i = 0; i < dim; ++i)
 		if (vector[i] > max_val)

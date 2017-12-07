@@ -34,6 +34,7 @@ void matrix_prepare(Matrix_t **m_ptr, int m, int n, math_t *data);
 
 void free_2d(math_t **data, int m);
 void clear_2d(math_t **data, int m, int n);
+void print_1d(math_t *data, int m);
 void print_2d(math_t **data, int m, int n);
 math_t **create_2d(int m, int n);
 
