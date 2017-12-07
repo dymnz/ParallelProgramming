@@ -418,11 +418,11 @@ void RNN_train(
 
 			// Adjust learning rate if the loss increases
 			if (last_total_loss < current_total_loss) {
-				if (learning_rate / 2 > 1e-4)
+				if (learning_rate / 2 > 1e-5)
 					learning_rate /= 2;
+			} else if (learning_rate * 1.1 < initial_learning_rate) {
+				learning_rate *= 1.1;
 			}
-
-
 
 			last_total_loss = current_total_loss;
 
@@ -436,11 +436,11 @@ void RNN_train(
 			    output_weight_gradient,
 			    internel_weight_gradient,
 			    1e-3,
-			    3e-2,
+			    1e-2,
 			    0
 			);
 			RNN_storage->bptt_truncate_len = old_bptt_truncate_len;
-			printf("average loss at epoch: %5d = %10lf LR: %lf\n",
+			printf("average loss at epoch: %10d = %10.10lf LR: %lf\n",
 			       e, current_total_loss / num_train, learning_rate);
 		}
 

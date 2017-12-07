@@ -403,17 +403,17 @@ void read_set_from_file_test() {
 }
 
 void RNN_cross_valid() {
-	char train_file[] = "./test_data/exp.txt";	
-	char test_file[] = "./test_data/exp10.txt";
-	char loss_file[] = "./test_data/loss10.txt";
-	char result_file[] = "./test_data/res10.txt";
+	char train_file[] = "./test_data/exp10.txt";	
+	char test_file[] = "./test_data/exp10_2.txt";
+	char loss_file[] = "./test_data/loss10_2.txt";
+	char result_file[] = "./test_data/res10_2.txt";
 
-	int H = 2;
-	int bptt_truncate_len = 5;
+	int H = 3;
+	int bptt_truncate_len = 4;
 
-	math_t initial_learning_rate = 0.005;
-	int max_epoch = 50000;
-	int print_loss_interval = 10;
+	math_t initial_learning_rate = 0.001;
+	int max_epoch = 800000;
+	int print_loss_interval = 1000;
 
 	TrainSet_t *train_set = read_set_from_file(train_file);
 
