@@ -5,7 +5,7 @@ P = 1;     % Peak force
 CT = 5;    % Time to peak
 
 file_location = '../C/test_data/';
-file_name = 'res.txt';
+file_name = 'demo/res10_2_t10.txt';
 
 [num_matrix, input_matrix_list, output_matrix_list] = ...
     read_test_file(strcat(file_location, file_name));
@@ -23,7 +23,7 @@ for i = 1 : num_matrix
     delta_matrix = predicted_tf_vector - expected_tf_vector;
     
     RMSE_list(i) = sqrt(sum(delta_matrix.^2)/DATA_LENGTH);
-    disp(sprintf("sample %d loss: %f32", i, RMSE_list(i)));
+    fprintf("sample %d loss: %f\n", i, RMSE_list(i));
     
     figure;
     subplot_helper(1:DATA_LENGTH, pulse_vector, ...
@@ -39,10 +39,11 @@ for i = 1 : num_matrix
                     [4 1 3], {'sample' 'amplitude' 'force'}, '-');    
     subplot_helper(1:DATA_LENGTH, predicted_tf_vector, ...
                     [4 1 3], {'sample' 'amplitude' 'force'}, '-'); 
-                    
+    legend('pulse', 'expected', 'predicted');
     subplot_helper(1:DATA_LENGTH, abs(delta_matrix), ...
                     [4 1 4], {'sample' 'amplitude' '|force error|'}, '-'); 
     ylim([0 1]);
-    
-    
+   
 end
+
+fprintf("average loss: %f\n", mean(RMSE_list));

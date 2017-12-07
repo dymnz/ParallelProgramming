@@ -12,7 +12,7 @@ CT = 5;    % Time to peak
 
 % File
 file_location = '../C/test_data/';
-file_name = 'exp10.txt';
+file_name = 'exp10_2.txt';
 fileID = fopen(strcat(file_location, file_name),'w');
 fprintf(fileID, '%d\n', NUM_TEST);
 
