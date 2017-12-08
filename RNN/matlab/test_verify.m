@@ -6,8 +6,8 @@ CT = 5;    % Time to peak
 
 file_location = '../C/test_data/';
 %file_name = 'demo/res10_CT2.txt';
-file_name = 'demo/res2.txt';
-%file_name = 'demo/res10_t2.txt';
+%file_name = 'demo/res2.txt';
+file_name = 'demo/res10_t2.txt';
 %% 
 
 [num_matrix, input_matrix_list, output_matrix_list] = ...
