@@ -1,8 +1,52 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
 #include "common_math.h"
 #include "RNN.h"
 #include "file_process.h"
+
+#define FILE_NAME_LENGTH 255
+
+void file_prepare(
+    char train_file[],
+    char test_file[],
+    char loss_file[],
+    char result_file[],
+    char train_file_name[],
+    char test_file_name[],
+    char loss_file_name[],
+    char result_file_name[]
+) {
+	char file_postfix[] = ".txt";
+	char output_file_prefix[] = "./test_data/output/";
+	char input_file_prefix[] = "./test_data/input/";
+
+	char train_file_prefix[] = "exp_";
+	char test_file_prefix[] = "exp_";
+	char loss_file_prefix[] = "loss_";
+	char result_file_prefix[] = "res_";
+
+	strcat(train_file, input_file_prefix);
+	strcat(test_file, input_file_prefix);
+	strcat(loss_file, output_file_prefix);
+	strcat(result_file, output_file_prefix);
+
+	strcat(train_file, train_file_prefix);
+	strcat(test_file, test_file_prefix);
+	strcat(loss_file, loss_file_prefix);
+	strcat(result_file, result_file_prefix);
+
+	strcat(train_file, train_file_name);
+	strcat(test_file, test_file_name);
+	strcat(loss_file, loss_file_name);
+	strcat(result_file, result_file_name);
+
+	strcat(train_file, file_postfix);
+	strcat(test_file, file_postfix);
+	strcat(loss_file, file_postfix);
+	strcat(result_file, file_postfix);
+}
 
 void uniform_random_with_seed_test() {
 	int round = 1000000;
@@ -370,8 +414,8 @@ void read_set_from_file_test() {
 	fclose(pRes);
 
 	FILE *pLoss = fopen(loss_file, "a");
-	
-	
+
+
 
 	int i;
 	math_t loss, total_loss = 0.0f;
@@ -381,11 +425,11 @@ void read_set_from_file_test() {
 		    train_set->input_matrix_list[i],
 		    predicted_output_matrix
 		);
-		
+
 		loss = RNN_loss_calculation(
-			RNN_storage, 
-			predicted_output_matrix, 
-			train_set->output_matrix_list[i]);
+		           RNN_storage,
+		           predicted_output_matrix,
+		           train_set->output_matrix_list[i]);
 		fprintf(pLoss, "%lf\n", loss);
 		total_loss += loss;
 		write_matrix_to_file(result_file, train_set->input_matrix_list[i]);
@@ -402,17 +446,35 @@ void read_set_from_file_test() {
 	matrix_free(internel_weight_gradient);
 }
 
+
+
 void RNN_cross_valid() {
-	char train_file[] = "./test_data/exp10.txt";	
-	char test_file[] = "./test_data/exp10_2.txt";
-	char loss_file[] = "./test_data/loss10_2.txt";
-	char result_file[] = "./test_data/res10_2.txt";
+	char train_file[FILE_NAME_LENGTH];
+	char test_file[FILE_NAME_LENGTH];
+	char loss_file[FILE_NAME_LENGTH];
+	char result_file[FILE_NAME_LENGTH];
+
+	char train_file_name[] = "2_1_CT5";
+	char test_file_name[] = "10_2";
+	char loss_file_name[] = "10_2";
+	char result_file_name[] = "10_2";
+
+	file_prepare(
+	    train_file,
+	    test_file,
+	    loss_file,
+	    result_file,
+	    train_file_name,
+	    test_file_name,
+	    loss_file_name,
+	    result_file_name
+	);
 
 	int H = 3;
 	int bptt_truncate_len = 4;
 
 	math_t initial_learning_rate = 0.001;
-	int max_epoch = 800000;
+	int max_epoch = 500000;
 	int print_loss_interval = 1000;
 
 	TrainSet_t *train_set = read_set_from_file(train_file);
@@ -454,7 +516,6 @@ void RNN_cross_valid() {
 	    print_loss_interval
 	);
 
-
 	TrainSet_destroy(train_set);
 	train_set = read_set_from_file(test_file);
 
@@ -463,7 +524,7 @@ void RNN_cross_valid() {
 	fclose(pRes);
 
 	FILE *pLoss = fopen(loss_file, "w");
-	
+
 	int i;
 	math_t loss, total_loss = 0.0f;
 	for (i = 0; i < train_set->num_matrix; ++i) {
@@ -472,11 +533,11 @@ void RNN_cross_valid() {
 		    train_set->input_matrix_list[i],
 		    predicted_output_matrix
 		);
-		
+
 		loss = RNN_loss_calculation(
-			RNN_storage, 
-			predicted_output_matrix, 
-			train_set->output_matrix_list[i]);
+		           RNN_storage,
+		           predicted_output_matrix,
+		           train_set->output_matrix_list[i]);
 		fprintf(pLoss, "%lf\n", loss);
 		total_loss += loss;
 		write_matrix_to_file(result_file, train_set->input_matrix_list[i]);

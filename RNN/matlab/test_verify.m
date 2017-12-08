@@ -8,6 +8,7 @@ file_location = '../C/test_data/';
 %file_name = 'demo/res10_CT2.txt';
 %file_name = 'demo/res2.txt';
 file_name = 'demo/res10_t2.txt';
+%file_name = 'exp2_1_CT5.txt';
 %% 
 
 [num_matrix, input_matrix_list, output_matrix_list] = ...

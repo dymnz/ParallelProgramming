@@ -1,3 +1,4 @@
+
 #pragma once
 #include <stdio.h>
 #include <stdlib.h>
@@ -89,7 +90,7 @@ void RNN_Predict(
     Matrix_t *predicted_output_matrix
 );
 
-void Gradient_check(
+void RNN_Gradient_check(
     RNN_t *RNN_storage,
     TrainSet_t *train_set,
     Matrix_t *predicted_output_matrix,
@@ -102,5 +103,9 @@ void Gradient_check(
 );
 
 math_t internal_squash_func(math_t value);
-math_t output_squash_func(math_t value);
+math_t output_squash_derivative(
+    math_t predicted_output,
+    math_t expected_output
+);
+void output_squash_func(math_t *vector, math_t *result, int dim);
 math_t sigmoid(math_t value);

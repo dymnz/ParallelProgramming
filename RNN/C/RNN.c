@@ -142,9 +142,7 @@ void RNN_forward_propagation(
 				temp_vector[n] += S[t][r] * V[r][n];
 			}
 		}
-		//stable_softmax(temp_vector, O[t], o_dim);
-		//O[t][0] = output_squash_func(temp_vector[0]);
-		O[t][0] = temp_vector[0];
+		output_squash_func(temp_vector, O[t], o_dim);
 	}
 
 	free(temp_vector);
@@ -222,18 +220,13 @@ void RNN_BPTT(
 	int t, o, bptt_t, m, n;
 
 	/*
-		//Construct delta_o = (o - y) = (y' - y)//
-		Construct delta_o = -y / (y') * (1-(y')^2)
-
+		Derivative of loss w.r.t. output layer
 	 */
-
-	// printf("----------------\n");
-	// matrix_print(predicted_output_matrix);
 
 	// Delta o
 	for (t = 0; t < t_dim; ++t) {
 		for (o = 0; o < o_dim; ++o) {
-			delta_o[t][o] =  2 * (O[t][o] - Y[t][o]);
+			delta_o[t][o] = output_squash_derivative(O[t][o], Y[t][o]);
 		}
 	}
 
@@ -304,13 +297,6 @@ void RNN_BPTT(
 		}
 	}
 
-	// printf("-------------dU\n");
-	// matrix_print(input_weight_gradient);
-	// printf("-------------dV\n");
-	// matrix_print(output_weight_gradient);
-	// printf("-------------dW\n");
-	// matrix_print(internel_weight_gradient);
-
 	free_2d(delta_o, t_dim);
 	free(delta_t);
 	free(temp_delta_t);
@@ -356,11 +342,6 @@ void RNN_SGD(
 	);
 
 	int m, n;
-
-	// printf("---------------U\n"); matrix_print(RNN_storage->input_weight_matrix);
-	// printf("---------------V\n"); matrix_print(RNN_storage->output_weight_matrix);
-	// printf("---------------W\n"); matrix_print(RNN_storage->internal_weight_matrix);
-	// sleep(1);
 
 	// Update U
 	for (m = 0; m < i_dim; ++m)
@@ -428,7 +409,7 @@ void RNN_train(
 
 			int old_bptt_truncate_len = RNN_storage->bptt_truncate_len;
 			RNN_storage->bptt_truncate_len = 10000;
-			Gradient_check(
+			RNN_Gradient_check(
 			    RNN_storage,
 			    train_set,
 			    predicted_output_matrix,
@@ -464,7 +445,7 @@ void RNN_train(
 	}
 }
 
-void Gradient_check(
+void RNN_Gradient_check(
     RNN_t *RNN_storage,
     TrainSet_t *train_set,
     Matrix_t *predicted_output_matrix,
@@ -593,8 +574,19 @@ math_t internal_squash_func(math_t value) {
 	return tanh(value);
 }
 
-math_t output_squash_func(math_t value) {
-	return sigmoid(value);
+math_t output_squash_derivative(
+    math_t predicted_output,
+    math_t expected_output
+) {
+	// The derivative of squared error (O - Y)
+	return 2 * (predicted_output - expected_output);
+}
+
+void output_squash_func(math_t *vector, math_t *result, int dim) {
+	int i;
+	for (i = 0; i < dim; ++i) {
+		result[i] = vector[i];
+	}
 }
 
 math_t sigmoid(math_t value) {
